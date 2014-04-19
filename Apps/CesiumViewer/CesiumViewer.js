@@ -2,6 +2,7 @@
 define([
         'Core/defined',
         'Core/formatError',
+        'Core/DefaultProxy',
         'DynamicScene/CzmlDataSource',
         'DynamicScene/GeoJsonDataSource',
         'DynamicScene/KmlDataSource',
@@ -15,6 +16,7 @@ define([
     ], function(
         defined,
         formatError,
+        DefaultProxy,
         CzmlDataSource,
         GeoJsonDataSource,
         KmlDataSource,
@@ -116,7 +118,7 @@ define([
             } else if (endsWith(sourceUrl, '.CZML')) {
                 source = new CzmlDataSource();
             } else if (endsWith(sourceUrl, ".KML")) {
-                source = new KmlDataSource();
+                source = new KmlDataSource(new DefaultProxy('/proxy/'));
             } else if (endsWith(sourceUrl, ".KMZ")) {
                 source = new KmlDataSource();
         } else {

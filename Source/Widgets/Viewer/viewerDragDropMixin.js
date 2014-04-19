@@ -1,5 +1,6 @@
 /*global define*/
 define([
+        '../../Core/DefaultProxy',
         '../../Core/defaultValue',
         '../../Core/defined',
         '../../Core/DeveloperError',
@@ -12,6 +13,7 @@ define([
         '../../ThirdParty/when',
         '../getElement'
     ], function(
+        DefaultProxy,
         defaultValue,
         defined,
         DeveloperError,
@@ -224,11 +226,11 @@ define([
                     dataSource = new GeoJsonDataSource();
                     promise = dataSource.load(JSON.parse(evt.target.result), source);
                 } else if (endsWith(sourceUpperCase, ".KML")) {
-                    dataSource = new KmlDataSource();
+                    dataSource = new KmlDataSource(new DefaultProxy('/proxy/'));
                     var parser = new DOMParser();
                     promise = dataSource.load(parser.parseFromString(evt.target.result, "text/xml"), source);
                 } else if (endsWith(sourceUpperCase, ".KMZ")) {
-                    dataSource = new KmlDataSource();
+                    dataSource = new KmlDataSource(new DefaultProxy('/proxy/'));
                     promise = dataSource.loadKmz(file, source);
                 } else {
                     viewer.onDropError.raiseEvent(viewer, source, 'Unrecognized file extension: ' + source);
