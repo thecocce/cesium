@@ -5,6 +5,7 @@ define([
         'Core/getFilenameFromUri',
         'DynamicScene/CzmlDataSource',
         'DynamicScene/GeoJsonDataSource',
+        'DynamicScene/KmlDataSource',
         'Scene/PerformanceDisplay',
         'Scene/TileMapServiceImageryProvider',
         'Widgets/DataSourceBrowser/DataSourcePanelViewModel',
@@ -20,6 +21,7 @@ define([
         getFilenameFromUri,
         CzmlDataSource,
         GeoJsonDataSource,
+        KmlDataSource,
         PerformanceDisplay,
         TileMapServiceImageryProvider,
         DataSourcePanelViewModel,
@@ -117,6 +119,10 @@ define([
                    /\.json/i.test(source) ||
                    /\.topojson/i.test(source)) {
             dataSource = new GeoJsonDataSource(getFilenameFromUri(source));
+            loadPromise = dataSource.loadUrl(source);
+        } else if (/\.kml/i.test(source) ||
+                   /\.kmz/i.test(source)) {
+            dataSource = new KmlDataSource();
             loadPromise = dataSource.loadUrl(source);
         } else {
             showLoadError(source, 'Unknown format.');

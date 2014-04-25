@@ -217,10 +217,11 @@ define([
                     loadPromise = dataSource.load(JSON.parse(evt.target.result), fileName);
                 } else if (/\.kml/i.test(fileName)) {
                     dataSource = new KmlDataSource();
-                    loadPromise = dataSource.load(JSON.parse(evt.target.result), fileName);
+                    var parser = new DOMParser();
+                    loadPromise = dataSource.load(parser.parseFromString(evt.target.result, "text/xml"), fileName);
                 } else if (/\.kmz/i.test(fileName)) {
-                    dataSource = new KmlDataSource(fileName);
-                    loadPromise = dataSource.load(JSON.parse(evt.target.result), fileName);
+                    dataSource = new KmlDataSource();
+                    loadPromise = dataSource.loadKmz(file, fileName);
                 } else {
                     viewer.dropError.raiseEvent(viewer, fileName, 'Unrecognized file: ' + fileName);
                     return;
