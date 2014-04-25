@@ -28,7 +28,15 @@ define(['../Core/Color',
         this.updaters = new AssociativeArray();
         this.updatersWithAttributes = new AssociativeArray();
         this.attributes = new AssociativeArray();
+        this.subscriptions = new AssociativeArray();
+        this.toggledObjects = new AssociativeArray();
         this.itemsToRemove = [];
+    };
+
+    Batch.prototype.uiShowChanged = function(dynamicObject, propertyName, value, oldValue) {
+        if (propertyName === 'uiShow' && value !== oldValue) {
+            this.toggledObjects.set(dynamicObject.id, dynamicObject);
+        }
     };
 
     Batch.prototype.add = function(updater, instance) {
@@ -39,6 +47,7 @@ define(['../Core/Color',
         if (!updater.hasConstantOutline || !updater.outlineColorProperty.isConstant) {
             this.updatersWithAttributes.set(id, updater);
         }
+        this.subscriptions.set(id, updater.dynamicObject.definitionChanged.addEventListener(Batch.prototype.uiShowChanged, this));
     };
 
     Batch.prototype.remove = function(updater) {
@@ -46,6 +55,12 @@ define(['../Core/Color',
         this.createPrimitive = this.geometry.remove(id) || this.createPrimitive;
         this.updaters.remove(id);
         this.updatersWithAttributes.remove(id);
+        this.toggledObjects.removeAll();
+        var subscription = this.subscriptions.get(id);
+        if (defined(subscription)) {
+            subscription();
+        }
+        this.subscriptions.remove(id);
     };
 
     var colorScratch = new Color();
@@ -76,16 +91,23 @@ define(['../Core/Color',
             this.primitive = primitive;
             this.createPrimitive = false;
         } else if (defined(primitive) && primitive._state === PrimitiveState.COMPLETE) {
+            var updater;
+            var dynamicObject;
+            var id;
+            var attributes;
+            var i;
+
             var updatersWithAttributes = this.updatersWithAttributes.values;
             var length = updatersWithAttributes.length;
-            for (var i = 0; i < length; i++) {
-                var updater = updatersWithAttributes[i];
-                var instance = this.geometry.get(updater.dynamicObject.id);
+            for (i = 0; i < length; i++) {
+                updater = updatersWithAttributes[i];
+                dynamicObject = updater.dynamicObject;
+                id = dynamicObject.id;
 
-                var attributes = this.attributes.get(instance.id.id);
+                attributes = this.attributes.get(id);
                 if (!defined(attributes)) {
-                    attributes = primitive.getGeometryInstanceAttributes(instance.id);
-                    this.attributes.set(instance.id.id, attributes);
+                    attributes = primitive.getGeometryInstanceAttributes(dynamicObject);
+                    this.attributes.set(id, attributes);
                 }
 
                 if (!updater.outlineColorProperty.isConstant) {
@@ -108,6 +130,26 @@ define(['../Core/Color',
                     }
                 }
             }
+
+            var updaters = this.updaters;
+            var toggledObjects = this.toggledObjects.values;
+            length = toggledObjects.length;
+            for (i = 0; i < length; i++) {
+                dynamicObject = toggledObjects[i];
+                id = dynamicObject.id;
+                updater = updaters.get(id);
+                attributes = this.attributes.get(id);
+                if (!defined(attributes)) {
+                    attributes = primitive.getGeometryInstanceAttributes(dynamicObject);
+                    this.attributes.set(id, attributes);
+                }
+                var uishow = updater.isOutlineVisible(time) && dynamicObject.uiShow;
+                if (uishow !== attributes._lastShow) {
+                    attributes._lastShow = uishow;
+                    attributes.show = ShowGeometryInstanceAttribute.toValue(uishow, attributes.show);
+                }
+            }
+            this.toggledObjects.removeAll();
         } else if (defined(primitive) && primitive._state !== PrimitiveState.COMPLETE) {
             isUpdated = false;
         }
@@ -121,9 +163,21 @@ define(['../Core/Color',
         if (defined(primitive)) {
             this.primitives.remove(primitive);
             this.primitive = undefined;
-            this.geometry.removeAll();
-            this.updaters.removeAll();
         }
+
+        this.geometry.removeAll();
+        this.updaters.removeAll();
+        this.updatersWithAttributes.removeAll();
+        this.attributes.removeAll();
+        this.toggledObjects.removeAll();
+
+        var subscriptions = this.subscriptions.values;
+        var len = subscriptions.length;
+        for (var i = 0; i < len; i++) {
+            subscriptions[i]();
+        }
+        this.subscriptions.removeAll();
+        this.itemsToRemove.length = 0;
     };
 
     /**

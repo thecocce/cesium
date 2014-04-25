@@ -66,6 +66,8 @@ define(['../../Core/BoundingSphere',
 
         var selectionIndicator = viewer.selectionIndicator;
         var selectionIndicatorViewModel = defined(selectionIndicator) ? selectionIndicator.viewModel : undefined;
+        var dataSourceBrowser = viewer.dataSourceBrowser;
+        var dataSourceBrowserViewModel = defined(dataSourceBrowser) ? dataSourceBrowser.viewModel : undefined;
 
         var enableInfoOrSelection = defined(infoBox) || defined(selectionIndicator);
 
@@ -100,7 +102,7 @@ define(['../../Core/BoundingSphere',
         // Subscribe to onTick so that we can update the view each update.
         function onTick(clock) {
             var time = clock.currentTime;
-            if (defined(dynamicObjectView)) {
+            if (defined(dynamicObjectView) && viewer.trackedObject.uiShow) {
                 dynamicObjectView.update(time);
             }
 
@@ -290,13 +292,33 @@ define(['../../Core/BoundingSphere',
                 if (defined(selectionIndicatorViewModel)) {
                     selectionIndicatorViewModel.animateAppear();
                 }
+
+                if (defined(dataSourceBrowserViewModel)) {
+                    dataSourceBrowserViewModel.selectViewModelById(value.id);
+                }
             } else {
                 // Leave the info text in place here, it is needed during the exit animation.
                 if (defined(selectionIndicatorViewModel)) {
                     selectionIndicatorViewModel.animateDepart();
                 }
+
+                if (defined(dataSourceBrowserViewModel)) {
+                    dataSourceBrowserViewModel.selectedViewModel = undefined;
+                }
             }
         }));
+
+        if (defined(viewer.dataSourceBrowser)) {
+            eventHelper.add(dataSourceBrowserViewModel.onObjectDoubleClick, trackObject);
+
+            knockoutSubscriptions.push(subscribeAndEvaluate(dataSourceBrowserViewModel, 'selectedViewModel', function(value) {
+                if (defined(value) && defined(value.dynamicObject)) {
+                    viewer.selectedObject = value.dynamicObject;
+                } else {
+                    viewer.selectedObject = undefined;
+                }
+            }));
+        }
 
         // Wrap destroy to clean up event subscriptions.
         viewer.destroy = wrapFunction(viewer, viewer.destroy, function() {

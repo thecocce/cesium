@@ -72,6 +72,8 @@ define(['../Core/createGuid',
         this._pyramidSubscription = undefined;
         this._rectangle = undefined;
         this._rectangleSubscription = undefined;
+        this._uiShow = true;
+        this._uiShowSubscription = undefined;
         this._vector = undefined;
         this._vectorSubscription = undefined;
         this._vertexPositions = undefined;
@@ -238,6 +240,14 @@ define(['../Core/createGuid',
          * @type {DynamicRectangle}
          */
         rectangle : createDynamicPropertyDescriptor('rectangle'),
+        /**
+         * Gets or sets a boolean value indicating if the object should be displayed.
+         * This is a constant value to be used by the UI and when false, overrides
+         * any value specified by the show property.
+         * @memberof DynamicObject.prototype
+         * @type {Boolean}
+         */
+        uiShow : createDynamicPropertyDescriptor('uiShow'),
         /**
          * Gets or sets the vector.
          * @memberof DynamicObject.prototype

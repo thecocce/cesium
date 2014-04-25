@@ -18,6 +18,7 @@ define([
         '../BaseLayerPicker/createDefaultTerrainProviderViewModels',
         '../CesiumWidget/CesiumWidget',
         '../ClockViewModel',
+        '../DataSourceBrowser/DataSourceBrowser',
         '../FullscreenButton/FullscreenButton',
         '../Geocoder/Geocoder',
         '../getElement',
@@ -48,6 +49,7 @@ define([
         createDefaultTerrainProviderViewModels,
         CesiumWidget,
         ClockViewModel,
+        DataSourceBrowser,
         FullscreenButton,
         Geocoder,
         getElement,
@@ -111,6 +113,7 @@ define([
      * @param {Object} [options] Configuration options for the widget.
      * @param {Boolean} [options.animation=true] If set to false, the Animation widget will not be created.
      * @param {Boolean} [options.baseLayerPicker=true] If set to false, the BaseLayerPicker widget will not be created.
+     * @param {Boolean} [options.dataSourceBrowser=true] If set to false, the DataSourceBrowser widget will not be created.
      * @param {Boolean} [options.fullscreenButton=true] If set to false, the FullscreenButton widget will not be created.
      * @param {Boolean} [options.geocoder=true] If set to false, the Geocoder widget will not be created.
      * @param {Boolean} [options.homeButton=true] If set to false, the HomeButton widget will not be created.
@@ -409,6 +412,10 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
                         timeline.zoomTo(dataSourceClock.startTime, dataSourceClock.stopTime);
                     }
                 }
+
+                if (defined(that._dataSourceBrowser)) {
+                    that._dataSourceBrowser.viewModel.clockTrackedDataSource = dataSource;
+                }
             }
         }
 
@@ -449,6 +456,18 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
         eventHelper.add(dataSourceCollection.dataSourceAdded, onDataSourceAdded);
         eventHelper.add(dataSourceCollection.dataSourceRemoved, onDataSourceRemoved);
 
+        //DataSourceBrowser
+        var dataSourceBrowser;
+        if (!defined(options.dataSourceBrowser) || options.dataSourceBrowser !== false) {
+            var dataSourceBrowserContainer = document.createElement('div');
+            dataSourceBrowserContainer.className = 'cesium-viewer-dataSourceBrowserContainer';
+            viewerContainer.appendChild(dataSourceBrowserContainer);
+            dataSourceBrowser = new DataSourceBrowser(dataSourceBrowserContainer, dataSourceCollection);
+            eventHelper.add(dataSourceBrowser.viewModel.onClockSelected, function(dataSource) {
+                that.clockTrackedDataSource = dataSource;
+            });
+        }
+
         this._container = container;
         this._element = viewerContainer;
         this._cesiumWidget = cesiumWidget;
@@ -464,6 +483,7 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
         this._animation = animation;
         this._timeline = timeline;
         this._fullscreenButton = fullscreenButton;
+        this._dataSourceBrowser = dataSourceBrowser;
         this._geocoder = geocoder;
         this._eventHelper = eventHelper;
         this._lastWidth = 0;
@@ -597,6 +617,17 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
         fullscreenButton : {
             get : function() {
                 return this._fullscreenButton;
+            }
+        },
+
+        /**
+         * Gets the DataSourceBrowser.
+         * @memberof Viewer
+         * @type {DataSourceBrowser}
+         */
+        dataSourceBrowser : {
+            get : function() {
+                return this._dataSourceBrowser;
             }
         },
 
@@ -786,6 +817,10 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
             this._infoBox.viewModel.maxHeight = panelMaxHeight;
         }
 
+        if (defined(this._dataSourceBrowser)) {
+            this._dataSourceBrowser.viewModel.maxHeight = panelMaxHeight;
+        }
+
         var timeline = this._timeline;
         var timelineExists = defined(timeline);
         var animationExists = defined(this._animation);
@@ -926,6 +961,11 @@ Either specify options.terrainProvider instead or set options.baseLayerPicker to
         if (defined(this._selectionIndicator)) {
             this._element.removeChild(this._selectionIndicator.container);
             this._selectionIndicator = this._selectionIndicator.destroy();
+        }
+
+        if (defined(this._dataSourceBrowser)) {
+            this._element.removeChild(this._dataSourceBrowser.container);
+            this._dataSourceBrowser = this._dataSourceBrowser.destroy();
         }
 
         this._clockViewModel = this._clockViewModel.destroy();
