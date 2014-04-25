@@ -3,11 +3,14 @@ define([
         'Core/defined',
         'Core/formatError',
         'Core/DefaultProxy',
+        'Core/getFilenameFromUri',
         'DynamicScene/CzmlDataSource',
         'DynamicScene/GeoJsonDataSource',
         'DynamicScene/KmlDataSource',
         'Scene/PerformanceDisplay',
         'Scene/TileMapServiceImageryProvider',
+        'Widgets/DataSourceBrowser/DataSourcePanelViewModel',
+        'Widgets/DataSourceBrowser/ListDataSourcePanel',
         'Widgets/Viewer/Viewer',
         'Widgets/Viewer/viewerDragDropMixin',
         'Widgets/Viewer/viewerDynamicObjectMixin',
@@ -17,11 +20,14 @@ define([
         defined,
         formatError,
         DefaultProxy,
+        getFilenameFromUri,
         CzmlDataSource,
         GeoJsonDataSource,
         KmlDataSource,
         PerformanceDisplay,
         TileMapServiceImageryProvider,
+        DataSourcePanelViewModel,
+        ListDataSourcePanel,
         Viewer,
         viewerDragDropMixin,
         viewerDynamicObjectMixin,
@@ -51,11 +57,7 @@ define([
 
     var loadingIndicator = document.getElementById('loadingIndicator');
 
-    function endsWith(str, suffix) {
-        var strLength = str.length;
-        var suffixLength = suffix.length;
-        return (suffixLength < strLength) && (str.indexOf(suffix, strLength - suffixLength) !== -1);
-    }
+    DataSourcePanelViewModel.defaultDataSourcePanels.unshift(new ListDataSourcePanel('Local Gallery', 'Gallery/'));
 
     var imageryProvider;
 
@@ -107,47 +109,45 @@ define([
         context.throwOnWebGLError = true;
     }
 
-        if (defined(endUserOptions.source)) {
-            var source;
-            var sourceFunctionName = 'loadUrl';
-            var sourceUrl = endUserOptions.source.toUpperCase();
-            if (endsWith(sourceUrl, '.GEOJSON') || //
-                endsWith(sourceUrl, '.JSON') || //
-                endsWith(sourceUrl, '.TOPOJSON')) {
-                source = new GeoJsonDataSource();
-            } else if (endsWith(sourceUrl, '.CZML')) {
-                source = new CzmlDataSource();
-            } else if (endsWith(sourceUrl, ".KML")) {
-                source = new KmlDataSource(new DefaultProxy('/proxy/'));
-            } else if (endsWith(sourceUrl, ".KMZ")) {
-                source = new KmlDataSource();
-        } else {
-            loadingIndicator.style.display = 'none';
+    var source = endUserOptions.source;
+    if (defined(source)) {
+        var dataSource;
+        var loadPromise;
 
-            showLoadError(endUserOptions.source, 'Unknown format.');
+        if (/\.czml/i.test(source)) {
+            dataSource = new CzmlDataSource(getFilenameFromUri(source));
+            loadPromise = dataSource.loadUrl(source);
+        } else if (/\.geojson/i.test(source) ||
+                   /\.json/i.test(source) ||
+                   /\.topojson/i.test(source)) {
+            dataSource = new GeoJsonDataSource(getFilenameFromUri(source));
+            loadPromise = dataSource.loadUrl(source);
+        } else if (/\.kml/i.test(source) ||
+                   /\.kmz/i.test(source)) {
+            dataSource = new KmlDataSource(new DefaultProxy('/proxy/'));
+            loadPromise = dataSource.loadUrl(source);
+        } else {
+            showLoadError(source, 'Unknown format.');
         }
 
-            if (defined(source)) {
-                source[sourceFunctionName](endUserOptions.source).then(function() {
-                    viewer.dataSources.add(source);
+        if (defined(dataSource)) {
+            viewer.dataSources.add(dataSource);
 
-                if (defined(endUserOptions.lookAt)) {
-                    var dynamicObject = source.getDynamicObjectCollection().getById(endUserOptions.lookAt);
+            loadPromise.then(function() {
+                var lookAt = endUserOptions.lookAt;
+                if (defined(lookAt)) {
+                    var dynamicObject = dataSource.getDynamicObjectCollection().getById(lookAt);
                     if (defined(dynamicObject)) {
                         viewer.trackedObject = dynamicObject;
                     } else {
-                        var error = 'No object with id "' + endUserOptions.lookAt + '" exists in the provided source.';
-                        showLoadError(endUserOptions.source, error);
+                        var error = 'No object with id "' + lookAt + '" exists in the provided source.';
+                        showLoadError(source, error);
                     }
                 }
-            }, function(error) {
-                showLoadError(endUserOptions.source, error);
-            }).always(function() {
-                loadingIndicator.style.display = 'none';
+            }).otherwise(function(error) {
+                showLoadError(source, error);
             });
         }
-    } else {
-        loadingIndicator.style.display = 'none';
     }
 
     if (endUserOptions.stats) {
@@ -165,4 +165,6 @@ define([
             console.error(error);
         }
     }
+
+    loadingIndicator.style.display = 'none';
 });
