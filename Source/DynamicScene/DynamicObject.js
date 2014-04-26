@@ -80,8 +80,8 @@ define(['../Core/createGuid',
         this._vertexPositionsSubscription = undefined;
         this._viewFrom = undefined;
         this._viewFromSubscription = undefined;
-        this._wallFrom = undefined;
-        this._wallFromSubscription = undefined;
+        this._wall = undefined;
+        this._wallSubscription = undefined;
     };
 
     defineProperties(DynamicObject.prototype, {
