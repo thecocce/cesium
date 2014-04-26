@@ -213,11 +213,11 @@ define([
                 } else if (/\.geojson$/i.test(fileName) || /\.json$/i.test(fileName) || /\.topojson$/i.test(fileName)) {
                     dataSource = new GeoJsonDataSource(fileName);
                     loadPromise = dataSource.load(JSON.parse(evt.target.result), fileName);
-                } else if (/\.kml/i.test(fileName)) {
+                } else if (/\.kml$/i.test(fileName)) {
                     dataSource = new KmlDataSource();
                     var parser = new DOMParser();
                     loadPromise = dataSource.load(parser.parseFromString(evt.target.result, "text/xml"), fileName);
-                } else if (/\.kmz/i.test(fileName)) {
+                } else if (/\.kmz$/i.test(fileName)) {
                     dataSource = new KmlDataSource();
                     loadPromise = dataSource.loadKmz(file, fileName);
                 } else {
