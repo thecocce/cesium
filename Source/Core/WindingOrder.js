@@ -1,5 +1,5 @@
 /*global define*/
-define(['./Enumeration'], function(Enumeration) {
+define([], function() {
     "use strict";
 
     /**
@@ -11,19 +11,19 @@ define(['./Enumeration'], function(Enumeration) {
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x0900
          */
-        CLOCKWISE : new Enumeration(0x0900, 'CLOCKWISE'), // WebGL: CW
+        CLOCKWISE : 0x0900, // WebGL: CW
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x901
          */
-        COUNTER_CLOCKWISE : new Enumeration(0x0901, 'COUNTER_CLOCKWISE'), // WebGL CCW
+        COUNTER_CLOCKWISE : 0x0901, // WebGL CCW
 
         /**
          * DOC_TBA

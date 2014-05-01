@@ -1,5 +1,5 @@
 /*global define*/
-define(['../Core/Enumeration'], function(Enumeration) {
+define([], function() {
     "use strict";
 
     /**
@@ -11,29 +11,29 @@ define(['../Core/Enumeration'], function(Enumeration) {
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * Wdefault 0x0404
          */
-        FRONT : new Enumeration(0x0404, 'FRONT'),
+        FRONT : 0x0404,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x405
          */
-        BACK : new Enumeration(0x0405, 'BACK'),
+        BACK : 0x0405,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x408
          */
-        FRONT_AND_BACK : new Enumeration(0x0408, 'FRONT_AND_BACK'),
+        FRONT_AND_BACK : 0x0408,
 
         /**
          * DOC_TBA

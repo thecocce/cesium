@@ -1,5 +1,5 @@
 /*global define*/
-define(['../Core/Enumeration'], function(Enumeration) {
+define([], function() {
     "use strict";
 
     /**
@@ -11,74 +11,74 @@ define(['../Core/Enumeration'], function(Enumeration) {
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x200
          */
-        NEVER : new Enumeration(0x0200, 'NEVER'),
+        NEVER : 0x0200,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x201
          */
-        LESS : new Enumeration(0x0201, 'LESS'),
+        LESS : 0x0201,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x202
          */
-        EQUAL : new Enumeration(0x0202, 'EQUAL'),
+        EQUAL : 0x0202,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x203
          */
-        LESS_OR_EQUAL : new Enumeration(0x0203, 'LEQUAL'),
+        LESS_OR_EQUAL : 0x0203,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x204
          */
-        GREATER : new Enumeration(0x0204, 'GREATER'),
+        GREATER : 0x0204,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x25
          */
-        NOT_EQUAL : new Enumeration(0x0205, 'NOTEQUAL'),
+        NOT_EQUAL : 0x0205,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x206
          */
-        GREATER_OR_EQUAL : new Enumeration(0x0206, 'GEQUAL'),
+        GREATER_OR_EQUAL : 0x0206,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x207
          */
-        ALWAYS : new Enumeration(0x0207, 'ALWAYS'),
+        ALWAYS : 0x0207,
 
         /**
          * DOC_TBA

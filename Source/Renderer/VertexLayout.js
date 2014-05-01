@@ -1,5 +1,5 @@
 /*global define*/
-define(['../Core/Enumeration'], function(Enumeration) {
+define([], function() {
     "use strict";
 
     /**
@@ -16,22 +16,22 @@ define(['../Core/Enumeration'], function(Enumeration) {
          * the sharing of vertex buffers among vertex arrays.  It also requires much less initial CPU
          * processing than interleaving.
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0
          */
-        SEPARATE : new Enumeration(0, 'SEPARATE'),
+        SEPARATE : 0,
         /**
          * Each attribute will be interleaved in a single vertex buffer.  This can have a slight
          * performance advantage over using a separate vertex buffer per attribute, but it requires
          * extra CPU processing to initially interleave the vertex data.  This is recommended for
          * static data that will be rendered over several frames.
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 1
          */
-        INTERLEAVED : new Enumeration(1, 'INTERLEAVED'),
+        INTERLEAVED : 1,
 
         /**
          * DOC_TBA

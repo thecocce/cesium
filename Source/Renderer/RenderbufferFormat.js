@@ -1,5 +1,5 @@
 /*global define*/
-define(['../Core/Enumeration'], function(Enumeration) {
+define([], function() {
     "use strict";
 
     /**
@@ -11,56 +11,56 @@ define(['../Core/Enumeration'], function(Enumeration) {
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x8056
          */
-        RGBA4 : new Enumeration(0x8056, 'RGBA4'),
+        RGBA4 : 0x8056,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x8057
          */
-        RGB5_A1 : new Enumeration(0x8057, 'RGB5_A1'),
+        RGB5_A1 : 0x8057,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x8D62
          */
-        RGB565 : new Enumeration(0x8D62, 'RGB565'),
+        RGB565 : 0x8D62,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x81A5
          */
-        DEPTH_COMPONENT16 : new Enumeration(0x81A5, 'DEPTH_COMPONENT16'),
+        DEPTH_COMPONENT16 : 0x81A5,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x8D48
          */
-        STENCIL_INDEX8 : new Enumeration(0x8D48, 'STENCIL_INDEX8'),
+        STENCIL_INDEX8 : 0x8D48,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 084F9
          */
-        DEPTH_STENCIL : new Enumeration(0x84F9, 'DEPTH_STENCIL'),
+        DEPTH_STENCIL : 0x84F9,
 
         /**
          * DOC_TBA

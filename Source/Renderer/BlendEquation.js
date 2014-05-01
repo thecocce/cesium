@@ -1,5 +1,5 @@
 /*global define*/
-define(['../Core/Enumeration'], function(Enumeration) {
+define([], function() {
     "use strict";
 
     /**
@@ -11,29 +11,29 @@ define(['../Core/Enumeration'], function(Enumeration) {
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x8006
          */
-        ADD : new Enumeration(0x8006, 'ADD'), // WebGL: FUNC_ADD
+        ADD : 0x8006, // WebGL: FUNC_ADD
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x800A
          */
-        SUBTRACT : new Enumeration(0x800A, 'SUBTRACT'), // WebGL: FUNC_SUBTRACT
+        SUBTRACT : 0x800A, // WebGL: FUNC_SUBTRACT
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x800B
          */
-        REVERSE_SUBTRACT : new Enumeration(0x800B, 'REVERSE_SUBTRACT'), // WebGL: FUNC_REVERSE_SUBTRACT
+        REVERSE_SUBTRACT : 0x800B, // WebGL: FUNC_REVERSE_SUBTRACT
 
         // No min and max like in ColladaFX GLES2 profile
 

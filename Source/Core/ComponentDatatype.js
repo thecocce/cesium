@@ -3,14 +3,12 @@ define([
         './defaultValue',
         './defined',
         './DeveloperError',
-        './FeatureDetection',
-        './Enumeration'
+        './FeatureDetection'
     ], function(
         defaultValue,
         defined,
         DeveloperError,
-        FeatureDetection,
-        Enumeration) {
+        FeatureDetection) {
     "use strict";
 
     // Bail out if the browser doesn't support typed arrays, to prevent the setup function
@@ -31,61 +29,51 @@ define([
          * 8-bit signed byte enumeration corresponding to <code>gl.BYTE</code> and the type
          * of an element in <code>Int8Array</code>.
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x1400
          */
-        BYTE : new Enumeration(0x1400, 'BYTE', {
-            sizeInBytes : Int8Array.BYTES_PER_ELEMENT
-        }),
+        BYTE : 0x1400,
 
         /**
          * 8-bit unsigned byte enumeration corresponding to <code>UNSIGNED_BYTE</code> and the type
          * of an element in <code>Uint8Array</code>.
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x1401
          */
-        UNSIGNED_BYTE : new Enumeration(0x1401, 'UNSIGNED_BYTE', {
-            sizeInBytes : Uint8Array.BYTES_PER_ELEMENT
-        }),
+        UNSIGNED_BYTE : 0x1401,
 
         /**
          * 16-bit signed short enumeration corresponding to <code>SHORT</code> and the type
          * of an element in <code>Int16Array</code>.
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x1402
          */
-        SHORT : new Enumeration(0x1402, 'SHORT', {
-            sizeInBytes : Int16Array.BYTES_PER_ELEMENT
-        }),
+        SHORT : 0x1402,
 
         /**
          * 16-bit unsigned short enumeration corresponding to <code>UNSIGNED_SHORT</code> and the type
          * of an element in <code>Uint16Array</code>.
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x1403
          */
-        UNSIGNED_SHORT : new Enumeration(0x1403, 'UNSIGNED_SHORT', {
-            sizeInBytes : Uint16Array.BYTES_PER_ELEMENT
-        }),
+        UNSIGNED_SHORT : 0x1403,
 
         /**
          * 32-bit floating-point enumeration corresponding to <code>FLOAT</code> and the type
          * of an element in <code>Float32Array</code>.
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x1406
          */
-        FLOAT : new Enumeration(0x1406, 'FLOAT', {
-            sizeInBytes : Float32Array.BYTES_PER_ELEMENT
-        }),
+        FLOAT : 0x1406,
 
         /**
          * 64-bit floating-point enumeration corresponding to <code>gl.DOUBLE</code> (in Desktop OpenGL;
@@ -94,13 +82,11 @@ define([
          *
          * @memberOf ComponentDatatype
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x140A
          */
-        DOUBLE : new Enumeration(0x140A, 'DOUBLE', {
-            sizeInBytes : Float64Array.BYTES_PER_ELEMENT
-        })
+        DOUBLE : 0x140A
     };
 
     /**

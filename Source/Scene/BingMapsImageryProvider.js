@@ -53,7 +53,7 @@ define([
      *        Bing Maps imagery without creating a separate key for your application.
      * @param {String} [description.tileProtocol] The protocol to use when loading tiles, e.g. 'http:' or 'https:'.
      *        By default, tiles are loaded using the same protocol as the page.
-     * @param {Enumeration} [description.mapStyle=BingMapsStyle.AERIAL] The type of Bing Maps
+     * @param {Number} [description.mapStyle=BingMapsStyle.AERIAL] The type of Bing Maps
      *        imagery to load.
      * @param {TileDiscardPolicy} [description.tileDiscardPolicy] The policy that determines if a tile
      *        is invalid and should be discarded.  If this value is not specified, a default

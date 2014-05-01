@@ -1,5 +1,5 @@
 /*global define*/
-define(['../Core/Enumeration'], function(Enumeration) {
+define([], function() {
     "use strict";
 
     /**
@@ -12,23 +12,23 @@ define(['../Core/Enumeration'], function(Enumeration) {
          * DOC_TBA
          *
          * @constant
-         * @type {Enumeration}
+         * @type {Number}
          */
-        STREAM_DRAW : new Enumeration(0x88E0, 'STREAM_DRAW'),
+        STREAM_DRAW : 0x88E0,
         /**
          * DOC_TBA
          *
          * @constant
-         * @type {Enumeration}
+         * @type {Number}
          */
-        STATIC_DRAW : new Enumeration(0x88E4, 'STATIC_DRAW'),
+        STATIC_DRAW : 0x88E4,
         /**
          * DOC_TBA
          *
          * @constant
-         * @type {Enumeration}
+         * @type {Number}
          */
-        DYNAMIC_DRAW : new Enumeration(0x88E8, 'DYNAMIC_DRAW'),
+        DYNAMIC_DRAW : 0x88E8,
 
         /**
          * DOC_TBA

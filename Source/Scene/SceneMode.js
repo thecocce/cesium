@@ -1,5 +1,5 @@
 /*global define*/
-define(['../Core/Enumeration'], function(Enumeration) {
+define([], function() {
     "use strict";
 
     /**
@@ -11,44 +11,38 @@ define(['../Core/Enumeration'], function(Enumeration) {
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0
          */
-        SCENE2D : new Enumeration(0, 'SCENE2D', {
-            morphTime : 0.0
-        }),
+        SCENE2D : 0,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 1
          */
-        COLUMBUS_VIEW : new Enumeration(1, 'COLUMBUS_VIEW', {
-            morphTime : 0.0
-        }),
+        COLUMBUS_VIEW : 1,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 2
          */
-        SCENE3D : new Enumeration(2, 'SCENE3D', {
-            morphTime : 1.0
-        }),
+        SCENE3D : 2,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 3
          */
-        MORPHING : new Enumeration(3, 'MORPHING')
+        MORPHING : 3
     };
 
     return SceneMode;

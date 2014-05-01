@@ -1,5 +1,5 @@
 /*global define*/
-define(['../Core/Enumeration'], function(Enumeration) {
+define([], function() {
     "use strict";
 
     /**
@@ -11,29 +11,29 @@ define(['../Core/Enumeration'], function(Enumeration) {
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x1100
          */
-        DONT_CARE : new Enumeration(0x1100, 'DONT_CARE'),
+        DONT_CARE : 0x1100,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x1101
          */
-        FASTEST : new Enumeration(0x1101, 'FASTEST'),
+        FASTEST : 0x1101,
 
         /**
          * DOC_TBA
          *
-         * @type {Enumeration}
+         * @type {Number}
          * @constant
          * @default 0x1102
          */
-        NICEST : new Enumeration(0x1102, 'NICEST'),
+        NICEST : 0x1102,
 
         /**
          * DOC_TBA
