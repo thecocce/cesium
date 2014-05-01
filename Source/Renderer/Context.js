@@ -2290,7 +2290,7 @@ define([
                     defined(attributes[name].values)) {
                 names.push(name);
 
-                if (attributes[name].componentDatatype.value === ComponentDatatype.DOUBLE.value) {
+                if (attributes[name].componentDatatype === ComponentDatatype.DOUBLE) {
                     attributes[name].componentDatatype = ComponentDatatype.FLOAT;
                     attributes[name].values = ComponentDatatype.createTypedArray(ComponentDatatype.FLOAT, attributes[name].values);
                 }
@@ -2508,7 +2508,7 @@ define([
                     attribute = attributes[name];
 
                     var componentDatatype = attribute.componentDatatype;
-                    if (componentDatatype.value === ComponentDatatype.DOUBLE.value) {
+                    if (componentDatatype === ComponentDatatype.DOUBLE) {
                         componentDatatype = ComponentDatatype.FLOAT;
                     }
 

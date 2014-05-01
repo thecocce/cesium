@@ -27,9 +27,9 @@ define([
          * with 0.0 being 2D or Columbus View and 1.0 being 3D.
          *
          * @type {Number}
-         * @default {@link SceneMode.SCENE3D.morphTime}
+         * @default 0
          */
-        this.morphTime = SceneMode.SCENE3D.morphTime;
+        this.morphTime = 0;
 
         /**
          * The current frame number.

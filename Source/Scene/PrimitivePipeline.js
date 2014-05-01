@@ -115,7 +115,7 @@ define([
                     var otherAttribute = instances[i].attributes[name];
 
                     if (!defined(otherAttribute) ||
-                        (attribute.componentDatatype.value !== otherAttribute.componentDatatype.value) ||
+                        (attribute.componentDatatype !== otherAttribute.componentDatatype) ||
                         (attribute.componentsPerAttribute !== otherAttribute.componentsPerAttribute) ||
                         (attribute.normalize !== otherAttribute.normalize)) {
 
@@ -221,7 +221,7 @@ define([
         var name;
         if (!allow3DOnly) {
             for (name in attributes) {
-                if (attributes.hasOwnProperty(name) && attributes[name].componentDatatype.value === ComponentDatatype.DOUBLE.value) {
+                if (attributes.hasOwnProperty(name) && attributes[name].componentDatatype === ComponentDatatype.DOUBLE) {
                     var name3D = name + '3D';
                     var name2D = name + '2D';
 
@@ -234,7 +234,7 @@ define([
             }
         } else {
             for (name in attributes) {
-                if (attributes.hasOwnProperty(name) && attributes[name].componentDatatype.value === ComponentDatatype.DOUBLE.value) {
+                if (attributes.hasOwnProperty(name) && attributes[name].componentDatatype === ComponentDatatype.DOUBLE) {
                     GeometryPipeline.encodeAttribute(geometry, name, name + '3DHigh', name + '3DLow');
                 }
             }
@@ -259,7 +259,7 @@ define([
             var attribute = attributes[name];
 
             var componentDatatype = attribute.componentDatatype;
-            if (componentDatatype.value === ComponentDatatype.DOUBLE.value) {
+            if (componentDatatype === ComponentDatatype.DOUBLE) {
                 componentDatatype = ComponentDatatype.FLOAT;
             }
 
@@ -491,7 +491,7 @@ define([
                 var name = attributesToWrite[q];
                 var attribute = attributes[name];
                 packedData[count++] = stringHash[name];
-                packedData[count++] = attribute.componentDatatype.value;
+                packedData[count++] = attribute.componentDatatype;
                 packedData[count++] = attribute.componentsPerAttribute;
                 packedData[count++] = attribute.normalize ? 1 : 0;
                 packedData[count++] = attribute.values.length;
@@ -639,7 +639,7 @@ define([
                 var name = attributesToWrite[q];
                 var attribute = attributes[name];
                 packedData[count++] = stringHash[name];
-                packedData[count++] = attribute.componentDatatype.value;
+                packedData[count++] = attribute.componentDatatype;
                 packedData[count++] = attribute.componentsPerAttribute;
                 packedData[count++] = attribute.normalize;
                 packedData[count++] = attribute.value.length;
