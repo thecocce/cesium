@@ -116,9 +116,9 @@ define([
         tangent.x = -origin.y;
         tangent.y = origin.x;
         tangent.z = 0.0;
-        Cartesian3.normalize(tangent, tangent);
+        tangent = Cartesian3.normalize(tangent, tangent);
 
-        Cartesian3.cross(normal, tangent, bitangent);
+        bitangent = Cartesian3.cross(normal, tangent, bitangent);
 
         if (!defined(result)) {
             return new Matrix4(
@@ -220,9 +220,9 @@ define([
         tangent.x = -origin.y;
         tangent.y = origin.x;
         tangent.z = 0.0;
-        Cartesian3.normalize(tangent, tangent);
+        tangent = Cartesian3.normalize(tangent, tangent);
 
-        Cartesian3.cross(normal, tangent, bitangent);
+        bitangent = Cartesian3.cross(normal, tangent, bitangent);
 
         if (!defined(result)) {
             return new Matrix4(
@@ -588,20 +588,22 @@ define([
         if (!defined(modelViewProjectionMatrix)) {
             throw new DeveloperError('modelViewProjectionMatrix is required.');
         }
-
         if (!defined(viewportTransformation)) {
             throw new DeveloperError('viewportTransformation is required.');
         }
-
         if (!defined(point)) {
             throw new DeveloperError('point is required.');
         }
         //>>includeEnd('debug');
 
+        if (!defined(result)){
+            result = new Cartesian2();
+        }
+
         var tmp = pointToWindowCoordinatesTemp;
 
         Matrix4.multiplyByVector(modelViewProjectionMatrix, Cartesian4.fromElements(point.x, point.y, point.z, 1, tmp), tmp);
-        Cartesian4.multiplyByScalar(tmp, 1.0 / tmp.w, tmp);
+        tmp = Cartesian4.multiplyByScalar(tmp, 1.0 / tmp.w, tmp);
         Matrix4.multiplyByVector(viewportTransformation, tmp, tmp);
         return Cartesian2.fromCartesian4(tmp, result);
     };

@@ -82,8 +82,8 @@ define([
         this._verticalOrigin = defaultValue(options.verticalOrigin, VerticalOrigin.BOTTOM);
         this._horizontalOrigin = defaultValue(options.horizontalOrigin, HorizontalOrigin.LEFT);
         this._pixelOffset = Cartesian2.clone(defaultValue(options.pixelOffset, Cartesian2.ZERO));
-        this._eyeOffset = Cartesian3.clone(defaultValue(options.eyeOffset, Cartesian3.ZERO));
-        this._position = Cartesian3.clone(defaultValue(options.position, Cartesian3.ZERO));
+        this._eyeOffset = Cartesian3.clone(defaultValue(options.eyeOffset, Cartesian3.ZERO), new Cartesian3());
+        this._position = Cartesian3.clone(defaultValue(options.position, Cartesian3.ZERO), new Cartesian3());
         this._scale = defaultValue(options.scale, 1.0);
         this._id = options.id;
         this._translucencyByDistance = options.translucencyByDistance;
@@ -146,7 +146,7 @@ define([
 
                 var position = this._position;
                 if (!Cartesian3.equals(position, value)) {
-                    Cartesian3.clone(value, position);
+                    position = Cartesian3.clone(value, position);
 
                     var glyphs = this._glyphs;
                     for ( var i = 0, len = glyphs.length; i < len; i++) {
@@ -332,7 +332,7 @@ define([
 
                 var pixelOffset = this._pixelOffset;
                 if (!Cartesian2.equals(pixelOffset, value)) {
-                    Cartesian2.clone(value, pixelOffset);
+                    pixelOffset = Cartesian2.clone(value, pixelOffset);
                     repositionAllGlyphs(this);
                 }
             }
@@ -454,7 +454,7 @@ define([
 
                 var eyeOffset = this._eyeOffset;
                 if (!Cartesian3.equals(eyeOffset, value)) {
-                    Cartesian3.clone(value, eyeOffset);
+                    eyeOffset = Cartesian3.clone(value, eyeOffset);
 
                     var glyphs = this._glyphs;
                     for ( var i = 0, len = glyphs.length; i < len; i++) {

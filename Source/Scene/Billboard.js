@@ -80,18 +80,18 @@ define([
         //>>includeEnd('debug');
 
         this._show = defaultValue(options.show, true);
-        this._position = Cartesian3.clone(defaultValue(options.position, Cartesian3.ZERO));
-        this._actualPosition = Cartesian3.clone(this._position); // For columbus view and 2D
-        this._pixelOffset = Cartesian2.clone(defaultValue(options.pixelOffset, Cartesian2.ZERO));
+        this._position = Cartesian3.clone(defaultValue(options.position, Cartesian3.ZERO), new Cartesian3());
+        this._actualPosition = Cartesian3.clone(this._position, new Cartesian3()); // For columbus view and 2D
+        this._pixelOffset = Cartesian2.clone(defaultValue(options.pixelOffset, Cartesian2.ZERO), new Cartesian2());
         this._translate = new Cartesian2(0.0, 0.0); // used by labels for glyph vertex translation
-        this._eyeOffset = Cartesian3.clone(defaultValue(options.eyeOffset, Cartesian3.ZERO));
+        this._eyeOffset = Cartesian3.clone(defaultValue(options.eyeOffset, Cartesian3.ZERO), new Cartesian3());
         this._verticalOrigin = defaultValue(options.verticalOrigin, VerticalOrigin.CENTER);
         this._horizontalOrigin = defaultValue(options.horizontalOrigin, HorizontalOrigin.CENTER);
         this._scale = defaultValue(options.scale, 1.0);
         this._imageIndex = defaultValue(options.imageIndex, -1);
         this._color = Color.clone(defaultValue(options.color, Color.WHITE));
         this._rotation = defaultValue(options.rotation, 0.0);
-        this._alignedAxis = Cartesian3.clone(defaultValue(options.alignedAxis, Cartesian3.ZERO));
+        this._alignedAxis = Cartesian3.clone(defaultValue(options.alignedAxis, Cartesian3.ZERO), new Cartesian3());
         this._width = options.width;
         this._height = options.height;
         this._scaleByDistance = options.scaleByDistance;
@@ -174,8 +174,8 @@ define([
 
                 var position = this._position;
                 if (!Cartesian3.equals(position, value)) {
-                    Cartesian3.clone(value, position);
-                    Cartesian3.clone(value, this._actualPosition);
+                    position = Cartesian3.clone(value, position);
+                    this._actualPosition = Cartesian3.clone(value, this._actualPosition);
 
                     makeDirty(this, POSITION_INDEX);
                 }
@@ -211,7 +211,7 @@ define([
 
                 var pixelOffset = this._pixelOffset;
                 if (!Cartesian2.equals(pixelOffset, value)) {
-                    Cartesian2.clone(value, pixelOffset);
+                    pixelOffset = Cartesian2.clone(value, pixelOffset);
                     makeDirty(this, PIXEL_OFFSET_INDEX);
                 }
             }
@@ -373,7 +373,7 @@ define([
 
                 var eyeOffset = this._eyeOffset;
                 if (!Cartesian3.equals(eyeOffset, value)) {
-                    Cartesian3.clone(value, eyeOffset);
+                    eyeOffset = Cartesian3.clone(value, eyeOffset);
                     makeDirty(this, EYE_OFFSET_INDEX);
                 }
             }
@@ -598,7 +598,7 @@ define([
 
                 var axis = this._alignedAxis;
                 if (!Cartesian3.equals(axis, value)) {
-                    Cartesian3.clone(value, axis);
+                    axis = Cartesian3.clone(value, axis);
                     makeDirty(this, ALIGNED_AXIS_INDEX);
                 }
             }
@@ -693,7 +693,7 @@ define([
 
         var translate = this._translate;
         if (!Cartesian2.equals(translate, value)) {
-            Cartesian2.clone(value, translate);
+            translate = Cartesian2.clone(value, translate);
             makeDirty(this, PIXEL_OFFSET_INDEX);
         }
     };
@@ -703,7 +703,7 @@ define([
     };
 
     Billboard.prototype._setActualPosition = function(value) {
-        Cartesian3.clone(value, this._actualPosition);
+        this._actualPosition = Cartesian3.clone(value, this._actualPosition);
         makeDirty(this, POSITION_INDEX);
     };
 
@@ -782,8 +782,8 @@ define([
         //>>includeEnd('debug');
 
         // pixel offset for screenspace computation is the pixelOffset + screenspace translate
-        Cartesian2.clone(this._pixelOffset, tempPixelOffset);
-        Cartesian2.add(tempPixelOffset, this._translate, tempPixelOffset);
+        tempPixelOffset = Cartesian2.clone(this._pixelOffset, tempPixelOffset);
+        tempPixelOffset = Cartesian2.add(tempPixelOffset, this._translate, tempPixelOffset);
 
         var modelMatrix = billboardCollection.modelMatrix;
         return Billboard._computeScreenSpacePosition(modelMatrix, this._actualPosition, this._eyeOffset, tempPixelOffset, scene);

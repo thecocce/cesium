@@ -97,7 +97,7 @@ define([
          *
          * @see EllipsoidPrimitive#modelMatrix
          */
-        this.center = Cartesian3.clone(defaultValue(options.center, Cartesian3.ZERO));
+        this.center = Cartesian3.clone(defaultValue(options.center, Cartesian3.ZERO), new Cartesian3());
         this._center = new Cartesian3();
 
         /**
@@ -116,7 +116,7 @@ define([
          *
          * @see EllipsoidPrimitive#modelMatrix
          */
-        this.radii = Cartesian3.clone(options.radii);
+        this.radii = Cartesian3.clone(options.radii, new Cartesian3());
         this._radii = new Cartesian3();
 
         this._oneOverEllipsoidRadiiSquared = new Cartesian3();
@@ -312,7 +312,7 @@ define([
 
         var radii = this.radii;
         if (!Cartesian3.equals(this._radii, radii)) {
-            Cartesian3.clone(radii, this._radii);
+            this._radii = Cartesian3.clone(radii, this._radii);
 
             var r = this._oneOverEllipsoidRadiiSquared;
             r.x = 1.0 / (radii.x * radii.x);
@@ -324,7 +324,7 @@ define([
 
         if (!Matrix4.equals(this.modelMatrix, this._modelMatrix) || !Cartesian3.equals(this.center, this._center)) {
             Matrix4.clone(this.modelMatrix, this._modelMatrix);
-            Cartesian3.clone(this.center, this._center);
+            this._center = Cartesian3.clone(this.center, this._center);
 
             // Translate model coordinates used for rendering such that the origin is the center of the ellipsoid.
             Matrix4.multiplyByTranslation(this.modelMatrix, this.center, this._computedModelMatrix);
@@ -332,7 +332,7 @@ define([
         }
 
         if (boundingSphereDirty) {
-            Cartesian3.clone(Cartesian3.ZERO, this._boundingSphere.center);
+            this._boundingSphere.center = Cartesian3.clone(Cartesian3.ZERO, this._boundingSphere.center);
             this._boundingSphere.radius = Cartesian3.getMaximumComponent(radii);
             BoundingSphere.transform(this._boundingSphere, this._computedModelMatrix, this._boundingSphere);
         }

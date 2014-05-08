@@ -169,11 +169,11 @@ define([
             return new Ellipsoid(radii.x, radii.y, radii.z);
         }
 
-        Cartesian3.clone(radii, result._radii);
-        Cartesian3.clone(ellipsoid._radiiSquared, result._radiiSquared);
-        Cartesian3.clone(ellipsoid._radiiToTheFourth, result._radiiToTheFourth);
-        Cartesian3.clone(ellipsoid._oneOverRadii, result._oneOverRadii);
-        Cartesian3.clone(ellipsoid._oneOverRadiiSquared, result._oneOverRadiiSquared);
+        result._radii = Cartesian3.clone(radii, result._radii);
+        result._radiiSquared = Cartesian3.clone(ellipsoid._radiiSquared, result._radiiSquared);
+        result._radiiToTheFourth = Cartesian3.clone(ellipsoid._radiiToTheFourth, result._radiiToTheFourth);
+        result._oneOverRadii = Cartesian3.clone(ellipsoid._oneOverRadii, result._oneOverRadii);
+        result._oneOverRadiiSquared = Cartesian3.clone(ellipsoid._oneOverRadiiSquared, result._oneOverRadiiSquared);
         result._minimumRadius = ellipsoid._minimumRadius;
         result._maximumRadius = ellipsoid._maximumRadius;
         result._centerToleranceSquared = ellipsoid._centerToleranceSquared;
@@ -305,13 +305,16 @@ define([
      */
     Ellipsoid.prototype.cartographicToCartesian = function(cartographic, result) {
         //`cartographic is required` is thrown from geodeticSurfaceNormalCartographic.
+        if (!defined(result)){
+            result = new Cartesian3();
+        }
         var n = cartographicToCartesianNormal;
         var k = cartographicToCartesianK;
         this.geodeticSurfaceNormalCartographic(cartographic, n);
-        Cartesian3.multiplyComponents(this._radiiSquared, n, k);
+        k = Cartesian3.multiplyComponents(this._radiiSquared, n, k);
         var gamma = Math.sqrt(Cartesian3.dot(n, k));
-        Cartesian3.divideByScalar(k, gamma, k);
-        Cartesian3.multiplyByScalar(n, cartographic.height, n);
+        k = Cartesian3.divideByScalar(k, gamma, k);
+        n = Cartesian3.multiplyByScalar(n, cartographic.height, n);
         return Cartesian3.add(k, n, result);
     };
 

@@ -1113,8 +1113,8 @@ define([
                         position = positions[positionsLength - 2];
                     } else {
                         position = scratchWriteVector;
-                        Cartesian3.subtract(positions[0], positions[1], position);
-                        Cartesian3.add(positions[0], position, position);
+                        position = Cartesian3.subtract(positions[0], positions[1], position);
+                        position = Cartesian3.add(positions[0], position, position);
                     }
                 } else {
                     position = positions[j - 1];
@@ -1134,8 +1134,8 @@ define([
                         position = positions[1];
                     } else {
                         position = scratchWriteVector;
-                        Cartesian3.subtract(positions[positionsLength - 1], positions[positionsLength - 2], position);
-                        Cartesian3.add(positions[positionsLength - 1], position, position);
+                        position = Cartesian3.subtract(positions[positionsLength - 1], positions[positionsLength - 2], position);
+                        position = Cartesian3.add(positions[positionsLength - 1], position, position);
                     }
                 } else {
                     position = positions[j + 1];
@@ -1206,8 +1206,8 @@ define([
                         prevPosition = positions[positionsLength - 2];
                     } else {
                         prevPosition = morphVectorScratch;
-                        Cartesian3.subtract(positions[0], positions[1], prevPosition);
-                        Cartesian3.add(positions[0], prevPosition, prevPosition);
+                        prevPosition = Cartesian3.subtract(positions[0], positions[1], prevPosition);
+                        prevPosition = Cartesian3.add(positions[0], prevPosition, prevPosition);
                     }
                 } else {
                     prevPosition = positions[j - 1];
@@ -1223,8 +1223,8 @@ define([
                         nextPosition = positions[1];
                     } else {
                         nextPosition = morphVectorScratch;
-                        Cartesian3.subtract(positions[positionsLength - 1], positions[positionsLength - 2], nextPosition);
-                        Cartesian3.add(positions[positionsLength - 1], nextPosition, nextPosition);
+                        nextPosition = Cartesian3.subtract(positions[positionsLength - 1], positions[positionsLength - 2], nextPosition);
+                        nextPosition = Cartesian3.add(positions[positionsLength - 1], nextPosition, nextPosition);
                     }
                 } else {
                     nextPosition = positions[j + 1];
@@ -1445,8 +1445,8 @@ define([
                         position = positions[positionsLength - 2];
                     } else {
                         position = scratchWriteVector;
-                        Cartesian3.subtract(positions[0], positions[1], position);
-                        Cartesian3.add(positions[0], position, position);
+                        position = Cartesian3.subtract(positions[0], positions[1], position);
+                        position = Cartesian3.add(positions[0], position, position);
                     }
                 } else {
                     position = positions[i - 1];
@@ -1466,8 +1466,8 @@ define([
                         position = positions[1];
                     } else {
                         position = scratchWriteVector;
-                        Cartesian3.subtract(positions[positionsLength - 1], positions[positionsLength - 2], position);
-                        Cartesian3.add(positions[positionsLength - 1], position, position);
+                        position = Cartesian3.subtract(positions[positionsLength - 1], positions[positionsLength - 2], position);
+                        position = Cartesian3.add(positions[positionsLength - 1], position, position);
                     }
                 } else {
                     position = positions[i + 1];

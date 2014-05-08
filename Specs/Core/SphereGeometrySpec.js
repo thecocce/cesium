@@ -71,15 +71,15 @@ defineSuite([
         var binormals = m.attributes.binormal.values;
 
         for ( var i = 0; i < positions.length; i += 3) {
-            var position = Cartesian3.fromArray(positions, i);
-            var normal = Cartesian3.fromArray(normals, i);
-            var tangent = Cartesian3.fromArray(tangents, i);
-            var binormal = Cartesian3.fromArray(binormals, i);
+            var position = Cartesian3.fromArray(positions, new Cartesian3(), i);
+            var normal = Cartesian3.fromArray(normals, new Cartesian3(), i);
+            var tangent = Cartesian3.fromArray(tangents, new Cartesian3(), i);
+            var binormal = Cartesian3.fromArray(binormals, new Cartesian3(), i);
 
             expect(Cartesian3.magnitude(position)).toEqualEpsilon(1.0, CesiumMath.EPSILON10);
-            expect(normal).toEqualEpsilon(Cartesian3.normalize(position), CesiumMath.EPSILON7);
+            expect(normal).toEqualEpsilon(Cartesian3.normalize(position, new Cartesian3()), CesiumMath.EPSILON7);
             expect(Cartesian3.dot(Cartesian3.UNIT_Z, tangent)).not.toBeLessThan(0.0);
-            expect(binormal).toEqualEpsilon(Cartesian3.cross(normal, tangent), CesiumMath.EPSILON7);
+            expect(binormal).toEqualEpsilon(Cartesian3.cross(normal, tangent, new Cartesian3()), CesiumMath.EPSILON7);
         }
     });
 });

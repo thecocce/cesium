@@ -185,14 +185,14 @@ define([
 
         var right = Cartesian3.cross(direction, up, getPlanesRight);
         var nearCenter = getPlanesNearCenter;
-        Cartesian3.multiplyByScalar(direction, n, nearCenter);
-        Cartesian3.add(position, nearCenter, nearCenter);
+        nearCenter = Cartesian3.multiplyByScalar(direction, n, nearCenter);
+        nearCenter = Cartesian3.add(position, nearCenter, nearCenter);
 
         var point = getPlanesPoint;
 
         // Left plane
-        Cartesian3.multiplyByScalar(right, l, point);
-        Cartesian3.add(nearCenter, point, point);
+        point = Cartesian3.multiplyByScalar(right, l, point);
+        point = Cartesian3.add(nearCenter, point, point);
 
         var plane = planes[0];
         if (!defined(plane)) {
@@ -204,8 +204,8 @@ define([
         plane.w = -Cartesian3.dot(right, point);
 
         // Right plane
-        Cartesian3.multiplyByScalar(right, r, point);
-        Cartesian3.add(nearCenter, point, point);
+        point = Cartesian3.multiplyByScalar(right, r, point);
+        point = Cartesian3.add(nearCenter, point, point);
 
         plane = planes[1];
         if (!defined(plane)) {
@@ -217,8 +217,8 @@ define([
         plane.w = -Cartesian3.dot(Cartesian3.negate(right, negateScratch), point);
 
         // Bottom plane
-        Cartesian3.multiplyByScalar(up, b, point);
-        Cartesian3.add(nearCenter, point, point);
+        point = Cartesian3.multiplyByScalar(up, b, point);
+        point = Cartesian3.add(nearCenter, point, point);
 
         plane = planes[2];
         if (!defined(plane)) {
@@ -230,8 +230,8 @@ define([
         plane.w = -Cartesian3.dot(up, point);
 
         // Top plane
-        Cartesian3.multiplyByScalar(up, t, point);
-        Cartesian3.add(nearCenter, point, point);
+        point = Cartesian3.multiplyByScalar(up, t, point);
+        point = Cartesian3.add(nearCenter, point, point);
 
         plane = planes[3];
         if (!defined(plane)) {
@@ -253,8 +253,8 @@ define([
         plane.w = -Cartesian3.dot(direction, nearCenter);
 
         // Far plane
-        Cartesian3.multiplyByScalar(direction, f, point);
-        Cartesian3.add(position, point, point);
+        point = Cartesian3.multiplyByScalar(direction, f, point);
+        point = Cartesian3.add(position, point, point);
 
         plane = planes[5];
         if (!defined(plane)) {

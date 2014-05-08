@@ -99,9 +99,9 @@ defineSuite([
         var newPositions = PolylinePipeline.scaleToSurface(positions, CesiumMath.PI_OVER_TWO/2, ellipsoid);
 
         expect(newPositions.length).toEqual(3*3);
-        var p1n = Cartesian3.fromArray(newPositions, 0);
-        var p3n = Cartesian3.fromArray(newPositions, 3);
-        var p2n = Cartesian3.fromArray(newPositions, 6);
+        var p1n = Cartesian3.fromArray(newPositions, new Cartesian3(), 0);
+        var p3n = Cartesian3.fromArray(newPositions,new Cartesian3(), 3);
+        var p2n = Cartesian3.fromArray(newPositions, new Cartesian3(), 6);
         expect(Cartesian3.equalsEpsilon(p1, p1n, CesiumMath.EPSILON4)).toEqual(true);
         expect(Cartesian3.equalsEpsilon(p2, p2n, CesiumMath.EPSILON4)).toEqual(true);
         expect(Cartesian3.equalsEpsilon(p3, p3n, CesiumMath.EPSILON4)).toEqual(true);
@@ -142,8 +142,8 @@ defineSuite([
 
         PolylinePipeline.scaleToGeodeticHeight(positions, height, ellipsoid, result);
 
-        var p1n = Cartesian3.fromArray(result, 0);
-        var p2n = Cartesian3.fromArray(result, 3);
+        var p1n = Cartesian3.fromArray(result, new Cartesian3(), 0);
+        var p2n = Cartesian3.fromArray(result, new Cartesian3(), 3);
         expect(ellipsoid.cartesianToCartographic(p1n).height).toEqualEpsilon(200, CesiumMath.EPSILON8);
         expect(ellipsoid.cartesianToCartographic(p2n).height).toEqualEpsilon(200, CesiumMath.EPSILON8);
     });
@@ -159,8 +159,8 @@ defineSuite([
 
         var newPositions = PolylinePipeline.scaleToGeodeticHeight(positions, height);
 
-        var p1n = Cartesian3.fromArray(newPositions, 0);
-        var p2n = Cartesian3.fromArray(newPositions, 3);
+        var p1n = Cartesian3.fromArray(newPositions, new Cartesian3(), 0);
+        var p2n = Cartesian3.fromArray(newPositions, new Cartesian3() ,3);
         expect(ellipsoid.cartesianToCartographic(p1n).height).toEqualEpsilon(200, CesiumMath.EPSILON8);
         expect(ellipsoid.cartesianToCartographic(p2n).height).toEqualEpsilon(200, CesiumMath.EPSILON8);
     });
@@ -175,8 +175,8 @@ defineSuite([
 
         var newPositions = PolylinePipeline.scaleToGeodeticHeight(positions, height);
 
-        var p1n = Cartesian3.fromArray(newPositions, 0);
-        var p2n = Cartesian3.fromArray(newPositions, 3);
+        var p1n = Cartesian3.fromArray(newPositions, new Cartesian3(), 0);
+        var p2n = Cartesian3.fromArray(newPositions, new Cartesian3(), 3);
         expect(ellipsoid.cartesianToCartographic(p1n).height).toEqualEpsilon(200, CesiumMath.EPSILON8);
         expect(ellipsoid.cartesianToCartographic(p2n).height).toEqualEpsilon(300, CesiumMath.EPSILON8);
     });

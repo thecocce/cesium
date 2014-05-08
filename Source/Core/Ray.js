@@ -20,9 +20,9 @@ define([
      * @param {Cartesian3} [direction=Cartesian3.ZERO] The direction of the ray.
      */
     var Ray = function(origin, direction) {
-        direction = Cartesian3.clone(defaultValue(direction, Cartesian3.ZERO));
+        direction = Cartesian3.clone(defaultValue(direction, Cartesian3.ZERO), new Cartesian3());
         if (!Cartesian3.equals(direction, Cartesian3.ZERO)) {
-            Cartesian3.normalize(direction, direction);
+            direction = Cartesian3.normalize(direction, direction);
         }
 
         /**
@@ -30,7 +30,7 @@ define([
          * @type {Cartesian3}
          * @default {@link Cartesian3.ZERO}
          */
-        this.origin = Cartesian3.clone(defaultValue(origin, Cartesian3.ZERO));
+        this.origin = Cartesian3.clone(defaultValue(origin, Cartesian3.ZERO), new Cartesian3());
 
         /**
          * The direction of the ray.
@@ -63,6 +63,9 @@ define([
         }
         //>>includeEnd('debug');
 
+        if (!defined(result)){
+            result = new Cartesian3();
+        }
         result = Cartesian3.multiplyByScalar(ray.direction, t, result);
         return Cartesian3.add(ray.origin, result, result);
     };

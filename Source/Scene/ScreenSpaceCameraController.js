@@ -336,19 +336,19 @@ define([
                 movementState.motion.x = (lastMovement.endPosition.x - lastMovement.startPosition.x) * 0.5;
                 movementState.motion.y = (lastMovement.endPosition.y - lastMovement.startPosition.y) * 0.5;
 
-                Cartesian2.clone(lastMovement.startPosition, movementState.startPosition);
+                movementState.startPosition = Cartesian2.clone(lastMovement.startPosition, movementState.startPosition);
 
-                Cartesian2.multiplyByScalar(movementState.motion, d, movementState.endPosition);
-                Cartesian2.add(movementState.startPosition, movementState.endPosition, movementState.endPosition);
+                movementState.endPosition = Cartesian2.multiplyByScalar(movementState.motion, d, movementState.endPosition);
+                movementState.endPosition = Cartesian2.add(movementState.startPosition, movementState.endPosition, movementState.endPosition);
 
                 movementState.active = true;
             } else {
-                Cartesian2.clone(movementState.endPosition, movementState.startPosition);
+                movementState.startPosition = Cartesian2.clone(movementState.endPosition, movementState.startPosition);
 
-                Cartesian2.multiplyByScalar(movementState.motion, d, movementState.endPosition);
-                Cartesian2.add(movementState.startPosition, movementState.endPosition, movementState.endPosition);
+                movementState.endPosition = Cartesian2.multiplyByScalar(movementState.motion, d, movementState.endPosition);
+                movementState.endPosition = Cartesian2.add(movementState.startPosition, movementState.endPosition, movementState.endPosition);
 
-                Cartesian3.clone(Cartesian2.ZERO, movementState.motion);
+                movementState.motion = Cartesian3.clone(Cartesian2.ZERO, movementState.motion);
             }
 
             // If value from the decreasing exponential function is close to zero,
@@ -452,7 +452,7 @@ define([
         var distance = Cartesian3.magnitude(direction);
 
         if (distance > 0.0) {
-            Cartesian3.normalize(direction, direction);
+            direction = Cartesian3.normalize(direction, direction);
             camera.move(direction, distance);
         }
     }
@@ -479,12 +479,12 @@ define([
         var start = twist2DStart;
         start.x = (2.0 / width) * movement.startPosition.x - 1.0;
         start.y = (2.0 / height) * (height - movement.startPosition.y) - 1.0;
-        Cartesian2.normalize(start, start);
+        start = Cartesian2.normalize(start, start);
 
         var end = twist2DEnd;
         end.x = (2.0 / width) * movement.endPosition.x - 1.0;
         end.y = (2.0 / height) * (height - movement.endPosition.y) - 1.0;
-        Cartesian2.normalize(end, end);
+        end = Cartesian2.normalize(end, end);
 
         var startTheta = Math.acos(start.x);
         if (start.y < 0) {
@@ -555,13 +555,13 @@ define([
         var direction = startRay.direction;
         var scalar = -Cartesian3.dot(normal, position) / Cartesian3.dot(normal, direction);
         var startPlanePos = Cartesian3.multiplyByScalar(direction, scalar, translateCVStartPos);
-        Cartesian3.add(position, startPlanePos, startPlanePos);
+        startPlanePos = Cartesian3.add(position, startPlanePos, startPlanePos);
 
         position = endRay.origin;
         direction = endRay.direction;
         scalar = -Cartesian3.dot(normal, position) / Cartesian3.dot(normal, direction);
         var endPlanePos = Cartesian3.multiplyByScalar(direction, scalar, translateCVEndPos);
-        Cartesian3.add(position, endPlanePos, endPlanePos);
+        endPlanePos = Cartesian3.add(position, endPlanePos, endPlanePos);
 
         var diff = Cartesian3.subtract(startPlanePos, endPlanePos, translatCVDifference);
         var temp = diff.x;
@@ -570,7 +570,7 @@ define([
         diff.z = temp;
         var mag = Cartesian3.magnitude(diff);
         if (mag > CesiumMath.EPSILON6) {
-            Cartesian3.normalize(diff, diff);
+            diff = Cartesian3.normalize(diff, diff);
             camera.move(diff, mag);
         }
     }
@@ -594,7 +594,7 @@ define([
         var direction = ray.direction;
         var scalar = -Cartesian3.dot(normal, position) / Cartesian3.dot(normal, direction);
         var center = Cartesian3.multiplyByScalar(direction, scalar, rotateCVCenter);
-        Cartesian3.add(position, center, center);
+        center = Cartesian3.add(position, center, center);
         var transform = Matrix4.fromTranslation(center, rotateTransform);
 
         var oldEllipsoid = controller._ellipsoid;
@@ -661,7 +661,7 @@ define([
         }
     }
 
-    var rotate3DRestrictedDirection = Cartesian3.clone(Cartesian3.ZERO);
+    var rotate3DRestrictedDirection = Cartesian3.clone(Cartesian3.ZERO, new Cartesian3());
     var rotate3DScratchCartesian3 = new Cartesian3();
     var rotate3DNegateScratch = new Cartesian3();
     var rotate3DInverseMatrixScratch = new Matrix4();
@@ -710,7 +710,7 @@ define([
                     east = camera.right;
                 } else {
                     east = Cartesian3.cross(camera.constrainedAxis, positionNormal, rotate3DScratchCartesian3);
-                    Cartesian3.normalize(east, east);
+                    east = Cartesian3.normalize(east, east);
                 }
 
                 var rDotE = Cartesian3.dot(camera.right, east);
@@ -746,8 +746,8 @@ define([
         camera.constrainedAxis = oldAxis;
     }
 
-    var pan3DP0 = Cartesian4.clone(Cartesian4.UNIT_W);
-    var pan3DP1 = Cartesian4.clone(Cartesian4.UNIT_W);
+    var pan3DP0 = Cartesian4.clone(Cartesian4.UNIT_W, new Cartesian4());
+    var pan3DP1 = Cartesian4.clone(Cartesian4.UNIT_W, new Cartesian4());
     var pan3DTemp0 = new Cartesian3();
     var pan3DTemp1 = new Cartesian3();
     var pan3DTemp2 = new Cartesian3();
@@ -766,8 +766,8 @@ define([
         p1 = camera.worldToCameraCoordinates(p1, p1);
 
         if (!defined(camera.constrainedAxis)) {
-            Cartesian3.normalize(p0, p0);
-            Cartesian3.normalize(p1, p1);
+            p0 = Cartesian3.normalize(p0, p0);
+            p1 = Cartesian3.normalize(p1, p1);
             var dot = Cartesian3.dot(p0, p1);
             var axis = Cartesian3.cross(p0, p1, pan3DTemp0);
 
@@ -778,23 +778,23 @@ define([
         } else {
             var basis0 = camera.constrainedAxis;
             var basis1 = Cartesian3.mostOrthogonalAxis(basis0, pan3DTemp0);
-            Cartesian3.cross(basis1, basis0, basis1);
-            Cartesian3.normalize(basis1, basis1);
+            basis1 = Cartesian3.cross(basis1, basis0, basis1);
+            basis1 = Cartesian3.normalize(basis1, basis1);
             var basis2 = Cartesian3.cross(basis0, basis1, pan3DTemp1);
 
             var startRho = Cartesian3.magnitude(p0);
             var startDot = Cartesian3.dot(basis0, p0);
             var startTheta = Math.acos(startDot / startRho);
             var startRej = Cartesian3.multiplyByScalar(basis0, startDot, pan3DTemp2);
-            Cartesian3.subtract(p0, startRej, startRej);
-            Cartesian3.normalize(startRej, startRej);
+            startRej = Cartesian3.subtract(p0, startRej, startRej);
+            startRej = Cartesian3.normalize(startRej, startRej);
 
             var endRho = Cartesian3.magnitude(p1);
             var endDot = Cartesian3.dot(basis0, p1);
             var endTheta = Math.acos(endDot / endRho);
             var endRej = Cartesian3.multiplyByScalar(basis0, endDot, pan3DTemp3);
-            Cartesian3.subtract(p1, endRej, endRej);
-            Cartesian3.normalize(endRej, endRej);
+            endRej = Cartesian3.subtract(p1, endRej, endRej);
+            endRej = Cartesian3.normalize(endRej, endRej);
 
             var startPhi = Math.acos(Cartesian3.dot(startRej, basis1));
             if (Cartesian3.dot(startRej, basis2) < 0) {
@@ -855,7 +855,7 @@ define([
     var tilt3DWindowPos = new Cartesian2();
     var tilt3DRay = new Ray();
     var tilt3DCart = new Cartographic();
-    var tilt3DCenter = Cartesian4.clone(Cartesian4.UNIT_W);
+    var tilt3DCenter = Cartesian4.clone(Cartesian4.UNIT_W, new Cartesian4());
     var tilt3DTransform = new Matrix4();
 
     function tilt3D(controller, movement) {

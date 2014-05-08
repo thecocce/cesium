@@ -58,20 +58,20 @@ define([
 
                 //z is always zero in 2D for up and right
                 camera.up.z = 0;
-                Cartesian3.normalize(camera.up, camera.up);
+                camera.up = Cartesian3.normalize(camera.up, camera.up);
                 camera.right.z = 0;
-                Cartesian3.normalize(camera.right, camera.right);
+                camera.right = Cartesian3.normalize(camera.right, camera.right);
 
                 //Remember what up was when we started, so we
                 //can detect rotation when we are finished.
-                Cartesian2.clone(camera.right, that._first2dUp);
+                that._first2dUp = Cartesian2.clone(camera.right, that._first2dUp);
             } else {
                 camera.position = projection.project(cartographic);
             }
 
             //Store last view distance and up vector.
             that._lastDistance = camera.frustum.right - camera.frustum.left;
-            Cartesian2.clone(camera.right, that._last2dUp);
+            that._last2dUp = Cartesian2.clone(camera.right, that._last2dUp);
         }
     }
 
@@ -110,8 +110,8 @@ define([
 
                 // Z along the position
                 var zBasis = update3DCartesian3Scratch2;
-                Cartesian3.normalize(cartesian, zBasis);
-                Cartesian3.normalize(deltaCartesian, deltaCartesian);
+                zBasis = Cartesian3.normalize(cartesian, zBasis);
+                deltaCartesian = Cartesian3.normalize(deltaCartesian, deltaCartesian);
 
                 Matrix3.multiplyByVector(toInertial, zBasis, zBasis);
                 Matrix3.multiplyByVector(toInertialDelta, deltaCartesian, deltaCartesian);
@@ -126,9 +126,9 @@ define([
                     Matrix3.multiplyByVector(toFixed, yBasis, yBasis);
                     Matrix3.multiplyByVector(toFixed, zBasis, zBasis);
 
-                    Cartesian3.normalize(xBasis, xBasis);
-                    Cartesian3.normalize(yBasis, yBasis);
-                    Cartesian3.normalize(zBasis, zBasis);
+                    xBasis = Cartesian3.normalize(xBasis, xBasis);
+                    yBasis = Cartesian3.normalize(yBasis, yBasis);
+                    zBasis = Cartesian3.normalize(zBasis, zBasis);
 
                     var transform = update3DTransform;
                     transform[0]  = xBasis.x;
@@ -160,7 +160,7 @@ define([
             that._screenSpaceCameraController.ellipsoid = Ellipsoid.UNIT_SPHERE;
 
             var position = camera.position;
-            Cartesian3.clone(position, that._lastOffset);
+            that._lastOffset = Cartesian3.clone(position, that._lastOffset);
             that._lastDistance = Cartesian3.magnitude(position);
         }
     }
@@ -188,7 +188,7 @@ define([
             controller.columbusViewMode = CameraColumbusViewMode.LOCKED;
 
             var position = camera.position;
-            Cartesian3.clone(position, that._lastOffset);
+            that._lastOffset = Cartesian3.clone(position, that._lastOffset);
             that._lastDistance = Cartesian3.magnitude(position);
         }
     }
@@ -226,7 +226,7 @@ define([
                 var rotation = Quaternion.fromAxisAngle(Cartesian3.UNIT_Z, theta, update3DControllerQuaternion);
                 Matrix3.multiplyByVector(Matrix3.fromQuaternion(rotation, update3DControllerMatrix3), offset, offset);
             }
-            Cartesian3.multiplyByScalar(Cartesian3.normalize(offset, offset), that._lastDistance, offset);
+            offset = Cartesian3.multiplyByScalar(Cartesian3.normalize(offset, offset), that._lastDistance, offset);
             camera.lookAt(offset, Cartesian3.ZERO, Cartesian3.UNIT_Z);
         }
     }
@@ -331,7 +331,7 @@ define([
 
             var viewFromProperty = this.dynamicObject.viewFrom;
             if (!defined(viewFromProperty) || !defined(viewFromProperty.getValue(time, offset))) {
-                Cartesian3.clone(dynamicObjectViewDefaultOffset, offset);
+                offset = Cartesian3.clone(dynamicObjectViewDefaultOffset, offset);
             }
 
             //Reset object-based cached values.
@@ -339,7 +339,7 @@ define([
             var last2dUp = this._last2dUp;
             first2dUp.x = first2dUp.y = 0;
             last2dUp.x = last2dUp.y = 0;
-            Cartesian3.clone(offset, this._lastOffset);
+            this._lastOffset = Cartesian3.clone(offset, this._lastOffset);
             this._lastDistance = Cartesian3.magnitude(offset);
 
             //If looking straight down, move the camera slightly south the avoid gimbal lock.
@@ -349,7 +349,7 @@ define([
         } else if (defined(this._lastOffset)) {
             offset = this._lastOffset;
         } else {
-            Cartesian3.clone(dynamicObjectViewDefaultOffset, offset);
+            offset = Cartesian3.clone(dynamicObjectViewDefaultOffset, offset);
         }
 
         var mode = scene.mode;

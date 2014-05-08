@@ -43,7 +43,7 @@ define([
         if (!defined(right)) {
             right = r[0] = new Cartesian3();
         }
-        Cartesian3.clone(firstTangent, right);
+        right = Cartesian3.clone(firstTangent, right);
 
         for (i = 1; i < l.length - 1; ++i) {
             l[i] = u[i] = 1.0;
@@ -53,8 +53,8 @@ define([
             if (!defined(right)) {
                 right = r[i] = new Cartesian3();
             }
-            Cartesian3.subtract(points[i + 1], points[i - 1], right);
-            Cartesian3.multiplyByScalar(right, 3.0, right);
+            right = Cartesian3.subtract(points[i + 1], points[i - 1], right);
+            right = Cartesian3.multiplyByScalar(right, 3.0, right);
         }
 
         l[i] = 0.0;
@@ -65,15 +65,15 @@ define([
         if (!defined(right)) {
             right = r[i] = new Cartesian3();
         }
-        Cartesian3.subtract(points[i + 1], points[i - 1], right);
-        Cartesian3.multiplyByScalar(right, 3.0, right);
+        right = Cartesian3.subtract(points[i + 1], points[i - 1], right);
+        right = Cartesian3.multiplyByScalar(right, 3.0, right);
 
         d[i + 1] = 1.0;
         right = r[i + 1];
         if (!defined(right)) {
             right = r[i + 1] = new Cartesian3();
         }
-        Cartesian3.clone(lastTangent, right);
+        right = Cartesian3.clone(lastTangent, right);
 
         return TridiagonalSystemSolver.solve(l, d, u, r);
     }
@@ -95,8 +95,8 @@ define([
         if (!defined(right)) {
             right = r[0] = new Cartesian3();
         }
-        Cartesian3.subtract(points[1], points[0], right);
-        Cartesian3.multiplyByScalar(right, 3.0, right);
+        right = Cartesian3.subtract(points[1], points[0], right);
+        right = Cartesian3.multiplyByScalar(right, 3.0, right);
 
         for (i = 1; i < l.length; ++i) {
             l[i] = u[i] = 1.0;
@@ -106,8 +106,8 @@ define([
             if (!defined(right)) {
                 right = r[i] = new Cartesian3();
             }
-            Cartesian3.subtract(points[i + 1], points[i - 1], right);
-            Cartesian3.multiplyByScalar(right, 3.0, right);
+            right = Cartesian3.subtract(points[i + 1], points[i - 1], right);
+            right = Cartesian3.multiplyByScalar(right, 3.0, right);
         }
 
         d[i] = 2.0;
@@ -116,8 +116,8 @@ define([
         if (!defined(right)) {
             right = r[i] = new Cartesian3();
         }
-        Cartesian3.subtract(points[i], points[i - 1], right);
-        Cartesian3.multiplyByScalar(right, 3.0, right);
+        right = Cartesian3.subtract(points[i], points[i - 1], right);
+        right = Cartesian3.multiplyByScalar(right, 3.0, right);
 
         return TridiagonalSystemSolver.solve(l, d, u, r);
     }
@@ -482,11 +482,11 @@ define([
         var coefs = Matrix4.multiplyByVector(HermiteSpline.hermiteCoefficientMatrix, timeVec, timeVec);
 
         result = Cartesian3.multiplyByScalar(points[i], coefs.x, result);
-        Cartesian3.multiplyByScalar(points[i + 1], coefs.y, scratchTemp);
-        Cartesian3.add(result, scratchTemp, result);
-        Cartesian3.multiplyByScalar(outTangents[i], coefs.z, scratchTemp);
-        Cartesian3.add(result, scratchTemp, result);
-        Cartesian3.multiplyByScalar(inTangents[i], coefs.w, scratchTemp);
+        scratchTemp = Cartesian3.multiplyByScalar(points[i + 1], coefs.y, scratchTemp);
+        result = Cartesian3.add(result, scratchTemp, result);
+        scratchTemp = Cartesian3.multiplyByScalar(outTangents[i], coefs.z, scratchTemp);
+        result = Cartesian3.add(result, scratchTemp, result);
+        scratchTemp = Cartesian3.multiplyByScalar(inTangents[i], coefs.w, scratchTemp);
         return Cartesian3.add(result, scratchTemp, result);
     };
 

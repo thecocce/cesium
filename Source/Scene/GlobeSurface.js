@@ -523,7 +523,7 @@ define([
         if (frameState.mode !== SceneMode.SCENE3D) {
             boundingVolume = boundingSphereScratch;
             BoundingSphere.fromRectangleWithHeights2D(tile.rectangle, frameState.scene2D.projection, tile.minimumHeight, tile.maximumHeight, boundingVolume);
-            Cartesian3.fromElements(boundingVolume.center.z, boundingVolume.center.x, boundingVolume.center.y, boundingVolume.center);
+            boundingVolume.center = Cartesian3.fromElements(boundingVolume.center.z, boundingVolume.center.x, boundingVolume.center.y, boundingVolume.center);
 
             if (frameState.mode === SceneMode.MORPHING) {
                 boundingVolume = BoundingSphere.union(tile.boundingSphere3D, boundingVolume, boundingVolume);
@@ -548,8 +548,8 @@ define([
 
     var southwestCornerScratch = new Cartesian3();
     var northeastCornerScratch = new Cartesian3();
-    var negativeUnitY = Cartesian3.negate(Cartesian3.UNIT_Y);
-    var negativeUnitZ = Cartesian3.negate(Cartesian3.UNIT_Z);
+    var negativeUnitY = Cartesian3.negate(Cartesian3.UNIT_Y, new Cartesian3());
+    var negativeUnitZ = Cartesian3.negate(Cartesian3.UNIT_Z, new Cartesian3());
     var vectorScratch = new Cartesian3();
 
     function distanceSquaredToTile(frameState, cameraCartesianPosition, cameraCartographicPosition, tile) {
@@ -911,7 +911,7 @@ define([
 
                     uniformMap.center3D = tile.center;
 
-                    Cartesian4.clone(tileRectangle, uniformMap.tileRectangle);
+                    uniformMap.tileRectangle = Cartesian4.clone(tileRectangle, uniformMap.tileRectangle);
                     uniformMap.southAndNorthLatitude.x = southLatitude;
                     uniformMap.southAndNorthLatitude.y = northLatitude;
                     uniformMap.southMercatorYLowAndHighAndOneOverHeight.x = southMercatorYLow;
@@ -1002,7 +1002,7 @@ define([
                     // which might get destroyed eventually
                     uniformMap.dayTextures.length = numberOfDayTextures;
                     uniformMap.waterMask = tile.waterMaskTexture;
-                    Cartesian4.clone(tile.waterMaskTranslationAndScale, uniformMap.waterMaskTranslationAndScale);
+                    uniformMap.waterMaskTranslationAndScale = Cartesian4.clone(tile.waterMaskTranslationAndScale, uniformMap.waterMaskTranslationAndScale);
 
                     commandList.push(command);
 
@@ -1025,7 +1025,7 @@ define([
 
                     if (frameState.mode !== SceneMode.SCENE3D) {
                         BoundingSphere.fromRectangleWithHeights2D(tile.rectangle, frameState.scene2D.projection, tile.minimumHeight, tile.maximumHeight, boundingVolume);
-                        Cartesian3.fromElements(boundingVolume.center.z, boundingVolume.center.x, boundingVolume.center.y, boundingVolume.center);
+                        boundingVolume.center = Cartesian3.fromElements(boundingVolume.center.z, boundingVolume.center.x, boundingVolume.center.y, boundingVolume.center);
 
                         if (frameState.mode === SceneMode.MORPHING) {
                             boundingVolume = BoundingSphere.union(tile.boundingSphere3D, boundingVolume, boundingVolume);

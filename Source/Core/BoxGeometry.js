@@ -64,8 +64,8 @@ define([
 
         var vertexFormat = defaultValue(options.vertexFormat, VertexFormat.DEFAULT);
 
-        this._minimumCorner = Cartesian3.clone(min);
-        this._maximumCorner = Cartesian3.clone(max);
+        this._minimumCorner = Cartesian3.clone(min, new Cartesian3());
+        this._maximumCorner = Cartesian3.clone(max, new Cartesian3());
         this._vertexFormat = vertexFormat;
         this._workerName = 'createBoxGeometry';
     };
@@ -101,8 +101,8 @@ define([
         }
         //>>includeEnd('debug');
 
-        var corner = Cartesian3.multiplyByScalar(dimensions, 0.5);
-        var min = Cartesian3.negate(corner);
+        var corner = Cartesian3.multiplyByScalar(dimensions, 0.5, new Cartesian3());
+        var min = Cartesian3.negate(corner, new Cartesian3());
         var max = corner;
 
         var newOptions = {

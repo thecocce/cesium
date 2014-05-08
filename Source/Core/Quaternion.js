@@ -61,7 +61,7 @@ define([
         this.w = defaultValue(w, 0.0);
     };
 
-    var fromAxisAngleScratch;
+    var fromAxisAngleScratch = new Cartesian3();
 
     /**
      * Computes a quaternion representing a rotation around an axis.
@@ -294,7 +294,7 @@ define([
         if (!defined(result)) {
             result = new Quaternion();
         }
-        Cartesian3.fromArray(array, 0, sampledQuaternionRotation);
+        sampledQuaternionRotation = Cartesian3.fromArray(array, 0, sampledQuaternionRotation);
         var magnitude = Cartesian3.magnitude(sampledQuaternionRotation);
 
         Quaternion.unpack(sourceArray, lastIndex * 4, sampledQuaternionQuaternion0);
@@ -859,9 +859,9 @@ define([
         Quaternion.multiply(qInv, q0, squadScratchQuaternion1);
         var cart1 = Quaternion.log(squadScratchQuaternion1, squadScratchCartesian1);
 
-        Cartesian3.add(cart0, cart1, cart0);
-        Cartesian3.multiplyByScalar(cart0, 0.25, cart0);
-        Cartesian3.negate(cart0, cart0);
+        cart0 = Cartesian3.add(cart0, cart1, cart0);
+        cart0 = Cartesian3.multiplyByScalar(cart0, 0.25, cart0);
+        cart0 = Cartesian3.negate(cart0, cart0);
         Quaternion.exp(cart0, squadScratchQuaternion0);
 
         return Quaternion.multiply(q1, squadScratchQuaternion0, result);

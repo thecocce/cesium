@@ -139,7 +139,7 @@ define([
         var lowerLeft = projection.project(Rectangle.getSouthwest(rectangle, fromRectangleLowerLeft));
         var upperRight = projection.project(Rectangle.getNortheast(rectangle, fromRectangleUpperRight));
 
-        Cartesian2.subtract(upperRight, lowerLeft, upperRight);
+        upperRight = Cartesian2.subtract(upperRight, lowerLeft, upperRight);
 
         result.x = lowerLeft.x;
         result.y = lowerLeft.y;

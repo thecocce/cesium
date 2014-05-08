@@ -127,7 +127,7 @@ defineSuite([
         var ellipsoid = Ellipsoid.WGS84;
 
         var origin = new Cartesian3(20000.0, 0.0, 0.0);
-        var direction = Cartesian3.negate(Cartesian3.normalize(origin));
+        var direction = Cartesian3.negate(Cartesian3.normalize(origin, new Cartesian3()), new Cartesian3());
         var ray = new Ray(origin, direction);
 
         var expected = {
@@ -145,7 +145,7 @@ defineSuite([
         var ellipsoid = Ellipsoid.WGS84;
 
         var origin = new Cartesian3(20000.0, 0.0, 0.0);
-        var direction = Cartesian3.normalize(origin);
+        var direction = Cartesian3.normalize(origin, new Cartesian3());
         var ray = new Ray(origin, direction);
 
         var expected = {
@@ -252,7 +252,7 @@ defineSuite([
     });
 
     it('lineSegmentPlane intersects', function() {
-        var normal = Cartesian3.clone(Cartesian3.UNIT_Y);
+        var normal = Cartesian3.clone(Cartesian3.UNIT_Y, new Cartesian3());
         var point = new Cartesian3(0.0, 2.0, 0.0);
         var plane = Plane.fromPointNormal(point, normal);
 
@@ -326,7 +326,7 @@ defineSuite([
      });
 
     it('triangle is behind a plane', function() {
-        var plane = new Plane(Cartesian3.negate(Cartesian3.UNIT_Z), 0.0);
+        var plane = new Plane(Cartesian3.negate(Cartesian3.UNIT_Z, new Cartesian3()), 0.0);
         var p0 = new Cartesian3(0.0, 0.0, 2.0);
         var p1 = new Cartesian3(0.0, 1.0, 2.0);
         var p2 = new Cartesian3(1.0, 0.0, 2.0);

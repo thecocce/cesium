@@ -60,10 +60,10 @@ define([
         var eastNorthUp = Transforms.eastNorthUpToFixedFrame(origin, ellipsoid);
         this._ellipsoid = ellipsoid;
         this._origin = origin;
-        this._xAxis = Cartesian3.fromCartesian4(Matrix4.getColumn(eastNorthUp, 0));
-        this._yAxis = Cartesian3.fromCartesian4(Matrix4.getColumn(eastNorthUp, 1));
+        this._xAxis = Cartesian3.fromCartesian4(Matrix4.getColumn(eastNorthUp, 0), new Cartesian3());
+        this._yAxis = Cartesian3.fromCartesian4(Matrix4.getColumn(eastNorthUp, 1), new Cartesian3());
 
-        var normal = Cartesian3.fromCartesian4(Matrix4.getColumn(eastNorthUp, 2));
+        var normal = Cartesian3.fromCartesian4(Matrix4.getColumn(eastNorthUp, 2), new Cartesian3());
         this._plane = Plane.fromPointNormal(origin, normal);
     };
 
@@ -135,7 +135,7 @@ define([
 
         var intersectionPoint = IntersectionTests.rayPlane(ray, this._plane, projectPointOntoPlaneCartesian3);
         if (!defined(intersectionPoint)) {
-            Cartesian3.negate(ray.direction, ray.direction);
+            ray.direction = Cartesian3.negate(ray.direction, ray.direction);
             intersectionPoint = IntersectionTests.rayPlane(ray, this._plane, projectPointOntoPlaneCartesian3);
         }
 
@@ -218,10 +218,10 @@ define([
 
         for ( var i = 0; i < length; ++i) {
             var position = cartesians[i];
-            Cartesian3.multiplyByScalar(xAxis, position.x, tmp);
+            tmp = Cartesian3.multiplyByScalar(xAxis, position.x, tmp);
             var point = result[i] = Cartesian3.add(origin, tmp, result[i]);
-            Cartesian3.multiplyByScalar(yAxis, position.y, tmp);
-            Cartesian3.add(point, tmp, point);
+            tmp = Cartesian3.multiplyByScalar(yAxis, position.y, tmp);
+            point = Cartesian3.add(point, tmp, point);
             ellipsoid.scaleToGeocentricSurface(point, point);
         }
 

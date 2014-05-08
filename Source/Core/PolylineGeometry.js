@@ -140,24 +140,24 @@ define([
         for (j = 0; j < positionsLength; ++j) {
             if (j === 0) {
                 position = scratchCartesian3;
-                Cartesian3.subtract(positions[0], positions[1], position);
-                Cartesian3.add(positions[0], position, position);
+                position = Cartesian3.subtract(positions[0], positions[1], position);
+                position = Cartesian3.add(positions[0], position, position);
             } else {
                 position = positions[j - 1];
             }
 
-            Cartesian3.clone(position, scratchPrevPosition);
-            Cartesian3.clone(positions[j], scratchPosition);
+            scratchPrevPosition = Cartesian3.clone(position, scratchPrevPosition);
+            scratchPosition = Cartesian3.clone(positions[j], scratchPosition);
 
             if (j === positionsLength - 1) {
                 position = scratchCartesian3;
-                Cartesian3.subtract(positions[positionsLength - 1], positions[positionsLength - 2], position);
-                Cartesian3.add(positions[positionsLength - 1], position, position);
+                position = Cartesian3.subtract(positions[positionsLength - 1], positions[positionsLength - 2], position);
+                position = Cartesian3.add(positions[positionsLength - 1], position, position);
             } else {
                 position = positions[j + 1];
             }
 
-            Cartesian3.clone(position, scratchNextPosition);
+            scratchNextPosition = Cartesian3.clone(position, scratchNextPosition);
 
             segmentLength = lengths[segmentIndex];
             if (j === count + segmentLength) {

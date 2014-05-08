@@ -21,9 +21,9 @@ define([
     function pointOnEllipsoid(theta, rotation, northVec, eastVec, aSqr, ab, bSqr, mag, unitPos, result) {
         var azimuth = theta + rotation;
 
-        Cartesian3.multiplyByScalar(eastVec, Math.cos(azimuth), rotAxis);
-        Cartesian3.multiplyByScalar(northVec, Math.sin(azimuth), tempVec);
-        Cartesian3.add(rotAxis, tempVec, rotAxis);
+        rotAxis = Cartesian3.multiplyByScalar(eastVec, Math.cos(azimuth), rotAxis);
+        tempVec = Cartesian3.multiplyByScalar(northVec, Math.sin(azimuth), tempVec);
+        rotAxis = Cartesian3.add(rotAxis, tempVec, rotAxis);
 
         var cosThetaSquared = Math.cos(theta);
         cosThetaSquared = cosThetaSquared * cosThetaSquared;
@@ -39,8 +39,8 @@ define([
         Matrix3.fromQuaternion(unitQuat, rotMtx);
 
         Matrix3.multiplyByVector(rotMtx, unitPos, result);
-        Cartesian3.normalize(result, result);
-        Cartesian3.multiplyByScalar(result, mag, result);
+        result = Cartesian3.normalize(result, result);
+        result = Cartesian3.multiplyByScalar(result, mag, result);
         return result;
     }
 

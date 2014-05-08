@@ -82,7 +82,7 @@ define([
                 var cv = ellipsoid.transformPositionToScaledSpace(cameraPosition, this._cameraPositionInScaledSpace);
                 var vhMagnitudeSquared = Cartesian3.magnitudeSquared(cv) - 1.0;
 
-                Cartesian3.clone(cameraPosition, this._cameraPosition);
+                this._cameraPosition = Cartesian3.clone(cameraPosition, this._cameraPosition);
                 this._cameraPositionInScaledSpace = cv;
                 this._distanceToLimbInScaledSpaceSquared = vhMagnitudeSquared;
             }
@@ -279,7 +279,7 @@ define([
         magnitude = Math.max(1.0, magnitude);
 
         var cosAlpha = Cartesian3.dot(direction, scaledSpaceDirectionToPoint);
-        var sinAlpha = Cartesian3.magnitude(Cartesian3.cross(direction, scaledSpaceDirectionToPoint));
+        var sinAlpha = Cartesian3.magnitude(Cartesian3.cross(direction, scaledSpaceDirectionToPoint, scaledSpacePosition));
         var cosBeta = 1.0 / magnitude;
         var sinBeta = Math.sqrt(magnitudeSquared - 1.0) * cosBeta;
 

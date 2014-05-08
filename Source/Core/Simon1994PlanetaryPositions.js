@@ -493,7 +493,7 @@ define([
         //second forward transformation
         computeSimonEarth(date, translation);
 
-        Cartesian3.subtract(result, translation, result);
+        result = Cartesian3.subtract(result, translation, result);
         Matrix3.multiplyByVector(axesTransformation, result, result);
 
         return result;

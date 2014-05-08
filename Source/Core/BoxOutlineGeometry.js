@@ -59,8 +59,8 @@ define([
         }
         //>>includeEnd('debug');
 
-        this._min = Cartesian3.clone(min);
-        this._max = Cartesian3.clone(max);
+        this._min = Cartesian3.clone(min, new Cartesian3());
+        this._max = Cartesian3.clone(max, new Cartesian3());
         this._workerName = 'createBoxOutlineGeometry';
     };
 
@@ -93,8 +93,8 @@ define([
         }
         //>>includeEnd('debug');
 
-        var corner = Cartesian3.multiplyByScalar(dimensions, 0.5);
-        var min = Cartesian3.negate(corner);
+        var corner = Cartesian3.multiplyByScalar(dimensions, 0.5, new Cartesian3());
+        var min = Cartesian3.negate(corner, new Cartesian3());
         var max = corner;
 
         var newOptions = {

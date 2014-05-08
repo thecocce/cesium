@@ -198,7 +198,7 @@ define([
         }
         //>>includeEnd('debug');
 
-        this._center = Cartesian3.clone(center);
+        this._center = Cartesian3.clone(center, new Cartesian3());
         this._semiMajorAxis = semiMajorAxis;
         this._semiMinorAxis = semiMinorAxis;
         this._ellipsoid = defaultValue(options.ellipsoid, Ellipsoid.WGS84);

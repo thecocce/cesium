@@ -1,6 +1,5 @@
 /*global define*/
 define([
-        '../../Core/Cartesian3',
         '../../Core/defaultValue',
         '../../Core/defined',
         '../../Core/defineProperties',
@@ -8,7 +7,6 @@ define([
         '../createCommand',
         '../../ThirdParty/knockout'
 ], function (
-        Cartesian3,
         defaultValue,
         defined,
         defineProperties,

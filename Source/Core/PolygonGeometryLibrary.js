@@ -18,9 +18,9 @@ define([
 
     var distanceScratch = new Cartesian3();
     function getPointAtDistance(p0, p1, distance, length) {
-        Cartesian3.subtract(p1, p0, distanceScratch);
-        Cartesian3.multiplyByScalar(distanceScratch, distance / length, distanceScratch);
-        Cartesian3.add(p0, distanceScratch, distanceScratch);
+        distanceScratch = Cartesian3.subtract(p1, p0, distanceScratch);
+        distanceScratch = Cartesian3.multiplyByScalar(distanceScratch, distance / length, distanceScratch);
+        distanceScratch = Cartesian3.add(p0, distanceScratch, distanceScratch);
         return [distanceScratch.x, distanceScratch.y, distanceScratch.z];
     }
 

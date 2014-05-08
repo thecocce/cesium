@@ -371,7 +371,7 @@ define([
                 minimumHeight : result.minimumHeight,
                 maximumHeight : result.maximumHeight,
                 boundingSphere : BoundingSphere.clone(result.boundingSphere),
-                horizonOcclusionPoint : Cartesian3.clone(result.horizonOcclusionPoint),
+                horizonOcclusionPoint : Cartesian3.clone(result.horizonOcclusionPoint, new Cartesian3()),
                 westIndices : result.westIndices,
                 southIndices : result.southIndices,
                 eastIndices : result.eastIndices,

@@ -9,7 +9,7 @@ define(['../Core/Cartesian3',
     "use strict";
 
     function createCircleGeometry(circleGeometry) {
-        circleGeometry._ellipseGeometry._center = Cartesian3.clone(circleGeometry._ellipseGeometry._center);
+        circleGeometry._ellipseGeometry._center = Cartesian3.clone(circleGeometry._ellipseGeometry._center, new Cartesian3());
         circleGeometry._ellipseGeometry._ellipsoid = Ellipsoid.clone(circleGeometry._ellipseGeometry._ellipsoid);
         return CircleGeometry.createGeometry(circleGeometry);
     }

@@ -52,8 +52,8 @@ define([
     var cqRight = new Cartesian3();
     var cqUp = new Cartesian3();
     function createQuaternion(direction, up, result) {
-        Cartesian3.cross(direction, up, cqRight);
-        Cartesian3.cross(cqRight, direction, cqUp);
+        cqRight = Cartesian3.cross(direction, up, cqRight);
+        cqUp = Cartesian3.cross(cqRight, direction, cqUp);
         viewMat[0] = cqRight.x;
         viewMat[1] = cqUp.x;
         viewMat[2] = -direction.x;
@@ -87,13 +87,17 @@ define([
         return Math.max(dx, dy);
     }
 
+    var scratch1 = new Cartesian3();
+    var scratch2 = new Cartesian3();
+    var scratch3 = new Cartesian3();
+    var scratch4 = new Cartesian3();
     function createPath3D(camera, ellipsoid, start, up, right, end, duration) {
         // get minimum altitude from which the whole ellipsoid is visible
         var radius = ellipsoid.maximumRadius;
         var frustum = camera.frustum;
         var maxStartAlt = getAltitude(frustum, radius, radius);
 
-        var dot = Cartesian3.dot(Cartesian3.normalize(start), Cartesian3.normalize(end));
+        var dot = Cartesian3.dot(Cartesian3.normalize(start, scratch1), Cartesian3.normalize(end, scratch2));
 
         var points;
         var altitude;
@@ -102,29 +106,29 @@ define([
             altitude = radius + 0.6 * (maxStartAlt - radius);
             incrementPercentage = 0.35;
         } else {
-            var diff = Cartesian3.subtract(start, end);
-            altitude = Cartesian3.magnitude(Cartesian3.add(Cartesian3.multiplyByScalar(diff, 0.5), end));
-            var verticalDistance = Cartesian3.magnitude(Cartesian3.multiplyByScalar(up, Cartesian3.dot(diff, up)));
-            var horizontalDistance = Cartesian3.magnitude(Cartesian3.multiplyByScalar(right, Cartesian3.dot(diff, right)));
+            var diff = Cartesian3.subtract(start, end, scratch1);
+            altitude = Cartesian3.magnitude(Cartesian3.add(Cartesian3.multiplyByScalar(diff, 0.5, scratch2), end, scratch2));
+            var verticalDistance = Cartesian3.magnitude(Cartesian3.multiplyByScalar(up, Cartesian3.dot(diff, up), scratch2));
+            var horizontalDistance = Cartesian3.magnitude(Cartesian3.multiplyByScalar(right, Cartesian3.dot(diff, right), scratch2));
             altitude += getAltitude(frustum, verticalDistance, horizontalDistance);
             incrementPercentage = CesiumMath.clamp(dot + 1.0, 0.25, 0.5);
         }
 
-        var aboveEnd = Cartesian3.multiplyByScalar(Cartesian3.normalize(end), altitude);
-        var afterStart = Cartesian3.multiplyByScalar(Cartesian3.normalize(start), altitude);
+        var aboveEnd = Cartesian3.multiplyByScalar(Cartesian3.normalize(end, scratch1), altitude, scratch1);
+        var afterStart = Cartesian3.multiplyByScalar(Cartesian3.normalize(start, scratch2), altitude, scratch2);
 
         var axis, angle, rotation, middle;
         if (Cartesian3.magnitude(end) > maxStartAlt && dot > 0.75) {
-            middle = Cartesian3.add(Cartesian3.multiplyByScalar(Cartesian3.subtract(start, end), 0.5), end);
+            middle = Cartesian3.add(Cartesian3.multiplyByScalar(Cartesian3.subtract(start, end, scratch3), 0.5, scratch3), end, new Cartesian3());
             points = [ start, middle, end ];
         } else if (Cartesian3.magnitude(start) > maxStartAlt && dot > 0) {
-            middle = Cartesian3.add(Cartesian3.multiplyByScalar(Cartesian3.subtract(start, aboveEnd), 0.5), aboveEnd);
+            middle = Cartesian3.add(Cartesian3.multiplyByScalar(Cartesian3.subtract(start, aboveEnd, scratch3), 0.5, scratch3), aboveEnd, new Cartesian3());
             points = [ start, middle, end ];
         } else {
             points = [ start ];
 
-            angle = Math.acos(Cartesian3.dot(Cartesian3.normalize(afterStart), Cartesian3.normalize(aboveEnd)));
-            axis = Cartesian3.cross(aboveEnd, afterStart);
+            angle = Math.acos(Cartesian3.dot(Cartesian3.normalize(afterStart, scratch3), Cartesian3.normalize(aboveEnd, scratch4)));
+            axis = Cartesian3.cross(aboveEnd, afterStart, scratch3);
             if (Cartesian3.equalsEpsilon(axis, Cartesian3.ZERO, CesiumMath.EPSILON6)) {
                 axis = Cartesian3.UNIT_Z;
             }
@@ -165,9 +169,9 @@ define([
         var length = points.length - 1;
         for (var i = 1; i < length; ++i) {
             point = points[i];
-            Cartesian3.normalize(Cartesian3.negate(point, direction3D), direction3D);
-            Cartesian3.normalize(Cartesian3.cross(direction3D, Cartesian3.UNIT_Z, right3D), right3D);
-            Cartesian3.cross(right3D, direction3D, up3D);
+            direction3D = Cartesian3.normalize(Cartesian3.negate(point, direction3D), direction3D);
+            right3D = Cartesian3.normalize(Cartesian3.cross(direction3D, Cartesian3.UNIT_Z, right3D), right3D);
+            up3D = Cartesian3.cross(right3D, direction3D, up3D);
             orientations[i] = createQuaternion(direction3D, up3D, quat3D);
         }
 
@@ -175,9 +179,9 @@ define([
         if (defined(endDirection) && defined(endUp)) {
             orientations[length] = createQuaternion(endDirection, endUp);
         } else {
-            Cartesian3.normalize(Cartesian3.negate(point, direction3D), direction3D);
-            Cartesian3.normalize(Cartesian3.cross(direction3D, Cartesian3.UNIT_Z, right3D), right3D);
-            Cartesian3.cross(right3D, direction3D, up3D);
+            direction3D = Cartesian3.normalize(Cartesian3.negate(point, direction3D), direction3D);
+            right3D = Cartesian3.normalize(Cartesian3.cross(direction3D, Cartesian3.UNIT_Z, right3D), right3D);
+            up3D = Cartesian3.cross(right3D, direction3D, up3D);
             orientations[length] = createQuaternion(direction3D, up3D, quat3D);
         }
 
@@ -224,6 +228,10 @@ define([
         return update;
     }
 
+    var diffScratch = new Cartesian3();
+    var endScratch = new Cartesian3();
+    var startScratch = new Cartesian3();
+    var middleScratch = new Cartesian3();
     function createPath2D(camera, ellipsoid, start, end, duration) {
         // get minimum altitude from which the whole map is visible
         var radius = ellipsoid.maximumRadius;
@@ -236,33 +244,33 @@ define([
         if (start.z > maxStartAlt) {
             altitude = 0.6 * maxStartAlt;
         } else {
-            var diff = Cartesian3.subtract(start, end);
+            var diff = Cartesian3.subtract(start, end, diffScratch);
             altitude = getAltitude(frustum, Math.abs(diff.y), Math.abs(diff.x));
         }
 
-        var aboveEnd = Cartesian3.clone(end);
+        var aboveEnd = Cartesian3.clone(end, endScratch);
         aboveEnd.z = altitude;
-        var afterStart = Cartesian3.clone(start);
+        var afterStart = Cartesian3.clone(start, startScratch);
         afterStart.z = altitude;
 
         var middle;
         if (end.z > maxStartAlt) {
-            middle = Cartesian3.add(Cartesian3.multiplyByScalar(Cartesian3.subtract(start, end), 0.5), end);
+            middle = Cartesian3.add(Cartesian3.multiplyByScalar(Cartesian3.subtract(start, end, middleScratch), 0.5, middleScratch), end, new Cartesian3());
             points = [ start, middle, end ];
         } else if (start.z > maxStartAlt) {
-            middle = Cartesian3.add(Cartesian3.multiplyByScalar(Cartesian3.subtract(start, aboveEnd), 0.5), aboveEnd);
+            middle = Cartesian3.add(Cartesian3.multiplyByScalar(Cartesian3.subtract(start, aboveEnd, middleScratch), 0.5, middleScratch), aboveEnd, new Cartesian3());
             points = [ start, middle, end ];
         } else {
             points = [ start ];
 
-            var v = Cartesian3.subtract(afterStart, aboveEnd);
+            var v = Cartesian3.subtract(afterStart, aboveEnd, middleScratch);
             var distance = Cartesian3.magnitude(v);
-            Cartesian3.normalize(v, v);
+            v = Cartesian3.normalize(v, v);
 
             var increment = incrementPercentage * distance;
             var startCondition = distance - increment;
             for ( var i = startCondition; i > 0.0; i = i - increment) {
-                points.push(Cartesian3.add(Cartesian3.multiplyByScalar(v, i), aboveEnd));
+                points.push(Cartesian3.add(Cartesian3.multiplyByScalar(v, i, middleScratch), aboveEnd, new Cartesian3()));
             }
 
             points.push(end);
@@ -280,9 +288,10 @@ define([
         });
     }
 
-    var direction2D = Cartesian3.negate(Cartesian3.UNIT_Z);
-    var right2D = Cartesian3.normalize(Cartesian3.cross(direction2D, Cartesian3.UNIT_Y));
-    var up2D = Cartesian3.cross(right2D, direction2D);
+    var direction2D = Cartesian3.negate(Cartesian3.UNIT_Z, new Cartesian3());
+    var right2D = new Cartesian3();
+    right2D = Cartesian3.normalize(Cartesian3.cross(direction2D, Cartesian3.UNIT_Y, right2D), right2D);
+    var up2D = Cartesian3.cross(right2D, direction2D, new Cartesian3());
     var quat = createQuaternion(direction2D, up2D);
 
     function createOrientations2D(camera, path, endDirection, endUp) {
@@ -316,7 +325,7 @@ define([
         var camera = frameState.camera;
         var ellipsoid = frameState.scene2D.projection.ellipsoid;
 
-        var path = createPath2D(camera, ellipsoid, Cartesian3.clone(camera.position), destination, duration);
+        var path = createPath2D(camera, ellipsoid, Cartesian3.clone(camera.position, new Cartesian3()), destination, duration);
         var orientations = createOrientations2D(camera, path, direction, up);
 
         var update = function(value) {
@@ -338,15 +347,17 @@ define([
         return update;
     }
 
+    var sScratch = new Cartesian3();
+    var negativeZ = Cartesian3.negate(Cartesian3.UNIT_Z, new Cartesian3());
     function createUpdate2D(frameState, destination, duration, direction, up) {
         var camera = frameState.camera;
         var ellipsoid = frameState.scene2D.projection.ellipsoid;
 
-        var start = Cartesian3.clone(camera.position);
+        var start = Cartesian3.clone(camera.position, sScratch);
         start.z = camera.frustum.right - camera.frustum.left;
 
         var path = createPath2D(camera, ellipsoid, start, destination, duration);
-        var orientations = createOrientations2D(camera, path, Cartesian3.negate(Cartesian3.UNIT_Z), up);
+        var orientations = createOrientations2D(camera, path, negativeZ, up);
 
         var height = camera.position.z;
 
@@ -483,10 +494,10 @@ define([
                     upScratch = defaultValue(description.up, Cartesian3.cross(rightScratch, dirScratch, upScratch));
                 }
 
-                Cartesian3.clone(position, frameState.camera.position);
-                Cartesian3.clone(dirScratch, frameState.camera.direction);
-                Cartesian3.clone(upScratch, frameState.camera.up);
-                Cartesian3.clone(rightScratch, frameState.camera.right);
+                frameState.camera.position = Cartesian3.clone(position, frameState.camera.position);
+                frameState.camera.direction = Cartesian3.clone(dirScratch, frameState.camera.direction);
+                frameState.camera.up = Cartesian3.clone(upScratch, frameState.camera.up);
+                frameState.camera.right = Cartesian3.clone(rightScratch, frameState.camera.right);
 
                 if (frameState.mode === SceneMode.SCENE2D) {
                     var zoom = frameState.camera.position.z;

@@ -1281,10 +1281,10 @@ define([
         y *= (frustum.top - frustum.bottom) * 0.5;
 
         var origin = Cartesian3.clone(camera.position, scratchOrigin);
-        Cartesian3.multiplyByScalar(camera.right, x, scratchDirection);
-        Cartesian3.add(scratchDirection, origin, origin);
-        Cartesian3.multiplyByScalar(camera.up, y, scratchDirection);
-        Cartesian3.add(scratchDirection, origin, origin);
+        scratchDirection = Cartesian3.multiplyByScalar(camera.right, x, scratchDirection);
+        origin = Cartesian3.add(scratchDirection, origin, origin);
+        scratchDirection = Cartesian3.multiplyByScalar(camera.up, y, scratchDirection);
+        origin = Cartesian3.add(scratchDirection, origin, origin);
 
         Cartesian3.fromElements(origin.z, origin.x, origin.y, origin);
 

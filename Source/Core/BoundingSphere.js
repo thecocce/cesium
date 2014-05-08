@@ -43,7 +43,7 @@ define([
          * @type {Cartesian3}
          * @default {@link Cartesian3.ZERO}
          */
-        this.center = Cartesian3.clone(defaultValue(center, Cartesian3.ZERO));
+        this.center = Cartesian3.clone(defaultValue(center, Cartesian3.ZERO), new Cartesian3());
 
         /**
          * The radius of the sphere.
@@ -101,7 +101,7 @@ define([
 
         var numPositions = positions.length;
         for (var i = 1; i < numPositions; i++) {
-            Cartesian3.clone(positions[i], currentPos);
+            currentPos = Cartesian3.clone(positions[i], currentPos);
 
             var x = currentPos.x;
             var y = currentPos.y;
@@ -109,27 +109,27 @@ define([
 
             // Store points containing the the smallest and largest components
             if (x < xMin.x) {
-                Cartesian3.clone(currentPos, xMin);
+                xMin = Cartesian3.clone(currentPos, xMin);
             }
 
             if (x > xMax.x) {
-                Cartesian3.clone(currentPos, xMax);
+                xMax = Cartesian3.clone(currentPos, xMax);
             }
 
             if (y < yMin.y) {
-                Cartesian3.clone(currentPos, yMin);
+                yMin = Cartesian3.clone(currentPos, yMin);
             }
 
             if (y > yMax.y) {
-                Cartesian3.clone(currentPos, yMax);
+                yMax = Cartesian3.clone(currentPos, yMax);
             }
 
             if (z < zMin.z) {
-                Cartesian3.clone(currentPos, zMin);
+                zMin = Cartesian3.clone(currentPos, zMin);
             }
 
             if (z > zMax.z) {
-                Cartesian3.clone(currentPos, zMax);
+                zMax = Cartesian3.clone(currentPos, zMax);
             }
         }
 
@@ -179,7 +179,7 @@ define([
         // Begin 2nd pass to find naive radius and modify the ritter sphere.
         var naiveRadius = 0;
         for (i = 0; i < numPositions; i++) {
-            Cartesian3.clone(positions[i], currentPos);
+            currentPos = Cartesian3.clone(positions[i], currentPos);
 
             // Find the furthest point from the naive center to calculate the naive radius.
             var r = Cartesian3.magnitude(Cartesian3.subtract(currentPos, naiveCenter, fromPointsScratch));
@@ -203,10 +203,10 @@ define([
         }
 
         if (ritterRadius < naiveRadius) {
-            Cartesian3.clone(ritterCenter, result.center);
+            result.center = Cartesian3.clone(ritterCenter, result.center);
             result.radius = ritterRadius;
         } else {
-            Cartesian3.clone(naiveCenter, result.center);
+            result.center = Cartesian3.clone(naiveCenter, result.center);
             result.radius = naiveRadius;
         }
 
@@ -384,27 +384,27 @@ define([
 
             // Store points containing the the smallest and largest components
             if (x < xMin.x) {
-                Cartesian3.clone(currentPos, xMin);
+                xMin = Cartesian3.clone(currentPos, xMin);
             }
 
             if (x > xMax.x) {
-                Cartesian3.clone(currentPos, xMax);
+                xMax = Cartesian3.clone(currentPos, xMax);
             }
 
             if (y < yMin.y) {
-                Cartesian3.clone(currentPos, yMin);
+                yMin = Cartesian3.clone(currentPos, yMin);
             }
 
             if (y > yMax.y) {
-                Cartesian3.clone(currentPos, yMax);
+                yMax = Cartesian3.clone(currentPos, yMax);
             }
 
             if (z < zMin.z) {
-                Cartesian3.clone(currentPos, zMin);
+                zMin = Cartesian3.clone(currentPos, zMin);
             }
 
             if (z > zMax.z) {
-                Cartesian3.clone(currentPos, zMax);
+                zMax = Cartesian3.clone(currentPos, zMax);
             }
         }
 
@@ -480,10 +480,10 @@ define([
         }
 
         if (ritterRadius < naiveRadius) {
-            Cartesian3.clone(ritterCenter, result.center);
+            result.center = Cartesian3.clone(ritterCenter, result.center);
             result.radius = ritterRadius;
         } else {
-            Cartesian3.clone(naiveCenter, result.center);
+            result.center = Cartesian3.clone(naiveCenter, result.center);
             result.radius = naiveRadius;
         }
 
@@ -518,8 +518,8 @@ define([
         }
 
         var center = result.center;
-        Cartesian3.add(corner, oppositeCorner, center);
-        Cartesian3.multiplyByScalar(center, 0.5, center);
+        center = Cartesian3.add(corner, oppositeCorner, center);
+        center = Cartesian3.multiplyByScalar(center, 0.5, center);
         result.radius = Cartesian3.distance(center, oppositeCorner);
         return result;
     };
@@ -548,7 +548,7 @@ define([
             result = new BoundingSphere();
         }
 
-        Cartesian3.clone(Cartesian3.ZERO, result.center);
+        result.center = Cartesian3.clone(Cartesian3.ZERO, result.center);
         result.radius = ellipsoid.maximumRadius;
         return result;
     };
@@ -667,14 +667,14 @@ define([
         var leftCenter = left.center;
         var rightCenter = right.center;
 
-        Cartesian3.add(leftCenter, rightCenter, unionScratchCenter);
+        unionScratchCenter = Cartesian3.add(leftCenter, rightCenter, unionScratchCenter);
         var center = Cartesian3.multiplyByScalar(unionScratchCenter, 0.5, unionScratchCenter);
 
         var radius1 = Cartesian3.magnitude(Cartesian3.subtract(leftCenter, center, unionScratch)) + left.radius;
         var radius2 = Cartesian3.magnitude(Cartesian3.subtract(rightCenter, center, unionScratch)) + right.radius;
 
         result.radius = Math.max(radius1, radius2);
-        Cartesian3.clone(center, result.center);
+        result.center = Cartesian3.clone(center, result.center);
 
         return result;
     };
@@ -922,13 +922,13 @@ define([
 
         var normal = ellipsoid.geodeticSurfaceNormal(center, projectTo2DNormalScratch);
         var east = Cartesian3.cross(Cartesian3.UNIT_Z, normal, projectTo2DEastScratch);
-        Cartesian3.normalize(east, east);
+        east = Cartesian3.normalize(east, east);
         var north = Cartesian3.cross(normal, east, projectTo2DNorthScratch);
-        Cartesian3.normalize(north, north);
+        north = Cartesian3.normalize(north, north);
 
-        Cartesian3.multiplyByScalar(normal, radius, normal);
-        Cartesian3.multiplyByScalar(north, radius, north);
-        Cartesian3.multiplyByScalar(east, radius, east);
+        normal = Cartesian3.multiplyByScalar(normal, radius, normal);
+        north = Cartesian3.multiplyByScalar(north, radius, north);
+        east = Cartesian3.multiplyByScalar(east, radius, east);
 
         var south = Cartesian3.negate(north, projectTo2DSouthScratch);
         var west = Cartesian3.negate(east, projectTo2DWestScratch);
@@ -937,50 +937,50 @@ define([
 
         // top NE corner
         var corner = positions[0];
-        Cartesian3.add(normal, north, corner);
-        Cartesian3.add(corner, east, corner);
+        corner = Cartesian3.add(normal, north, corner);
+        corner = Cartesian3.add(corner, east, corner);
 
         // top NW corner
         corner = positions[1];
-        Cartesian3.add(normal, north, corner);
-        Cartesian3.add(corner, west, corner);
+        corner = Cartesian3.add(normal, north, corner);
+        corner = Cartesian3.add(corner, west, corner);
 
         // top SW corner
         corner = positions[2];
-        Cartesian3.add(normal, south, corner);
-        Cartesian3.add(corner, west, corner);
+        corner = Cartesian3.add(normal, south, corner);
+        corner = Cartesian3.add(corner, west, corner);
 
         // top SE corner
         corner = positions[3];
-        Cartesian3.add(normal, south, corner);
-        Cartesian3.add(corner, east, corner);
+        corner = Cartesian3.add(normal, south, corner);
+        corner = Cartesian3.add(corner, east, corner);
 
-        Cartesian3.negate(normal, normal);
+        normal = Cartesian3.negate(normal, normal);
 
         // bottom NE corner
         corner = positions[4];
-        Cartesian3.add(normal, north, corner);
-        Cartesian3.add(corner, east, corner);
+        corner = Cartesian3.add(normal, north, corner);
+        corner = Cartesian3.add(corner, east, corner);
 
         // bottom NW corner
         corner = positions[5];
-        Cartesian3.add(normal, north, corner);
-        Cartesian3.add(corner, west, corner);
+        corner = Cartesian3.add(normal, north, corner);
+        corner = Cartesian3.add(corner, west, corner);
 
         // bottom SW corner
         corner = positions[6];
-        Cartesian3.add(normal, south, corner);
-        Cartesian3.add(corner, west, corner);
+        corner = Cartesian3.add(normal, south, corner);
+        corner = Cartesian3.add(corner, west, corner);
 
         // bottom SE corner
         corner = positions[7];
-        Cartesian3.add(normal, south, corner);
-        Cartesian3.add(corner, east, corner);
+        corner = Cartesian3.add(normal, south, corner);
+        corner = Cartesian3.add(corner, east, corner);
 
         var length = positions.length;
         for (var i = 0; i < length; ++i) {
             var position = positions[i];
-            Cartesian3.add(center, position, position);
+            position = Cartesian3.add(center, position, position);
             var cartographic = ellipsoid.cartesianToCartographic(position, projectTo2DCartographicScratch);
             projection.project(cartographic, position);
         }

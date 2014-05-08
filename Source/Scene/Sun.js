@@ -245,7 +245,7 @@ define([
         var boundingVolume = this._boundingVolume;
         var boundingVolume2D = this._boundingVolume2D;
 
-        Cartesian3.clone(sunPosition, boundingVolume.center);
+        boundingVolume.center = Cartesian3.clone(sunPosition, boundingVolume.center);
         boundingVolume2D.center.x = sunPositionCV.z;
         boundingVolume2D.center.y = sunPositionCV.x;
         boundingVolume2D.center.z = sunPositionCV.y;

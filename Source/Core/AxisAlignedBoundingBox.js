@@ -30,21 +30,21 @@ define([
          * @type {Cartesian3}
          * @default {@link Cartesian3.ZERO}
          */
-        this.minimum = Cartesian3.clone(defaultValue(minimum, Cartesian3.ZERO));
+        this.minimum = Cartesian3.clone(defaultValue(minimum, Cartesian3.ZERO), new Cartesian3());
 
         /**
          * The maximum point defining the bounding box.
          * @type {Cartesian3}
          * @default {@link Cartesian3.ZERO}
          */
-        this.maximum = Cartesian3.clone(defaultValue(maximum, Cartesian3.ZERO));
+        this.maximum = Cartesian3.clone(defaultValue(maximum, Cartesian3.ZERO), new Cartesian3());
 
         //If center was not defined, compute it.
         if (!defined(center)) {
-            center = Cartesian3.add(this.minimum, this.maximum);
-            Cartesian3.multiplyByScalar(center, 0.5, center);
+            center = Cartesian3.add(this.minimum, this.maximum, new Cartesian3());
+            center = Cartesian3.multiplyByScalar(center, 0.5, center);
         } else {
-            center = Cartesian3.clone(center);
+            center = Cartesian3.clone(center, new Cartesian3());
         }
 
         /**
@@ -113,7 +113,7 @@ define([
         maximum.z = maximumZ;
 
         var center = Cartesian3.add(minimum, maximum, result.center);
-        Cartesian3.multiplyByScalar(center, 0.5, center);
+        center = Cartesian3.multiplyByScalar(center, 0.5, center);
 
         return result;
     };

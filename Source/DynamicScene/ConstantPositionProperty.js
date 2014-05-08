@@ -30,7 +30,7 @@ define(['./PositionProperty',
      */
     var ConstantPositionProperty = function(value, referenceFrame) {
         this._definitionChanged = new Event();
-        this._value = Cartesian3.clone(value);
+        this._value = Cartesian3.clone(value, new Cartesian3());
         this._referenceFrame = defaultValue(referenceFrame, ReferenceFrame.FIXED);
     };
 
@@ -94,7 +94,7 @@ define(['./PositionProperty',
         var definitionChanged = false;
         if (!Cartesian3.equals(this._value, value)) {
             definitionChanged = true;
-            this._value = Cartesian3.clone(value);
+            this._value = Cartesian3.clone(value, new Cartesian3());
         }
         if (defined(referenceFrame) && this._referenceFrame !== referenceFrame) {
             definitionChanged = true;

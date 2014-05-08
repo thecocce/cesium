@@ -47,7 +47,7 @@ define([
          *
          * @type {Cartesian3}
          */
-        this.normal = Cartesian3.clone(normal);
+        this.normal = Cartesian3.clone(normal, new Cartesian3());
 
         /**
          * The shortest distance from the origin to the plane.  The sign of
@@ -91,7 +91,7 @@ define([
             return new Plane(normal, distance);
         }
 
-        Cartesian3.clone(normal, result.normal);
+        result.normal = Cartesian3.clone(normal, result.normal);
         result.distance = distance;
         return result;
     };

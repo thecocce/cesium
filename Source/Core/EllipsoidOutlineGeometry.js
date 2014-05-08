@@ -74,7 +74,7 @@ define([
         }
         //>>includeEnd('debug');
 
-        this._radii = Cartesian3.clone(radii);
+        this._radii = Cartesian3.clone(radii, new Cartesian3());
         this._stackPartitions = stackPartitions;
         this._slicePartitions = slicePartitions;
         this._subdivisions = subdivisions;

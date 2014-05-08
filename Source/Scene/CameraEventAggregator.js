@@ -30,11 +30,11 @@ define([
     }
 
     function clonePinchMovement(pinchMovement, result) {
-        Cartesian2.clone(pinchMovement.distance.startPosition, result.distance.startPosition);
-        Cartesian2.clone(pinchMovement.distance.endPosition, result.distance.endPosition);
+        result.distance.startPosition = Cartesian2.clone(pinchMovement.distance.startPosition, result.distance.startPosition);
+        result.distance.endPosition = Cartesian2.clone(pinchMovement.distance.endPosition, result.distance.endPosition);
 
-        Cartesian2.clone(pinchMovement.angleAndHeight.startPosition, result.angleAndHeight.startPosition);
-        Cartesian2.clone(pinchMovement.angleAndHeight.endPosition, result.angleAndHeight.endPosition);
+        result.angleAndHeight.startPosition = Cartesian2.clone(pinchMovement.angleAndHeight.startPosition, result.angleAndHeight.startPosition);
+        result.angleAndHeight.endPosition = Cartesian2.clone(pinchMovement.angleAndHeight.endPosition, result.angleAndHeight.endPosition);
     }
 
     function listenToPinch(aggregator, modifier, canvas) {
@@ -79,8 +79,8 @@ define([
             if (isDown[key]) {
                 // Aggregate several input events into a single animation frame.
                 if (!update[key]) {
-                    Cartesian2.clone(mouseMovement.distance.endPosition, movement.distance.endPosition);
-                    Cartesian2.clone(mouseMovement.angleAndHeight.endPosition, movement.angleAndHeight.endPosition);
+                    movement.distance.endPosition = Cartesian2.clone(mouseMovement.distance.endPosition, movement.distance.endPosition);
+                    movement.angleAndHeight.endPosition = Cartesian2.clone(mouseMovement.angleAndHeight.endPosition, movement.angleAndHeight.endPosition);
                 } else {
                     clonePinchMovement(mouseMovement, movement);
                     update[key] = false;
@@ -122,7 +122,7 @@ define([
             if (!update[key]) {
                 movement.endPosition.y = movement.endPosition.y + arcLength;
             } else {
-                Cartesian2.clone(Cartesian2.ZERO, movement.startPosition);
+                movement.startPosition= Cartesian2.clone(Cartesian2.ZERO, movement.startPosition);
                 movement.endPosition.x = 0.0;
                 movement.endPosition.y = arcLength;
                 update[key] = false;
@@ -176,8 +176,8 @@ define([
     }
 
     function cloneMouseMovement(mouseMovement, result) {
-        Cartesian2.clone(mouseMovement.startPosition, result.startPosition);
-        Cartesian2.clone(mouseMovement.endPosition, result.endPosition);
+        result.startPosition = Cartesian2.clone(mouseMovement.startPosition, result.startPosition);
+        result.endPosition = Cartesian2.clone(mouseMovement.endPosition, result.endPosition);
     }
 
     function listenMouseMove(aggregator, modifier) {
@@ -219,7 +219,7 @@ define([
                         var key = getKey(type, modifier);
                         if (isDown[key]) {
                             if (!update[key]) {
-                                Cartesian2.clone(mouseMovement.endPosition, movement[key].endPosition);
+                                movement[key].endPosition = Cartesian2.clone(mouseMovement.endPosition, movement[key].endPosition);
                             } else {
                                 cloneMouseMovement(movement[key], lastMovement[key]);
                                 lastMovement[key].valid = true;

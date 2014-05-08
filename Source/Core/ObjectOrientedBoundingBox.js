@@ -48,13 +48,13 @@ define([
          * @type {Cartesian3}
          * @default {@link Cartesian3.ZERO}
          */
-        this.translation = Cartesian3.clone(defaultValue(translation, Cartesian3.ZERO));
+        this.translation = Cartesian3.clone(defaultValue(translation, Cartesian3.ZERO), new Cartesian3());
         /**
          * The scale of the box.
          * @type {Cartesian3}
          * @default {@link Cartesian3.ZERO}
          */
-        this.scale = Cartesian3.clone(defaultValue(scale, Cartesian3.ZERO));
+        this.scale = Cartesian3.clone(defaultValue(scale, Cartesian3.ZERO), new Cartesian3());
     };
 
     var scratchCartesian1 = new Cartesian3();
@@ -99,10 +99,10 @@ define([
 
         var meanPoint = Cartesian3.clone(positions[0], scratchCartesian1);
         for (i = 1; i < length; i++) {
-            Cartesian3.add(meanPoint, positions[i], meanPoint);
+            meanPoint = Cartesian3.add(meanPoint, positions[i], meanPoint);
         }
         var invLength = 1.0 / length;
-        Cartesian3.multiplyByScalar(meanPoint, invLength, meanPoint);
+        meanPoint = Cartesian3.multiplyByScalar(meanPoint, invLength, meanPoint);
 
         var exx = 0.0;
         var exy = 0.0;
@@ -156,12 +156,12 @@ define([
         }
 
         var center = Cartesian3.add(minPoint, maxPoint, scratchCartesian3);
-        Cartesian3.multiplyByScalar(center, 0.5, center);
+        center = Cartesian3.multiplyByScalar(center, 0.5, center);
         Matrix3.multiplyByVector(rotation, center, center);
-        Cartesian3.add(meanPoint, center, result.translation);
+        result.translation = Cartesian3.add(meanPoint, center, result.translation);
 
         var scale = Cartesian3.subtract(maxPoint, minPoint, scratchCartesian3);
-        Cartesian3.multiplyByScalar(scale, 0.5, result.scale);
+        result.scale = Cartesian3.multiplyByScalar(scale, 0.5, result.scale);
 
         return result;
     };
@@ -226,8 +226,8 @@ define([
         }
 
         Matrix3.clone(box.rotation, result.rotation);
-        Cartesian3.clone(box.translation, result.translation);
-        Cartesian3.clone(box.scale, result.scale);
+        result.translation = Cartesian3.clone(box.translation, result.translation);
+        result.scale = Cartesian3.clone(box.scale, result.scale);
 
         return result;
     };
@@ -296,7 +296,7 @@ define([
         var a = scratchAArray;
         var b = scratchBArray;
 
-        Cartesian3.subtract(left.translation, right.translation, scratchTCartesian);
+        scratchTCartesian = Cartesian3.subtract(left.translation, right.translation, scratchTCartesian);
         Matrix3.multiplyByVector(leftTransformTransposed, scratchTCartesian, scratchTCartesian);
         Cartesian3.pack(scratchTCartesian, T);
         Cartesian3.pack(left.scale, a);

@@ -136,8 +136,8 @@ defineSuite([
             perPositionHeight : true
         }));
 
-        expect(ellipsoid.cartesianToCartographic(Cartesian3.fromArray(p.attributes.position.values, 0)).height).toEqualEpsilon(100000, CesiumMath.EPSILON6);
-        expect(ellipsoid.cartesianToCartographic(Cartesian3.fromArray(p.attributes.position.values, 3)).height).toEqualEpsilon(0, CesiumMath.EPSILON6);
+        expect(ellipsoid.cartesianToCartographic(Cartesian3.fromArray(p.attributes.position.values, new Cartesian3(), 0)).height).toEqualEpsilon(100000, CesiumMath.EPSILON6);
+        expect(ellipsoid.cartesianToCartographic(Cartesian3.fromArray(p.attributes.position.values, new Cartesian3(), 3)).height).toEqualEpsilon(0, CesiumMath.EPSILON6);
     });
 
     it('computes all attributes', function() {

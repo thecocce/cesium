@@ -102,7 +102,7 @@ define([
             if (vertexFormat.st) {
                 var rotatedPoint = Matrix3.multiplyByVector(textureMatrix, position, scratchCartesian2);
                 var projectedPoint = projection.project(ellipsoid.cartesianToCartographic(rotatedPoint, scratchCartographic), scratchCartesian3);
-                Cartesian3.subtract(projectedPoint, projectedCenter, projectedPoint);
+                projectedPoint = Cartesian3.subtract(projectedPoint, projectedCenter, projectedPoint);
 
                 texCoordScratch.x = (projectedPoint.x + semiMajorAxis) / (2.0 * semiMajorAxis);
                 texCoordScratch.y = (projectedPoint.y + semiMajorAxis) / (2.0 * semiMajorAxis);
@@ -350,7 +350,7 @@ define([
             if (vertexFormat.st) {
                 var rotatedPoint = Matrix3.multiplyByVector(textureMatrix, position, scratchCartesian2);
                 var projectedPoint = projection.project(ellipsoid.cartesianToCartographic(rotatedPoint, scratchCartographic), scratchCartesian3);
-                Cartesian3.subtract(projectedPoint, projectedCenter, projectedPoint);
+                projectedPoint = Cartesian3.subtract(projectedPoint, projectedCenter, projectedPoint);
 
                 texCoordScratch.x = (projectedPoint.x + semiMajorAxis) / (2.0 * semiMajorAxis);
                 texCoordScratch.y = (projectedPoint.y + semiMajorAxis) / (2.0 * semiMajorAxis);
@@ -384,7 +384,7 @@ define([
 
                 binormal = Cartesian3.clone(normal, binormal);
                 var next = Cartesian3.fromArray(positions, (i + 3) % length, scratchCartesian4);
-                Cartesian3.subtract(next, position, next);
+                next = Cartesian3.subtract(next, position, next);
                 var bottom = Cartesian3.subtract(extrudedPosition, position, scratchCartesian3);
 
                 normal = Cartesian3.normalize(Cartesian3.cross(bottom, next, normal), normal);
@@ -632,7 +632,7 @@ define([
         }
         //>>includeEnd('debug');
 
-        this._center = Cartesian3.clone(center);
+        this._center = Cartesian3.clone(center, new Cartesian3());
         this._semiMajorAxis = semiMajorAxis;
         this._semiMinorAxis = semiMinorAxis;
         this._ellipsoid = defaultValue(options.ellipsoid, Ellipsoid.WGS84);

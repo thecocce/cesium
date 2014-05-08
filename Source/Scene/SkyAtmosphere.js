@@ -37,6 +37,7 @@ define([
         SkyAtmosphereFS) {
     "use strict";
 
+    var outerRadiusScratch = new Cartesian3();
     /**
      * An atmosphere drawn around the limb of the provided ellipsoid.  Based on
      * <a href="http://http.developer.nvidia.com/GPUGems2/gpugems2_chapter16.html" target="_blank">Accurate Atmospheric Scattering</a>
@@ -74,7 +75,7 @@ define([
 
         this._fCameraHeight = undefined;
         this._fCameraHeight2 = undefined;
-        this._outerRadius = Cartesian3.getMaximumComponent(Cartesian3.multiplyByScalar(ellipsoid.radii, 1.025));
+        this._outerRadius = Cartesian3.getMaximumComponent(Cartesian3.multiplyByScalar(ellipsoid.radii, 1.025, outerRadiusScratch));
         var innerRadius = ellipsoid.maximumRadius;
         var rayleighScaleDepth = 0.25;
 
@@ -143,7 +144,7 @@ define([
 
         if (!defined(command.vertexArray)) {
             var geometry = EllipsoidGeometry.createGeometry(new EllipsoidGeometry({
-                radii : Cartesian3.multiplyByScalar(this._ellipsoid.radii, 1.025),
+                radii : Cartesian3.multiplyByScalar(this._ellipsoid.radii, 1.025, new Cartesian3()),
                 slicePartitions : 256,
                 stackPartitions : 256
             }));
@@ -177,7 +178,7 @@ define([
 
         var cameraPosition = frameState.camera.positionWC;
 
-        this._fCameraHeight2 = Cartesian3.magnitudeSquared(cameraPosition);
+        this._fCameraHeight2 = Cartesian3.magnitudeSquared(cameraPosition, new Cartesian3());
         this._fCameraHeight = Math.sqrt(this._fCameraHeight2);
 
         if (this._fCameraHeight > this._outerRadius) {

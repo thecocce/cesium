@@ -33,9 +33,11 @@ define([
         WindingOrder) {
     "use strict";
 
+    var scratchU = new Cartesian2();
+    var scratchV = new Cartesian2();
     function isTipConvex(p0, p1, p2) {
-        var u = Cartesian2.subtract(p1, p0);
-        var v = Cartesian2.subtract(p2, p1);
+        var u = Cartesian2.subtract(p1, p0, scratchU);
+        var v = Cartesian2.subtract(p2, p1, scratchV);
 
         // Use the sign of the z component of the cross product
         return ((u.x * v.y) - (u.y * v.x)) >= 0.0;
@@ -123,6 +125,7 @@ define([
         return -1;
     }
 
+    var scratchDist = new Cartesian2();
     /**
      * Given a point inside a polygon, find the nearest point directly to the right that lies on one of the polygon's edges.
      *
@@ -168,7 +171,7 @@ define([
                     var ub = (((point2.x - point.x) * (point.y - v1.y)) - ((point2.y - point.y) * (point.x - v1.x))) * temp;
                     if ((ua >= 0.0) && (ua <= 1.0) && (ub >= 0.0) && (ub <= 1.0)) {
                         var tempIntersection = new Cartesian2(point.x + ua * (point2.x - point.x), point.y + ua * (point2.y - point.y));
-                        var dist = Cartesian2.subtract(tempIntersection, point);
+                        var dist = Cartesian2.subtract(tempIntersection, point, scratchDist);
                         temp = Cartesian2.magnitudeSquared(dist);
                         if (temp < minDistance) {
                             intersection = tempIntersection;
@@ -184,6 +187,9 @@ define([
         return intersection;
     }
 
+    var scratchV1 = new Cartesian2(1.0, 0.0);
+    var scratchV2 = new Cartesian2();
+    var scratchD = new Cartesian2();
     /**
      * Given an outer ring and multiple inner rings, determine the point on the outer ring that is visible
      * to the rightmost vertex of the rightmost inner ring.
@@ -208,8 +214,8 @@ define([
         }
 
         // Set P to be the edge endpoint closest to the inner ring vertex
-        var d1 = Cartesian2.magnitudeSquared(Cartesian2.subtract(outerRing[edgeIndices[0]], innerRingVertex));
-        var d2 = Cartesian2.magnitudeSquared(Cartesian2.subtract(outerRing[edgeIndices[1]], innerRingVertex));
+        var d1 = Cartesian2.magnitudeSquared(Cartesian2.subtract(outerRing[edgeIndices[0]], innerRingVertex, scratchD));
+        var d2 = Cartesian2.magnitudeSquared(Cartesian2.subtract(outerRing[edgeIndices[1]], innerRingVertex, scratchD));
         var p = (d1 < d2) ? outerRing[edgeIndices[0]] : outerRing[edgeIndices[1]];
 
         var reflexVertices = getReflexVertices(outerRing);
@@ -231,9 +237,9 @@ define([
         // Otherwise, return the reflex vertex that minimizes the angle between <1,0> and <k, reflex>.
         var minAngle = Number.MAX_VALUE;
         if (pointsInside.length > 0) {
-            var v1 = new Cartesian2(1.0, 0.0);
+            var v1 = scratchV1;
             for (i = 0; i < pointsInside.length; i++) {
-                var v2 = Cartesian2.subtract(pointsInside[i], innerRingVertex);
+                var v2 = Cartesian2.subtract(pointsInside[i], innerRingVertex, scratchV2);
                 var denominator = Cartesian2.magnitude(v1) * Cartesian2.magnitudeSquared(v2);
                 if (denominator !== 0) {
                     var angle = Math.abs(Math.acos(Cartesian2.dot(v1, v2) / denominator));
@@ -361,6 +367,9 @@ define([
                 !Cartesian2.equals(pArray[a1i].position, pArray[a2i].position);
     }
 
+    var scratchS1 = new Cartesian3();
+    var scratchS2 = new Cartesian3();
+    var scratchCut = new Cartesian3();
     /**
      * Determine whether the cut formed between the two vertices is internal
      * to the angle formed by the sides connecting at the first vertex.
@@ -386,14 +395,9 @@ define([
         var before = getNextVertex(a1i, pArray, BEFORE);
         var after = getNextVertex(a1i, pArray, AFTER);
 
-        var s1 = Cartesian2.subtract(pArray[before].position, a1.position);
-        var s2 = Cartesian2.subtract(pArray[after].position, a1.position);
-        var cut = Cartesian2.subtract(a2.position, a1.position);
-
-        // Convert to 3-dimensional so we can use cross product
-        s1 = new Cartesian3(s1.x, s1.y, 0.0);
-        s2 = new Cartesian3(s2.x, s2.y, 0.0);
-        cut = new Cartesian3(cut.x, cut.y, 0.0);
+        var s1 = Cartesian2.subtract(pArray[before].position, a1.position, scratchS1);
+        var s2 = Cartesian2.subtract(pArray[after].position, a1.position, scratchS2);
+        var cut = Cartesian2.subtract(a2.position, a1.position, scratchCut);
 
         if (isParallel(s1, cut)) { // Cut is parallel to s1
             return isInternalToParallelSide(s1, cut);
@@ -513,12 +517,8 @@ define([
             after = 0;
         }
 
-        var s1 = Cartesian2.subtract(pArray[before].position, pArray[index].position);
-        var s2 = Cartesian2.subtract(pArray[after].position, pArray[index].position);
-
-        // Convert to 3-dimensional so we can use cross product
-        s1 = new Cartesian3(s1.x, s1.y, 0.0);
-        s2 = new Cartesian3(s2.x, s2.y, 0.0);
+        var s1 = Cartesian2.subtract(pArray[before].position, pArray[index].position, scratchS1);
+        var s2 = Cartesian2.subtract(pArray[after].position, pArray[index].position, scratchS2);
 
         if (isParallel(s1, s2)) {
             var e = new DeveloperError("Superfluous vertex found.");
@@ -527,6 +527,7 @@ define([
         }
     }
 
+    var scratchIsParallel = new Cartesian3();
     /**
      * Determine whether s1 and s2 are parallel.
      *
@@ -537,9 +538,10 @@ define([
      * @private
      */
     function isParallel(s1, s2) {
-        return Cartesian3.cross(s1, s2).z === 0.0;
+        return Cartesian3.cross(s1, s2, scratchIsParallel).z === 0.0;
     }
 
+    var scratchLessThan = new Cartesian3();
     /**
      * Assuming s1 is to the left of s2, determine whether
      * the angle between them is less than 180 degrees.
@@ -551,9 +553,10 @@ define([
      * @private
      */
     function angleLessThan180(s1, s2) {
-        return Cartesian3.cross(s1, s2).z < 0.0;
+        return Cartesian3.cross(s1, s2, scratchLessThan).z < 0.0;
     }
 
+    var scratchGreaterThan = new Cartesian3();
     /**
      * Assuming s1 is to the left of s2, determine whether
      * the angle between them is greater than 180 degrees.
@@ -565,9 +568,10 @@ define([
      * @private
      */
     function angleGreaterThan180(s1, s2) {
-        return Cartesian3.cross(s1, s2).z > 0.0;
+        return Cartesian3.cross(s1, s2, scratchGreaterThan).z > 0.0;
     }
 
+    var scratchInsideBig = new Cartesian3();
     /**
      * Determines whether s3 is inside the greater-than-180-degree angle
      * between s1 and s2.
@@ -582,9 +586,10 @@ define([
      * @private
      */
     function isInsideBigAngle(s1, s2, s3) {
-        return (Cartesian3.cross(s1, s3).z > 0.0) && (Cartesian3.cross(s3, s2).z > 0.0);
+        return (Cartesian3.cross(s1, s3, scratchInsideBig).z > 0.0) && (Cartesian3.cross(s3, s2, scratchInsideBig).z > 0.0);
     }
 
+    var scratchInsideSmall = new Cartesian3();
     /**
      * Determines whether s3 is inside the less-than-180-degree angle
      * between s1 and s2.
@@ -599,7 +604,7 @@ define([
      * @private
      */
     function isInsideSmallAngle(s1, s2, s3) {
-        return (Cartesian3.cross(s1, s3).z < 0.0) && (Cartesian3.cross(s3, s2).z < 0.0);
+        return (Cartesian3.cross(s1, s3, scratchInsideSmall).z < 0.0) && (Cartesian3.cross(s3, s2, scratchInsideSmall).z < 0.0);
     }
 
     /**
@@ -671,12 +676,8 @@ define([
         var v2 = pArray[1].position;
         var v3 = pArray[2].position;
 
-        var side1 = Cartesian2.subtract(v2, v1);
-        var side2 = Cartesian2.subtract(v3, v1);
-
-        // Convert to 3-dimensional so we can use cross product
-        side1 = new Cartesian3(side1.x, side1.y, 0.0);
-        side2 = new Cartesian3(side2.x, side2.y, 0.0);
+        var side1 = Cartesian2.subtract(v2, v1, scratchS1);
+        var side2 = Cartesian2.subtract(v3, v1, scratchS2);
 
         // If they're parallel, so is the last
         return isParallel(side1, side2);
@@ -969,8 +970,8 @@ define([
 
                         i = edges[edge];
                         if (!i) {
-                            mid = Cartesian3.add(v0, v1);
-                            Cartesian3.multiplyByScalar(mid, 0.5, mid);
+                            mid = Cartesian3.add(v0, v1, new Cartesian3());
+                            mid = Cartesian3.multiplyByScalar(mid, 0.5, mid);
                             subdividedPositions.push(mid);
                             i = subdividedPositions.length - 1;
                             edges[edge] = i;
@@ -991,8 +992,8 @@ define([
 
                         i = edges[edge];
                         if (!i) {
-                            mid = Cartesian3.add(v1, v2);
-                            Cartesian3.multiplyByScalar(mid, 0.5, mid);
+                            mid = Cartesian3.add(v1, v2, new Cartesian3());
+                            mid = Cartesian3.multiplyByScalar(mid, 0.5, mid);
                             subdividedPositions.push(mid);
                             i = subdividedPositions.length - 1;
                             edges[edge] = i;
@@ -1013,8 +1014,8 @@ define([
 
                         i = edges[edge];
                         if (!i) {
-                            mid = Cartesian3.add(v2, v0);
-                            Cartesian3.multiplyByScalar(mid, 0.5, mid);
+                            mid = Cartesian3.add(v2, v0, new Cartesain3());
+                            mid = Cartesian3.multiplyByScalar(mid, 0.5, mid);
                             subdividedPositions.push(mid);
                             i = subdividedPositions.length - 1;
                             edges[edge] = i;
@@ -1096,8 +1097,8 @@ define([
 
                     n = ellipsoid.geodeticSurfaceNormal(p, n);
 
-                    Cartesian3.multiplyByScalar(n, height, n);
-                    Cartesian3.add(p, n, p);
+                    n = Cartesian3.multiplyByScalar(n, height, n);
+                    p = Cartesian3.add(p, n, p);
 
                     positions[i] = p.x;
                     positions[i + 1] = p.y;
@@ -1143,7 +1144,7 @@ define([
             for ( var i = 0; i < innerRings.length; i++) {
                 var innerRing = [];
                 for ( var j = 0; j < innerRings[i].length; j++) {
-                    innerRing.push(Cartesian3.clone(innerRings[i][j]));
+                    innerRing.push(Cartesian3.clone(innerRings[i][j], new Cartesian3()));
                 }
                 innerRingsCopy.push(innerRing);
             }

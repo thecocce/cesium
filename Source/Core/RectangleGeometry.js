@@ -176,12 +176,12 @@ define([
             if (vertexFormat.normal || vertexFormat.tangent || vertexFormat.binormal) {
                 normal = ellipsoid.geodeticSurfaceNormal(p, normal);
                 if (vertexFormat.tangent || vertexFormat.binormal) {
-                    Cartesian3.cross(Cartesian3.UNIT_Z, normal, tangent);
+                    tangent = Cartesian3.cross(Cartesian3.UNIT_Z, normal, tangent);
                     Matrix3.multiplyByVector(tangentRotationMatrix, tangent, tangent);
-                    Cartesian3.normalize(tangent, tangent);
+                    tangent = Cartesian3.normalize(tangent, tangent);
 
                     if (vertexFormat.binormal) {
-                        Cartesian3.normalize(Cartesian3.cross(normal, tangent, binormal), binormal);
+                        binormal = Cartesian3.normalize(Cartesian3.cross(normal, tangent, binormal), binormal);
                     }
                 }
 
@@ -250,8 +250,8 @@ define([
                 var p1 = Cartesian3.fromArray(positions, i + 3, v1Scratch);
                 if (recomputeNormal) {
                     var p2 = Cartesian3.fromArray(positions, i + bottomOffset, v2Scratch);
-                    Cartesian3.subtract(p1, p, p1);
-                    Cartesian3.subtract(p2, p, p2);
+                    p1 = Cartesian3.subtract(p1, p, p1);
+                    p2 = Cartesian3.subtract(p2, p, p2);
                     normal = Cartesian3.normalize(Cartesian3.cross(p2, p1, normal), normal);
                     recomputeNormal = false;
                 }
@@ -746,10 +746,10 @@ define([
             proj.project(nwCartographic, nw);
             proj.project(centerCartographic, center);
 
-            Cartesian3.subtract(nw, center, nw);
+            nw = Cartesian3.subtract(nw, center, nw);
             Matrix2.fromRotation(rotation, rotationMatrix);
             Matrix2.multiplyByVector(rotationMatrix, nw, nw);
-            Cartesian3.add(nw, center, nw);
+            nw = Cartesian3.add(nw, center, nw);
             proj.unproject(nw, nwCartographic);
 
             var latitude = nwCartographic.latitude;
@@ -789,7 +789,7 @@ define([
             Matrix2.fromRotation(-stRotation, textureMatrix);
 
             var axis = ellipsoid.cartographicToCartesian(centerCartographic, v1Scratch);
-            Cartesian3.normalize(axis, axis);
+            axis = Cartesian3.normalize(axis, axis);
             Quaternion.fromAxisAngle(axis, -stRotation, quaternionScratch);
             Matrix3.fromQuaternion(quaternionScratch, tangentRotationMatrix);
         } else {

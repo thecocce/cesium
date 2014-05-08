@@ -81,7 +81,7 @@ define([
         }
         //>>includeEnd('debug');
 
-        this._radii = Cartesian3.clone(radii);
+        this._radii = Cartesian3.clone(radii, new Cartesian3());
         this._stackPartitions = stackPartitions;
         this._slicePartitions = slicePartitions;
         this._vertexFormat = vertexFormat;
@@ -207,11 +207,11 @@ define([
                 if (vertexFormat.tangent || vertexFormat.binormal) {
                     var tangent = scratchTangent;
                     if (i < slicePartitions || i > vertexCount - slicePartitions - 1) {
-                        Cartesian3.cross(Cartesian3.UNIT_X, normal, tangent);
-                        Cartesian3.normalize(tangent, tangent);
+                        tangent = Cartesian3.cross(Cartesian3.UNIT_X, normal, tangent);
+                        tangent = Cartesian3.normalize(tangent, tangent);
                     } else {
-                        Cartesian3.cross(Cartesian3.UNIT_Z, normal, tangent);
-                        Cartesian3.normalize(tangent, tangent);
+                        tangent = Cartesian3.cross(Cartesian3.UNIT_Z, normal, tangent);
+                        tangent = Cartesian3.normalize(tangent, tangent);
                     }
 
                     if (vertexFormat.tangent) {
@@ -222,7 +222,7 @@ define([
 
                     if (vertexFormat.binormal) {
                         var binormal = Cartesian3.cross(normal, tangent, scratchBinormal);
-                        Cartesian3.normalize(binormal, binormal);
+                        binormal = Cartesian3.normalize(binormal, binormal);
 
                         binormals[binormalIndex++] = binormal.x;
                         binormals[binormalIndex++] = binormal.y;

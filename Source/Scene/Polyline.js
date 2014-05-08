@@ -61,7 +61,7 @@ define([
 
         this._positions = positions;
         if (this._loop && positions.length > 2 && !Cartesian3.equals(positions[0], positions[positions.length - 1])) {
-            positions.push(Cartesian3.clone(positions[0]));
+            positions.push(Cartesian3.clone(positions[0], new Cartesian3()));
         }
 
         this._length = positions.length;
@@ -151,7 +151,7 @@ define([
                 //>>includeEnd('debug');
 
                 if (this._loop && value.length > 2 && !Cartesian3.equals(value[0], value[value.length - 1])) {
-                    value.push(Cartesian3.clone(value[0]));
+                    value.push(Cartesian3.clone(value[0], new Cartesian3()));
                 }
 
                 if (this._positions.length !== value.length || this._positions.length !== this._length) {
@@ -236,7 +236,7 @@ define([
                     var positions = this._positions;
                     if (value) {
                         if (positions.length > 2 && !Cartesian3.equals(positions[0], positions[positions.length - 1])) {
-                            positions.push(Cartesian3.clone(positions[0]));
+                            positions.push(Cartesian3.clone(positions[0], new Cartesian3()));
                         }
                     } else {
                         if (positions.length > 2 && Cartesian3.equals(positions[0], positions[positions.length - 1])) {

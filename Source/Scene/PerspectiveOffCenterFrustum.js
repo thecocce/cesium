@@ -209,21 +209,21 @@ define([
         var right = Cartesian3.cross(direction, up, getPlanesRight);
 
         var nearCenter = getPlanesNearCenter;
-        Cartesian3.multiplyByScalar(direction, n, nearCenter);
-        Cartesian3.add(position, nearCenter, nearCenter);
+        nearCenter = Cartesian3.multiplyByScalar(direction, n, nearCenter);
+        nearCenter = Cartesian3.add(position, nearCenter, nearCenter);
 
         var farCenter = getPlanesFarCenter;
-        Cartesian3.multiplyByScalar(direction, f, farCenter);
-        Cartesian3.add(position, farCenter, farCenter);
+        farCenter = Cartesian3.multiplyByScalar(direction, f, farCenter);
+        farCenter = Cartesian3.add(position, farCenter, farCenter);
 
         var normal = getPlanesNormal;
 
         //Left plane computation
-        Cartesian3.multiplyByScalar(right, l, normal);
-        Cartesian3.add(nearCenter, normal, normal);
-        Cartesian3.subtract(normal, position, normal);
-        Cartesian3.normalize(normal, normal);
-        Cartesian3.cross(normal, up, normal);
+        normal = Cartesian3.multiplyByScalar(right, l, normal);
+        normal = Cartesian3.add(nearCenter, normal, normal);
+        normal = Cartesian3.subtract(normal, position, normal);
+        normal = Cartesian3.normalize(normal, normal);
+        normal = Cartesian3.cross(normal, up, normal);
 
         var plane = planes[0];
         if (!defined(plane)) {
@@ -235,11 +235,11 @@ define([
         plane.w = -Cartesian3.dot(normal, position);
 
         //Right plane computation
-        Cartesian3.multiplyByScalar(right, r, normal);
-        Cartesian3.add(nearCenter, normal, normal);
-        Cartesian3.subtract(normal, position, normal);
-        Cartesian3.normalize(normal, normal);
-        Cartesian3.cross(up, normal, normal);
+        normal = Cartesian3.multiplyByScalar(right, r, normal);
+        normal = Cartesian3.add(nearCenter, normal, normal);
+        normal = Cartesian3.subtract(normal, position, normal);
+        normal = Cartesian3.normalize(normal, normal);
+        normal = Cartesian3.cross(up, normal, normal);
 
         plane = planes[1];
         if (!defined(plane)) {
@@ -251,11 +251,11 @@ define([
         plane.w = -Cartesian3.dot(normal, position);
 
         //Bottom plane computation
-        Cartesian3.multiplyByScalar(up, b, normal);
-        Cartesian3.add(nearCenter, normal, normal);
-        Cartesian3.subtract(normal, position, normal);
-        Cartesian3.normalize(normal, normal);
-        Cartesian3.cross(right, normal, normal);
+        normal = Cartesian3.multiplyByScalar(up, b, normal);
+        normal = Cartesian3.add(nearCenter, normal, normal);
+        normal = Cartesian3.subtract(normal, position, normal);
+        normal = Cartesian3.normalize(normal, normal);
+        normal = Cartesian3.cross(right, normal, normal);
 
         plane = planes[2];
         if (!defined(plane)) {
@@ -267,11 +267,11 @@ define([
         plane.w = -Cartesian3.dot(normal, position);
 
         //Top plane computation
-        Cartesian3.multiplyByScalar(up, t, normal);
-        Cartesian3.add(nearCenter, normal, normal);
-        Cartesian3.subtract(normal, position, normal);
-        Cartesian3.normalize(normal, normal);
-        Cartesian3.cross(normal, right, normal);
+        normal = Cartesian3.multiplyByScalar(up, t, normal);
+        normal = Cartesian3.add(nearCenter, normal, normal);
+        normal = Cartesian3.subtract(normal, position, normal);
+        normal = Cartesian3.normalize(normal, normal);
+        normal = Cartesian3.cross(normal, right, normal);
 
         plane = planes[3];
         if (!defined(plane)) {
@@ -293,7 +293,7 @@ define([
         plane.w = -Cartesian3.dot(direction, nearCenter);
 
         //Far plane computation
-        Cartesian3.negate(direction, normal);
+        normal = Cartesian3.negate(direction, normal);
 
         plane = planes[5];
         if (!defined(plane)) {

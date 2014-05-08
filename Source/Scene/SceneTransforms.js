@@ -180,7 +180,7 @@ define([
         var canvas = scene.canvas;
 
         // Perspective divide to transform from clip coordinates to normalized device coordinates
-        Cartesian3.divideByScalar(position, position.w, positionNDC);
+        positionNDC = Cartesian3.divideByScalar(position, position.w, positionNDC);
 
         // Assuming viewport takes up the entire canvas...
         viewport.width = canvas.clientWidth;
@@ -198,7 +198,7 @@ define([
      */
     SceneTransforms.clipToDrawingBufferCoordinates = function(scene, position, result) {
         // Perspective divide to transform from clip coordinates to normalized device coordinates
-        Cartesian3.divideByScalar(position, position.w, positionNDC);
+        positionNDC = Cartesian3.divideByScalar(position, position.w, positionNDC);
 
         // Assuming viewport takes up the entire canvas...
         viewport.width = scene.drawingBufferWidth;

@@ -815,10 +815,10 @@ define([
     }
 
     function setCamera(uniformState, camera) {
-        Cartesian3.clone(camera.positionWC, uniformState._cameraPosition);
-        Cartesian3.clone(camera.directionWC, uniformState._cameraDirection);
-        Cartesian3.clone(camera.rightWC, uniformState._cameraRight);
-        Cartesian3.clone(camera.upWC, uniformState._cameraUp);
+        uniformState._cameraPosition = Cartesian3.clone(camera.positionWC, uniformState._cameraPosition);
+        uniformState._cameraDirection = Cartesian3.clone(camera.directionWC, uniformState._cameraDirection);
+        uniformState._cameraRight = Cartesian3.clone(camera.rightWC, uniformState._cameraRight);
+        uniformState._cameraUp = Cartesian3.clone(camera.upWC, uniformState._cameraUp);
         uniformState._encodedCameraPositionMCDirty = true;
     }
 
@@ -832,15 +832,15 @@ define([
         var position = Simon1994PlanetaryPositions.ComputeSunPositionInEarthInertialFrame(frameState.time, uniformState._sunPositionWC);
         Matrix3.multiplyByVector(transformMatrix, position, position);
 
-        Cartesian3.normalize(position, uniformState._sunDirectionWC);
+        uniformState._sunDirectionWC = Cartesian3.normalize(position, uniformState._sunDirectionWC);
 
         position = Matrix3.multiplyByVector(uniformState.viewRotation3D, position, uniformState._sunDirectionEC);
-        Cartesian3.normalize(position, position);
+        position = Cartesian3.normalize(position, position);
 
         position = Simon1994PlanetaryPositions.ComputeMoonPositionInEarthInertialFrame(frameState.time, uniformState._moonDirectionEC);
         Matrix3.multiplyByVector(transformMatrix, position, position);
         Matrix3.multiplyByVector(uniformState.viewRotation3D, position, position);
-        Cartesian3.normalize(position, position);
+        position = Cartesian3.normalize(position, position);
 
         var projection = frameState.scene2D.projection;
         var ellipsoid = projection.ellipsoid;

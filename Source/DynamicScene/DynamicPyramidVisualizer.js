@@ -189,7 +189,7 @@ define([
             (!Cartesian3.equals(position, pyramid._visualizerPosition) ||
              !Quaternion.equals(orientation, pyramid._visualizerOrientation))) {
             Matrix4.fromRotationTranslation(Matrix3.fromQuaternion(orientation, matrix3Scratch), position, pyramid.modelMatrix);
-            Cartesian3.clone(position, pyramid._visualizerPosition);
+            pyramid._visualizerPosition = Cartesian3.clone(position, pyramid._visualizerPosition);
             Quaternion.clone(orientation, pyramid._visualizerOrientation);
         }
 

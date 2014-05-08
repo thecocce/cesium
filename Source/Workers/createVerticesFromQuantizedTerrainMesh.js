@@ -120,7 +120,7 @@ define([
             cartographicScratch.height = h - skirtLength;
 
             var position = ellipsoid.cartographicToCartesian(cartographicScratch, cartesian3Scratch);
-            Cartesian3.subtract(position, center, position);
+            position = Cartesian3.subtract(position, center, position);
 
             vertexBuffer[vertexBufferIndex++] = position.x;
             vertexBuffer[vertexBufferIndex++] = position.y;

@@ -6,7 +6,7 @@ defineSuite([
          'Core/Ellipsoid',
          'Core/Math'
      ], function(
-             GeographicProjection,
+         GeographicProjection,
          Cartesian3,
          Cartographic,
          Ellipsoid,

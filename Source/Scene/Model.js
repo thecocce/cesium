@@ -646,8 +646,8 @@ define([
                                 if (defined(min) && defined(max)) {
                                     Matrix4.multiplyByPoint(transformToRoot, aMin, aMin);
                                     Matrix4.multiplyByPoint(transformToRoot, aMax, aMax);
-                                    Cartesian3.getMinimumByComponent(min, aMin, min);
-                                    Cartesian3.getMaximumByComponent(max, aMax, max);
+                                    min = Cartesian3.getMinimumByComponent(min, aMin, min);
+                                    max = Cartesian3.getMaximumByComponent(max, aMax, max);
                                 }
                             }
                         }
@@ -1458,7 +1458,7 @@ define([
 
     function getVec2UniformFunction(value, model) {
         var that = {
-            value : Cartesian2.fromArray(value),
+            value : Cartesian2.fromArray(value, new Cartesian2()),
             clone : Cartesian2.clone,
             func : function() {
                 return that.value;

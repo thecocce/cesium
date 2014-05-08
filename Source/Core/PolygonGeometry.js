@@ -219,8 +219,8 @@ define([
 
                             if (recomputeNormal) {
                                 var p2 = Cartesian3.fromArray(flatPositions, i + length, p2Scratch);
-                                Cartesian3.subtract(p1, position, p1);
-                                Cartesian3.subtract(p2, position, p2);
+                                p1 = Cartesian3.subtract(p1, position, p1);
+                                p2 = Cartesian3.subtract(p2, position, p2);
                                 normal = Cartesian3.normalize(Cartesian3.cross(p2, p1, normal), normal);
                                 recomputeNormal = false;
                             }

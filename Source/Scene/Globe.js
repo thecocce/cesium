@@ -323,45 +323,51 @@ define([
 
         // A conservative measure for the longitudes would be to use the min/max longitudes of the bounding frustum.
         var upperLeft = Cartesian3.add(center, northOffset, scratchCartesian4);
-        Cartesian3.subtract(upperLeft, eastOffset, upperLeft);
-        Cartesian3.multiplyComponents(radii, upperLeft, upperLeft);
+        upperLeft = Cartesian3.subtract(upperLeft, eastOffset, upperLeft);
+        upperLeft = Cartesian3.multiplyComponents(radii, upperLeft, upperLeft);
         Cartesian3.pack(upperLeft, depthQuadScratch, 0);
 
         var lowerLeft = Cartesian3.subtract(center, northOffset, scratchCartesian4);
-        Cartesian3.subtract(lowerLeft, eastOffset, lowerLeft);
-        Cartesian3.multiplyComponents(radii, lowerLeft, lowerLeft);
+        lowerLeft = Cartesian3.subtract(lowerLeft, eastOffset, lowerLeft);
+        lowerLeft = Cartesian3.multiplyComponents(radii, lowerLeft, lowerLeft);
         Cartesian3.pack(lowerLeft, depthQuadScratch, 3);
 
         var upperRight = Cartesian3.add(center, northOffset, scratchCartesian4);
-        Cartesian3.add(upperRight, eastOffset, upperRight);
-        Cartesian3.multiplyComponents(radii, upperRight, upperRight);
+        upperRight = Cartesian3.add(upperRight, eastOffset, upperRight);
+        upperRight = Cartesian3.multiplyComponents(radii, upperRight, upperRight);
         Cartesian3.pack(upperRight, depthQuadScratch, 6);
 
         var lowerRight = Cartesian3.subtract(center, northOffset, scratchCartesian4);
-        Cartesian3.add(lowerRight, eastOffset, lowerRight);
-        Cartesian3.multiplyComponents(radii, lowerRight, lowerRight);
+        lowerRight = Cartesian3.add(lowerRight, eastOffset, lowerRight);
+        lowerRight = Cartesian3.multiplyComponents(radii, lowerRight, lowerRight);
         Cartesian3.pack(lowerRight, depthQuadScratch, 9);
 
         return depthQuadScratch;
     }
 
+    var cart3RadScratch = new Cartesian3();
+    var negativeZ = Cartesian3.negate(Cartesian3.UNIT_Z, new Cartesian3());
+    var rightScratch = new Cartesian3();
+    var centerScratch = new Cartesian3();
+    var screenRightScratch = new Cartesian3();
+    var screenUpScratch = new Cartesian3();
     function computePoleQuad(globe, frameState, maxLat, maxGivenLat, viewProjMatrix, viewportTransformation) {
         var pt1 = globe._ellipsoid.cartographicToCartesian(new Cartographic(0.0, maxGivenLat));
         var pt2 = globe._ellipsoid.cartographicToCartesian(new Cartographic(Math.PI, maxGivenLat));
-        var radius = Cartesian3.magnitude(Cartesian3.subtract(pt1, pt2)) * 0.5;
+        var radius = Cartesian3.magnitude(Cartesian3.subtract(pt1, pt2, cart3RadScratch)) * 0.5;
 
-        var center = globe._ellipsoid.cartographicToCartesian(new Cartographic(0.0, maxLat));
+        var center = globe._ellipsoid.cartographicToCartesian(new Cartographic(0.0, maxLat), centerScratch);
 
-        var right;
+        var right = rightScratch;
         var dir = frameState.camera.direction;
-        if (1.0 - Cartesian3.dot(Cartesian3.negate(Cartesian3.UNIT_Z), dir) < CesiumMath.EPSILON6) {
-            right = Cartesian3.UNIT_X;
+        if (1.0 - Cartesian3.dot(negativeZ, dir) < CesiumMath.EPSILON6) {
+            right = Cartesian3.clone(Cartesian3.UNIT_X, right);
         } else {
-            right = Cartesian3.normalize(Cartesian3.cross(dir, Cartesian3.UNIT_Z));
+            right = Cartesian3.normalize(Cartesian3.cross(dir, Cartesian3.UNIT_Z, right), right);
         }
 
-        var screenRight = Cartesian3.add(center, Cartesian3.multiplyByScalar(right, radius));
-        var screenUp = Cartesian3.add(center, Cartesian3.multiplyByScalar(Cartesian3.normalize(Cartesian3.cross(Cartesian3.UNIT_Z, right)), radius));
+        var screenRight = Cartesian3.add(center, Cartesian3.multiplyByScalar(right, radius, screenRightScratch), screenRightScratch);
+        var screenUp = Cartesian3.add(center, Cartesian3.multiplyByScalar(Cartesian3.normalize(Cartesian3.cross(Cartesian3.UNIT_Z, right, screenUpScratch), screenUpScratch), radius, screenUpScratch), screenUpScratch);
 
         Transforms.pointToWindowCoordinates(viewProjMatrix, viewportTransformation, center, center);
         Transforms.pointToWindowCoordinates(viewProjMatrix, viewportTransformation, screenRight, screenRight);

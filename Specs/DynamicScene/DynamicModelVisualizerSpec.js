@@ -10,7 +10,6 @@ defineSuite([
              'DynamicScene/DynamicObjectCollection',
              'DynamicScene/DynamicObject',
              'Core/JulianDate',
-             'Core/Cartesian2',
              'Core/Cartesian3',
              'Core/Color',
              'Scene/Scene'
@@ -25,7 +24,6 @@ defineSuite([
             DynamicObjectCollection,
             DynamicObject,
             JulianDate,
-            Cartesian2,
             Cartesian3,
             Color,
             Scene) {

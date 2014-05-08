@@ -75,10 +75,10 @@ defineSuite([
         expect(positions.length).toEqual(2 * 2 * 3);
         expect(w.indices.length).toEqual(4 * 2);
 
-        var cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, 0));
+        var cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, new Cartesian3(), 0));
         expect(cartographic.height).toEqualEpsilon(0.0, CesiumMath.EPSILON8);
 
-        cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, 3));
+        cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, new Cartesian3(), 3));
         expect(cartographic.height).toEqualEpsilon(1000.0, CesiumMath.EPSILON8);
     });
 
@@ -99,16 +99,16 @@ defineSuite([
         expect(positions.length).toEqual(2 * 2 * 3);
         expect(w.indices.length).toEqual(4 * 2);
 
-        var cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, 0));
+        var cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, new Cartesian3(), 0));
         expect(cartographic.height).toEqualEpsilon(1000.0, CesiumMath.EPSILON8);
 
-        cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, 3));
+        cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, new Cartesian3(), 3));
         expect(cartographic.height).toEqualEpsilon(3000.0, CesiumMath.EPSILON8);
 
-        cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, 6));
+        cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, new Cartesian3(), 6));
         expect(cartographic.height).toEqualEpsilon(2000.0, CesiumMath.EPSILON8);
 
-        cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, 9));
+        cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, new Cartesian3(), 9));
         expect(cartographic.height).toEqualEpsilon(4000.0, CesiumMath.EPSILON8);
     });
 
@@ -130,10 +130,10 @@ defineSuite([
         expect(positions.length).toEqual(3 * 2 * 3);
         expect(w.indices.length).toEqual(7 * 2);
 
-        var cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, 0));
+        var cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, new Cartesian3(), 0));
         expect(cartographic.height).toEqualEpsilon(0.0, CesiumMath.EPSILON8);
 
-        cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, 3));
+        cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, new Cartesian3(), 3));
         expect(cartographic.height).toEqualEpsilon(2000.0, CesiumMath.EPSILON8);
     });
 
@@ -162,16 +162,16 @@ defineSuite([
         expect(positions.length).toEqual(2 * 2 * 3);
         expect(w.indices.length).toEqual(2 * 4);
 
-        var cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, 0));
+        var cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, new Cartesian3(), 0));
         expect(cartographic.height).toEqualEpsilon(min, CesiumMath.EPSILON8);
 
-        cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, 3));
+        cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, new Cartesian3(), 3));
         expect(cartographic.height).toEqualEpsilon(max, CesiumMath.EPSILON8);
 
-        cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, 6));
+        cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, new Cartesian3(), 6));
         expect(cartographic.height).toEqualEpsilon(min, CesiumMath.EPSILON8);
 
-        cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, 9));
+        cartographic = ellipsoid.cartesianToCartographic(Cartesian3.fromArray(positions, new Cartesian3(), 9));
         expect(cartographic.height).toEqualEpsilon(max, CesiumMath.EPSILON8);
     });
 });

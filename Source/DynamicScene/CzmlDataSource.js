@@ -274,7 +274,7 @@ define(['../Core/Cartesian2',
             if (len === 2) {
                 scratchSpherical.clock = unitSpherical[0];
                 scratchSpherical.cone = unitSpherical[1];
-                Cartesian3.fromSpherical(scratchSpherical, scratchCartesian);
+                scratchCartesian = Cartesian3.fromSpherical(scratchSpherical, scratchCartesian);
                 result = [scratchCartesian.x, scratchCartesian.y, scratchCartesian.z];
             } else {
                 var sphericalIt = 0;
@@ -284,7 +284,7 @@ define(['../Core/Cartesian2',
 
                     scratchSpherical.clock = unitSpherical[sphericalIt++];
                     scratchSpherical.cone = unitSpherical[sphericalIt++];
-                    Cartesian3.fromSpherical(scratchSpherical, scratchCartesian);
+                    scratchCartesian = Cartesian3.fromSpherical(scratchSpherical, scratchCartesian);
 
                     result[i + 1] = scratchCartesian.x;
                     result[i + 2] = scratchCartesian.y;
@@ -598,7 +598,7 @@ define(['../Core/Cartesian2',
 
         //Any time a constant value is assigned, it completely blows away anything else.
         if (!isSampled && !hasInterval) {
-            object[propertyName] = new ConstantPositionProperty(Cartesian3.unpack(unwrappedInterval), referenceFrame);
+            object[propertyName] = new ConstantPositionProperty(Cartesian3.unpack(unwrappedInterval, new Cartesian3()), referenceFrame);
             return true;
         }
 
@@ -632,7 +632,7 @@ define(['../Core/Cartesian2',
         if (!isSampled && hasInterval) {
             //Create a new interval for the constant value.
             combinedInterval = combinedInterval.clone();
-            combinedInterval.data = Cartesian3.unpack(unwrappedInterval);
+            combinedInterval.data = Cartesian3.unpack(unwrappedInterval, new Cartesian3());
 
             //If no property exists, simply use a new interval collection
             if (!defined(property)) {

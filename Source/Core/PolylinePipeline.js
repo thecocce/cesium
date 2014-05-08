@@ -88,8 +88,8 @@ define([
         var n = scaleN;
 
         ellipsoid.geodeticSurfaceNormal(p, n);
-        Cartesian3.multiplyByScalar(n, h, n);
-        Cartesian3.add(p, n, p);
+        n = Cartesian3.multiplyByScalar(n, h, n);
+        p = Cartesian3.add(p, n, p);
 
         return p;
     }
@@ -133,7 +133,7 @@ define([
             var yzPlane = Plane.fromPointNormal(origin, yzNormal, wrapLongitudeYZPlane);
 
             var count = 1;
-            cartesians.push(Cartesian3.clone(positions[0]));
+            cartesians.push(Cartesian3.clone(positions[0], new Cartesian3()));
             var prev = cartesians[0];
 
             var length = positions.length;
@@ -148,19 +148,19 @@ define([
                         // move point on the xz-plane slightly away from the plane
                         var offset = Cartesian3.multiplyByScalar(xzNormal, 5.0e-9, wrapLongitudeOffset);
                         if (Plane.getPointDistance(xzPlane, prev) < 0.0) {
-                            Cartesian3.negate(offset, offset);
+                            offset = Cartesian3.negate(offset, offset);
                         }
 
-                        cartesians.push(Cartesian3.add(intersection, offset));
+                        cartesians.push(Cartesian3.add(intersection, offset, new Cartesian3()));
                         segments.push(count + 1);
 
-                        Cartesian3.negate(offset, offset);
-                        cartesians.push(Cartesian3.add(intersection, offset));
+                        offset = Cartesian3.negate(offset, offset);
+                        cartesians.push(Cartesian3.add(intersection, offset, new Cartesian3()));
                         count = 1;
                     }
                 }
 
-                cartesians.push(Cartesian3.clone(positions[i]));
+                cartesians.push(Cartesian3.clone(positions[i], new Cartesian3()));
                 count++;
 
                 prev = cur;

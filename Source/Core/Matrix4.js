@@ -570,9 +570,9 @@ define([
         }
         //>>includeEnd('debug');
 
-        Cartesian3.normalize(Cartesian3.subtract(target, eye, fromCameraF), fromCameraF);
-        Cartesian3.normalize(Cartesian3.cross(fromCameraF, up, fromCameraS), fromCameraS);
-        Cartesian3.normalize(Cartesian3.cross(fromCameraS, fromCameraF, fromCameraU), fromCameraU);
+        fromCameraF = Cartesian3.normalize(Cartesian3.subtract(target, eye, fromCameraF), fromCameraF);
+        fromCameraS = Cartesian3.normalize(Cartesian3.cross(fromCameraF, up, fromCameraS), fromCameraS);
+        fromCameraU = Cartesian3.normalize(Cartesian3.cross(fromCameraS, fromCameraF, fromCameraU), fromCameraU);
 
         var sX = fromCameraS.x;
         var sY = fromCameraS.y;
