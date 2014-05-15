@@ -149,11 +149,11 @@ define([
         var datatype = ComponentDatatype.FLOAT;
         var typedArray = buffers.vertices;
         var buffer = context.createVertexBuffer(typedArray, BufferUsage.STATIC_DRAW);
-        var stride = 5 * datatype.sizeInBytes;
+        var stride = 5 * ComponentDatatype.getSizeInBytes(datatype);
         var position3DAndHeightLength = 3;
 
         if (includesHeights) {
-            stride += datatype.sizeInBytes;
+            stride += ComponentDatatype.getSizeInBytes(datatype);
             ++position3DAndHeightLength;
         }
 
@@ -169,7 +169,7 @@ define([
             vertexBuffer : buffer,
             componentDatatype : datatype,
             componentsPerAttribute : 2,
-            offsetInBytes : position3DAndHeightLength * datatype.sizeInBytes,
+            offsetInBytes : position3DAndHeightLength * ComponentDatatype.getSizeInBytes(datatype),
             strideInBytes : stride
         }];
 

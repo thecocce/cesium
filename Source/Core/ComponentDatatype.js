@@ -89,27 +89,28 @@ define([
         DOUBLE : 0x140A
     };
 
-    /**
-     * Gets the ComponentDatatype for the provided value.
-     *
-     * @param {Number} value The value.
-     *
-     * @returns {ComponentDatatype} The ComponentDatatype for the provided value, or undefined if no enumeration with the provided value exists.
-     */
-    ComponentDatatype.fromValue = function(value) {
+    ComponentDatatype.getSizeInBytes = function(value){
+        //>>includeStart('debug', pragmas.debug);
+        if (!defined(value)) {
+            throw new DeveloperError('value is required.');
+        }
+        //>>includeEnd('debug');
+
         switch (value) {
-        case ComponentDatatype.BYTE.value:
-            return ComponentDatatype.BYTE;
-        case ComponentDatatype.UNSIGNED_BYTE.value:
-            return ComponentDatatype.UNSIGNED_BYTE;
-        case ComponentDatatype.SHORT.value:
-            return ComponentDatatype.SHORT;
-        case ComponentDatatype.UNSIGNED_SHORT.value:
-            return ComponentDatatype.UNSIGNED_SHORT;
-        case ComponentDatatype.FLOAT.value:
-            return ComponentDatatype.FLOAT;
-        case ComponentDatatype.DOUBLE.value:
-            return ComponentDatatype.DOUBLE;
+        case ComponentDatatype.BYTE:
+            return Int8Array.BYTES_PER_ELEMENT;
+        case ComponentDatatype.UNSIGNED_BYTE:
+            return Uint8Array.BYTES_PER_ELEMENT;
+        case ComponentDatatype.SHORT:
+            return Int16Array.BYTES_PER_ELEMENT;
+        case ComponentDatatype.UNSIGNED_SHORT:
+            return Uint16Array.BYTES_PER_ELEMENT;
+        case ComponentDatatype.FLOAT:
+            return Float32Array.BYTES_PER_ELEMENT;
+        case ComponentDatatype.DOUBLE:
+            return Float64Array.BYTES_PER_ELEMENT;
+        default:
+            throw new DeveloperError('value is not a valid enumeration value.');
         }
     };
 
@@ -154,13 +155,13 @@ define([
      * }
      */
     ComponentDatatype.validate = function(componentDatatype) {
-        return defined(componentDatatype) && defined(componentDatatype.value) &&
-               (componentDatatype.value === ComponentDatatype.BYTE.value ||
-                componentDatatype.value === ComponentDatatype.UNSIGNED_BYTE.value ||
-                componentDatatype.value === ComponentDatatype.SHORT.value ||
-                componentDatatype.value === ComponentDatatype.UNSIGNED_SHORT.value ||
-                componentDatatype.value === ComponentDatatype.FLOAT.value ||
-                componentDatatype.value === ComponentDatatype.DOUBLE.value);
+        return defined(componentDatatype) &&
+               (componentDatatype === ComponentDatatype.BYTE ||
+                componentDatatype === ComponentDatatype.UNSIGNED_BYTE ||
+                componentDatatype === ComponentDatatype.SHORT ||
+                componentDatatype === ComponentDatatype.UNSIGNED_SHORT ||
+                componentDatatype === ComponentDatatype.FLOAT ||
+                componentDatatype === ComponentDatatype.DOUBLE);
     };
 
     /**
@@ -188,18 +189,18 @@ define([
         }
         //>>includeEnd('debug');
 
-        switch (componentDatatype.value) {
-        case ComponentDatatype.BYTE.value:
+        switch (componentDatatype) {
+        case ComponentDatatype.BYTE:
             return new Int8Array(valuesOrLength);
-        case ComponentDatatype.UNSIGNED_BYTE.value:
+        case ComponentDatatype.UNSIGNED_BYTE:
             return new Uint8Array(valuesOrLength);
-        case ComponentDatatype.SHORT.value:
+        case ComponentDatatype.SHORT:
             return new Int16Array(valuesOrLength);
-        case ComponentDatatype.UNSIGNED_SHORT.value:
+        case ComponentDatatype.UNSIGNED_SHORT:
             return new Uint16Array(valuesOrLength);
-        case ComponentDatatype.FLOAT.value:
+        case ComponentDatatype.FLOAT:
             return new Float32Array(valuesOrLength);
-        case ComponentDatatype.DOUBLE.value:
+        case ComponentDatatype.DOUBLE:
             return new Float64Array(valuesOrLength);
         default:
             throw new DeveloperError('componentDatatype is not a valid enumeration value.');
@@ -230,20 +231,20 @@ define([
         //>>includeEnd('debug');
 
         byteOffset = defaultValue(byteOffset, 0);
-        length = defaultValue(length, (buffer.byteLength - byteOffset) / componentDatatype.sizeInBytes);
+        length = defaultValue(length, (buffer.byteLength - byteOffset) / ComponentDatatype.getSizeInBytes(componentDatatype));
 
-        switch (componentDatatype.value) {
-        case ComponentDatatype.BYTE.value:
+        switch (componentDatatype) {
+        case ComponentDatatype.BYTE:
             return new Int8Array(buffer, byteOffset, length);
-        case ComponentDatatype.UNSIGNED_BYTE.value:
+        case ComponentDatatype.UNSIGNED_BYTE:
             return new Uint8Array(buffer, byteOffset, length);
-        case ComponentDatatype.SHORT.value:
+        case ComponentDatatype.SHORT:
             return new Int16Array(buffer, byteOffset, length);
-        case ComponentDatatype.UNSIGNED_SHORT.value:
+        case ComponentDatatype.UNSIGNED_SHORT:
             return new Uint16Array(buffer, byteOffset, length);
-        case ComponentDatatype.FLOAT.value:
+        case ComponentDatatype.FLOAT:
             return new Float32Array(buffer, byteOffset, length);
-        case ComponentDatatype.DOUBLE.value:
+        case ComponentDatatype.DOUBLE:
             return new Float64Array(buffer, byteOffset, length);
         default:
             throw new DeveloperError('componentDatatype is not a valid enumeration value.');

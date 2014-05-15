@@ -1325,7 +1325,7 @@ define([
             size : 1,
             datatype : WebGLRenderingContext.FLOAT,
             getValue : function(uniformState) {
-                return uniformState.frameState.mode.value;
+                return uniformState.frameState.mode;
             }
         }),
 

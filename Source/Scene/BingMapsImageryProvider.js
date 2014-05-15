@@ -132,7 +132,7 @@ define([
 
         this._ready = false;
 
-        var metadataUrl = this._url + '/REST/v1/Imagery/Metadata/' + this._mapStyle.imagerySetName + '?incl=ImageryProviders&key=' + this._key;
+        var metadataUrl = this._url + '/REST/v1/Imagery/Metadata/' + this._mapStyle + '?incl=ImageryProviders&key=' + this._key;
         var that = this;
         var metadataError;
 

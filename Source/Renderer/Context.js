@@ -2004,7 +2004,7 @@ define([
     }
 
     function computeAttributeSizeInBytes(attribute) {
-        return attribute.componentDatatype.sizeInBytes * attribute.componentsPerAttribute;
+        return ComponentDatatype.getSizeInBytes(attribute.componentDatatype) * attribute.componentsPerAttribute;
     }
 
     function interleaveAttributes(attributes) {
@@ -2051,7 +2051,7 @@ define([
 
         // Sort attributes by the size of their components.  From left to right, a vertex stores floats, shorts, and then bytes.
         names.sort(function(left, right) {
-            return attributes[right].componentDatatype.sizeInBytes - attributes[left].componentDatatype.sizeInBytes;
+            return ComponentDatatype.getSizeInBytes(attributes[right].componentDatatype) - ComponentDatatype.getSizeInBytes(attributes[left].componentDatatype);
         });
 
         // Compute sizes and strides.
@@ -2069,7 +2069,7 @@ define([
         if (vertexSizeInBytes > 0) {
             // Pad each vertex to be a multiple of the largest component datatype so each
             // attribute can be addressed using typed arrays.
-            var maxComponentSizeInBytes = attributes[names[0]].componentDatatype.sizeInBytes; // Sorted large to small
+            var maxComponentSizeInBytes = ComponentDatatype.getSizeInBytes(attributes[names[0]].componentDatatype); // Sorted large to small
             var remainder = vertexSizeInBytes % maxComponentSizeInBytes;
             if (remainder !== 0) {
                 vertexSizeInBytes += (maxComponentSizeInBytes - remainder);
@@ -2084,7 +2084,7 @@ define([
 
             for (j = 0; j < namesLength; ++j) {
                 name = names[j];
-                var sizeInBytes = attributes[name].componentDatatype.sizeInBytes;
+                var sizeInBytes = ComponentDatatype.getSizeInBytes(attributes[name].componentDatatype);
 
                 views[name] = {
                     pointer : ComponentDatatype.createTypedArray(attributes[name].componentDatatype, buffer),

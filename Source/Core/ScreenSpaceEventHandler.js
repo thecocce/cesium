@@ -62,9 +62,9 @@ define([
     }
 
     function getMouseEventsKey(type, modifier) {
-        var key = type.name;
+        var key = type;
         if (defined(modifier)) {
-            key += '+' + modifier.name;
+            key += '+' + modifier;
         }
         return key;
     }

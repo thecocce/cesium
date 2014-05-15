@@ -13,47 +13,47 @@ define(function() {
         /**
          * Aerial imagery.
          *
-         * @type {Number}
+         * @type {String}
          * @constant
          * @default 0
          */
-        AERIAL : 0,
+        AERIAL : 'Aerial',
 
         /**
          * Aerial imagery with a road overlay.
          *
-         * @type {Number}
+         * @type {String}
          * @constant
          * @default 1
          */
-        AERIAL_WITH_LABELS : 1,
+        AERIAL_WITH_LABELS : 'AerialWithLabels',
 
         /**
          * Roads without additional imagery.
          *
-         * @type {Number}
+         * @type {String}
          * @constant
          * @default 2
          */
-        ROAD : 2,
+        ROAD : 'Road',
 
         /**
          * Ordnance Survey imagery
          *
-         * @type {Number}
+         * @type {String}
          * @constant
          * @default 3
          */
-        ORDNANCE_SURVEY : 3,
+        ORDNANCE_SURVEY : 'OrdnanceSurvey',
 
         /**
          * Collins Bart imagery.
          *
-         * @type {Number}
+         * @type {String}
          * @constant
          * @default 4
          */
-        COLLINS_BART : 4
+        COLLINS_BART : 'CollinsBart'
     };
 
     return BingMapsStyle;
