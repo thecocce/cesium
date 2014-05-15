@@ -1,19 +1,20 @@
 /*global define*/
-define(['./Property',
+define([
         '../Core/defined',
         '../Core/defineProperties',
         '../Core/DeveloperError',
         '../Core/Event',
         '../Core/isArray',
-        '../Core/TimeIntervalCollection'
+        '../Core/TimeIntervalCollection',
+        './Property'
     ], function(
-        Property,
         defined,
         defineProperties,
         DeveloperError,
         Event,
         isArray,
-        TimeIntervalCollection) {
+        TimeIntervalCollection,
+        Property) {
     "use strict";
 
     /**

@@ -1,5 +1,5 @@
 /*global define*/
-define([], function() {
+define(function() {
     "use strict";
 
     /**
@@ -8,7 +8,8 @@ define([], function() {
     var TileState = {
         START : 0,
         LOADING : 1,
-        READY : 2
+        READY : 2,
+        UPSAMPLED_ONLY : 3
     };
 
     return TileState;
