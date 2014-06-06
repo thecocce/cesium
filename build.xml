@@ -63,7 +63,7 @@
 	</target>
 
 	<target name="instrumentForCoverage" depends="build" description="A debug build instrumented for JSCoverage (currently Windows only).">
-		<exec executable="${jscoveragePath}">
+		<exec executable="${jscoveragePath}" failonerror="true" >
 			<arg value="${sourceDirectory}" />
 			<arg value="${instrumentedDirectory}" />
 			<arg value="--no-instrument=./ThirdParty" />
@@ -308,7 +308,7 @@
 			</fileset>
 		</apply>
 		<echo message="${line.separator}Specs:" />
-		<exec executable="perl">
+		<exec executable="perl" failonerror="true" >
 			<arg value="${clocPath}" />
 			<arg value="--read-lang-def=${clocDefinitionsPath}" />
 			<arg value="Specs/" />
@@ -418,7 +418,7 @@
 	</target>
 
 	<target name="combineJavaScript.combineCesium" depends="combineJavaScript.combineCesium.check" unless="no.combineCesium.create">
-		<exec executable="${nodePath}" dir="${sourceDirectory}">
+		<exec executable="${nodePath}" failonerror="true" dir="${sourceDirectory}">
 			<arg value="${rjsPath}" />
 			<arg value="-o" />
 			<arg value="${rjsOptions}" />
@@ -612,7 +612,7 @@
 		<property name="relativeCesiumViewerOutputDirectory" location="${cesiumViewerOutputDirectory}" relative="true" basedir="${cesiumViewerDirectory}" />
 
 		<!-- mainConfigFile is relative to the build.js file -->
-		<exec executable="${nodePath}" dir="${cesiumViewerDirectory}">
+		<exec executable="${nodePath}" failonerror="true" dir="${cesiumViewerDirectory}">
 			<arg value="${rjsPath}" />
 			<arg value="-o" />
 			<arg value="${rjsOptions}" />
@@ -623,7 +623,7 @@
 			<arg value="out=${relativeCesiumViewerOutputDirectory}/CesiumViewerStartup.js" />
 		</exec>
 
-		<exec executable="${nodePath}" dir="${cesiumViewerDirectory}">
+		<exec executable="${nodePath}" failonerror="true" dir="${cesiumViewerDirectory}">
 			<arg value="${rjsPath}" />
 			<arg value="-o" />
 			<arg value="${rjsOptions}" />

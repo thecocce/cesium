@@ -68,7 +68,7 @@ define([
     var rotationMatrix = new Matrix2();
     var tangentRotationMatrix = new Matrix3();
     var proj = new GeographicProjection();
-    var position = new Cartesian3();
+	var position = new Cartesian3();
     var normal = new Cartesian3();
     var tangent = new Cartesian3();
     var binormal = new Cartesian3();

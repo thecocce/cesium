@@ -34,7 +34,7 @@ define([
         scratchUniformMatrix3 = new Float32Array(9);
         scratchUniformMatrix4 = new Float32Array(16);
     }
-    function setUniform (uniform) {
+    function setUniform (uniform) {	
         var gl = uniform._gl;
         var location = uniform._location;
         switch (uniform._activeUniform.type) {
@@ -706,12 +706,12 @@ define([
         for (var i = 0; i < numberOfAttributes; ++i) {
             var attr = gl.getActiveAttrib(program, i);
             var location = gl.getAttribLocation(program, attr.name);
-
+			
             attributes[attr.name] = {
                 name : attr.name,
                 type : attr.type,
                 index : location
-            };
+            };			
         }
 
         return attributes;
@@ -735,14 +735,15 @@ define([
                     // Single uniform
                     var location = gl.getUniformLocation(program, uniformName);
                     var uniformValue = gl.getUniform(program, location);
+									
                     var uniform = new Uniform(gl, activeUniform, uniformName, location, uniformValue);
 
-                    uniformsByName[uniformName] = uniform;
-                    uniforms.push(uniform);
+					uniformsByName[uniformName] = uniform;
+					uniforms.push(uniform);
 
-                    if (uniform._setSampler) {
-                        samplerUniforms.push(uniform);
-                    }
+					if (uniform._setSampler) {
+						samplerUniforms.push(uniform);
+					}
                 } else {
                     // Uniform array
 
@@ -795,6 +796,7 @@ define([
                 }
             }
         }
+		
 
         return {
             uniformsByName : uniformsByName,
@@ -863,11 +865,12 @@ define([
         var uniforms = this._uniforms;
         var manualUniforms = this._manualUniforms;
         var automaticUniforms = this._automaticUniforms;
-
-        if (uniformMap) {
+		
+        if (uniformMap) {		
             for ( var uniform in manualUniforms) {
-                if (manualUniforms.hasOwnProperty(uniform)) {
-                    manualUniforms[uniform].value = uniformMap[uniform]();
+				
+                if (manualUniforms.hasOwnProperty(uniform)) {				
+                    manualUniforms[uniform].value = uniformMap[uniform]();								
                 }
             }
         }
@@ -879,6 +882,7 @@ define([
 
         ///////////////////////////////////////////////////////////////////
 
+		
         len = uniforms.length;
         for (i = 0; i < len; ++i) {
             uniforms[i]._set();
