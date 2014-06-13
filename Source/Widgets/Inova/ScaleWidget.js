@@ -128,9 +128,10 @@ define([
       container.appendChild(this._div);
 
         this._svgNode = svg;
+        this._lastDistance = 0.0;
 
         var that = this;
-        setInterval(function(){update_scale(that)}, 1000);
+        setInterval(function(){update_scale(that)}, 100);
     };
 
     defineProperties(ScaleWidget.prototype, {
@@ -154,6 +155,8 @@ define([
     ScaleWidget.prototype.update = function() {
 
         var distance = this._ellipsoid.cartesianToCartographic(this._camera.position).height;
+        if (Math.abs(distance-this._lastDistance)<1.0)
+            return;
 
         var viewportWidth = this._canvas.width;
         var tanHalfAngle = Math.tan(0.5 * this._camera.frustum.fovy);
