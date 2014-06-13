@@ -72,16 +72,21 @@ define([
      * @constructor
      *
      */
-    var CompassPrimitive = function(cameraController, options) {
+    var CompassPrimitive = function(cameraController, canvas, options) {
         //>>includeStart('debug', pragmas.debug);
-        /*if (!defined(cameraController)) {
+        if (!defined(cameraController)) {
             throw new DeveloperError('cameraController is required');
-        }*/
+        }
+
+        if (!defined(canvas)) {
+            throw new DeveloperError('canvas is required');
+        }
         //>>includeEnd('debug');
 
         options = defaultValue(options, defaultValue.EMPTY_OBJECT);
 
         this._cameraController = cameraController;
+        this._canvas = canvas;
 
         /**
          * Determines if this primitive will be shown.
@@ -132,7 +137,7 @@ define([
                       enabled : true,
                       face : CullFace.BACK
                    },
-                   lineWidth : 4,
+                   lineWidth : 1,
                    polygonOffset : {
                            enabled : false,
                            factor : 0,
@@ -605,12 +610,16 @@ define([
 
             var heading = this._cameraController.heading;
 
+            var ratio = this._canvas.height/this._canvas.width;
+
             var rotationX = Matrix3.fromRotationX(Cesium.Math.toRadians(45.0));
             var rotationY = Matrix3.fromRotationY(heading);
             var finalRotation = Matrix3.multiply(rotationX, rotationY);
+            var ratioScale = Matrix3.fromScale(new Cesium.Cartesian3(ratio, 1.0, ratio));
+            var finalTransform = Matrix3.multiply(finalRotation, ratioScale);
 
             var screenOfs = new Cartesian3(440.0, 60.0, -100.0);
-            this._modelMatrix = Matrix4.fromRotationTranslation(finalRotation, screenOfs);
+            this._modelMatrix = Matrix4.fromRotationTranslation(finalTransform, screenOfs);
 
             commandList.push(this._drawCommand1);
             commandList.push(this._drawCommand2);

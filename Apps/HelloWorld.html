@@ -11,6 +11,7 @@
   <script src="../Build/Cesium/Cesium.js"></script>
   <style>
       @import url(../Build/Cesium/Widgets/widgets.css);
+	  @import url(../Build/Cesium/Widgets/Inova/inova.css);
 
       #cesiumContainer {
           position: absolute;
@@ -31,16 +32,25 @@
       }
   </style>
 </head>
-<body>
-  <div id="cesiumContainer"></div>
-  <script>
-    var widget = new Cesium.CesiumWidget('cesiumContainer');
+<body bgcolor="#000000">
+	<div id="appContainer" style="width:1000;height:800px;">
+		<div id="cesiumContainer"></div>		
+		<div id="widgetOverlay" style=" position:absolute; top:0px; left:0px; width:1000px;height:1000px; pointer-events: none; z-index: 9999;"></div>	
+
+
+	</div>	
+	<script>	
+		var widget = new Cesium.CesiumWidget('cesiumContainer');
+
+		var scene = widget.scene;
+		var camera = scene.camera;
+		var canvas = scene.canvas;
+		var ellipsoid = scene.globe.ellipsoid;
 		
-	var scene = widget.scene;
-	var camera = scene.camera;
-	var controller = new Cesium.CameraController(camera);
-	scene.primitives.add(new Cesium.CompassPrimitive(controller));	
-	
-  </script>
+		var controller = new Cesium.CameraController(camera);
+		scene.primitives.add(new Cesium.CompassPrimitive(controller, canvas));	
+			
+		var scalebar = new Cesium.ScaleWidget('widgetOverlay', canvas, camera, ellipsoid);
+	</script>
 </body>
 </html>
