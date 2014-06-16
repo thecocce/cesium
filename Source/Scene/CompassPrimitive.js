@@ -71,6 +71,11 @@ define([
      * @alias CompassPrimitive
      * @constructor
      *
+     *  Options:
+     *  x : Horizontal position on canvas (in percentage, from 0 to 100)
+     *  y : Vertical position on canvas (in percentage, from 0 to 100)
+     *  scale : Compass scale (1.0 means normal size, 0.5 means half of the size, etc)
+     *  tilt : Compass tilt, default is 45 degrees
      */
     var CompassPrimitive = function(cameraController, canvas, options) {
         //>>includeStart('debug', pragmas.debug);
@@ -87,6 +92,15 @@ define([
 
         this._cameraController = cameraController;
         this._canvas = canvas;
+
+        this._scale = defaultValue(options.scale, 1.0);
+        this._X = defaultValue(options.x, 90.0);
+        this._Y = defaultValue(options.x, 10.0);
+        this._tilt = defaultValue(options.tilt, 45.0);
+
+
+        this._scale *= 0.2; // scale down because compass mesh was done with 500x500 size, now we're using 100x100
+
 
         /**
          * Determines if this primitive will be shown.
@@ -128,6 +142,7 @@ define([
         if (!this.show) {
             return;
         }
+
 
         if (!defined(this._drawCommand)) {
 
@@ -531,7 +546,7 @@ define([
 
 //            this._shaderProgram2 = context.createShaderProgram(vs, fs, attribLoc2);
 
-            this._projectionMatrix = Matrix4.computeOrthographicOffCenter(0.0, 500, 500, 0.0, 0.0, 300);
+            this._projectionMatrix = Matrix4.computeOrthographicOffCenter(0.0, 100, 100, 0.0, 0.0, 300);
 
             this._modelMatrix = Matrix4.IDENTITY;
 
@@ -612,13 +627,13 @@ define([
 
             var ratio = this._canvas.height/this._canvas.width;
 
-            var rotationX = Matrix3.fromRotationX(Cesium.Math.toRadians(45.0));
+            var rotationX = Matrix3.fromRotationX(Cesium.Math.toRadians(this._tilt));
             var rotationY = Matrix3.fromRotationY(heading);
             var finalRotation = Matrix3.multiply(rotationX, rotationY);
-            var ratioScale = Matrix3.fromScale(new Cesium.Cartesian3(ratio, 1.0, ratio));
+            var ratioScale = Matrix3.fromScale(new Cesium.Cartesian3(this._scale * ratio, this._scale, this._scale * ratio));
             var finalTransform = Matrix3.multiply(finalRotation, ratioScale);
 
-            var screenOfs = new Cartesian3(440.0, 60.0, -100.0);
+            var screenOfs = new Cartesian3(this._X, this._Y, -100.0);
             this._modelMatrix = Matrix4.fromRotationTranslation(finalTransform, screenOfs);
 
             commandList.push(this._drawCommand1);

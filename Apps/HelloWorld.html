@@ -35,9 +35,6 @@
 <body bgcolor="#000000">
 	<div id="appContainer" style="width:1000;height:800px;">
 		<div id="cesiumContainer"></div>		
-		<div id="widgetOverlay" style=" position:absolute; top:0px; left:0px; width:1000px;height:1000px; pointer-events: none; z-index: 9999;"></div>	
-
-
 	</div>	
 	<script>	
 		var widget = new Cesium.CesiumWidget('cesiumContainer');
@@ -50,7 +47,9 @@
 		var controller = new Cesium.CameraController(camera);
 		scene.primitives.add(new Cesium.CompassPrimitive(controller, canvas));	
 			
-		var scalebar = new Cesium.ScaleWidget('widgetOverlay', canvas, camera, ellipsoid);
+		var scaleOptions = {x:10, y:10};
+			
+		var scalebar = new Cesium.ScaleWidget('appContainer', canvas, camera, ellipsoid, scaleOptions);
 	</script>
 </body>
 </html>

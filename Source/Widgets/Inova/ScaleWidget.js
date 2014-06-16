@@ -5,6 +5,7 @@ define([
         '../../Core/defineProperties',
         '../../Core/destroyObject',
         '../../Core/DeveloperError',
+        '../../Core/Color',
         '../getElement'
     ], function(
         defaultValue,
@@ -12,6 +13,7 @@ define([
         defineProperties,
         destroyObject,
         DeveloperError,
+        Color,
         getElement) {
     "use strict";
 
@@ -30,13 +32,13 @@ define([
         return text;
     }
 
-   function svgLine(x1, y1, x2, y2, r,g,b,thickness) {
+   function svgLine(color,thickness) {
         var line = document.createElementNS (xmlns, 'line');
-        line.setAttributeNS(null, 'x1', x1);
+        /*line.setAttributeNS(null, 'x1', x1);
         line.setAttributeNS(null, 'y1', y1);
         line.setAttributeNS(null, 'x2', x2);
-        line.setAttributeNS(null, 'y2', y2);
-      line.setAttribute('style', 'stroke:rgba('+r+','+b+','+g+',255);stroke-width:'+thickness);
+        line.setAttributeNS(null, 'y2', y2);*/
+      line.setAttribute('style', 'stroke:rgba('+color.red+','+color.green+','+color.blue+','+color.alpha+');stroke-width:'+thickness);
         return line;
     }
 
@@ -62,8 +64,14 @@ define([
      *
      * @exception {DeveloperError} container is required.
      *
+     * Options
+     *  x : Horizontal position (in pixels)
+     *  y : Vertical position (in pixels)
+     *  color: Color of the scale lines (to change text color/font, use css)
+     *  interval: Invertal in miliseconds to update the scale (default: 100ms)
+     *
      */
-    var ScaleWidget = function(container, canvas, camera, ellipsoid) {
+    var ScaleWidget = function(container, canvas, camera, ellipsoid, options) {
         //>>includeStart('debug', pragmas.debug);
         if (!defined(container)) {
             throw new DeveloperError('container is required.');
@@ -81,49 +89,56 @@ define([
             throw new DeveloperError('ellipsoid is required');
         }
 
+        options = defaultValue(options, defaultValue.EMPTY_OBJECT);
+
         //>>includeEnd('debug');
 
         container = getElement(container);
 
+        var defaultColor = new Color(255, 255, 255, 255);
+
         this._container = container;
-      this._canvas = canvas;
-      this._camera = camera;
-      this._ellipsoid = ellipsoid;
+        this._canvas = canvas;
+        this._camera = camera;
+        this._ellipsoid = ellipsoid;
 
-      this._div = document.createElement('div');
+        this._maxWidth = 100.0;
+        this._X = defaultValue(options.x, 0.0);
+        this._Y = defaultValue(options.y, 0.0);
+        this._color = defaultValue(options.color, defaultColor);
+        this._interval = defaultValue(options.interval, 100);
 
-  //    this._X = canvas.width - 150;
-//      this._Y = canvas.height - 50;
-      this._X = 200;
-      this._Y = 50;
+        this._ofsX = this._maxWidth;
+        this._ofsY = 50;
 
-      var boxWidth = 500;
-      var boxHeight = 500;
+        var boxWidth = this._maxWidth * 2;
+        var boxHeight = 500;
+
+        this._div = document.createElement('div');
+        this._div.setAttribute("id", "scaleWidget");
+        this._div.setAttribute("style", "position:absolute; top:"+this._Y+"px; left:"+this._X+"px; width:"+boxWidth+"px;height:"+boxHeight+"px; pointer-events: none; z-index: 9999");
 
         var svg = document.createElementNS (xmlns, "svg");
-        svg.setAttributeNS (null, "viewBox", "0 0 " + boxWidth + " " + boxHeight);
+        //svg.setAttributeNS (null, "viewBox", "0 0 " + boxWidth + " " + boxHeight);
         svg.setAttributeNS (null, "width", boxWidth);
         svg.setAttributeNS (null, "height", boxHeight);
         svg.style.display = "block";
 
-      this._width = 100;
-      this._colorR = 255;
-      this._colorG = 255;
-      this._colorB = 255;
-      this._lineH = 10.0;
-      this._scaleValue = 100.0;
+        this._width = this._maxWidth;
+        this._lineH = 10.0;
+        this._scaleValue = 100.0;
 
-      this._myLabel = svgText(this._X, this._Y - 10.0, '500 Km');
-      this._lineBase = svgLine(this._X-this._width, this._Y, this._X+this._width, this._Y, this._colorR, this._colorG, this._colorB, 2);
-      this._lineLeft = svgLine(this._X-this._width, this._Y, this._X-this._width, this._Y-this._lineH, this._colorR, this._colorG, this._colorB, 2);
-      this._lineRight = svgLine(this._X+this._width, this._Y, this._X+this._width, this._Y-this._lineH, this._colorR, this._colorG, this._colorB, 2);
-      this._lineMiddle = svgLine(this._X, this._Y, this._X, this._Y-this._lineH*0.5, this._colorR, this._colorG, this._colorB, 1);
+        this._myLabel = svgText(this._ofsX, this._ofsY- 14.0, 'Loading...');
+        this._lineBase = svgLine(this._color, 2);
+        this._lineLeft = svgLine(this._color, 2);
+        this._lineRight = svgLine(this._color, 2);
+        this._lineMiddle = svgLine(this._color, 1);
 
         svg.appendChild(this._myLabel);
-      svg.appendChild(this._lineBase);
-      svg.appendChild(this._lineRight);
-      svg.appendChild(this._lineLeft);
-      svg.appendChild(this._lineMiddle);
+        svg.appendChild(this._lineBase);
+        svg.appendChild(this._lineRight);
+        svg.appendChild(this._lineLeft);
+        svg.appendChild(this._lineMiddle);
         this._div.appendChild(svg);
       container.appendChild(this._div);
 
@@ -131,7 +146,7 @@ define([
         this._lastDistance = 0.0;
 
         var that = this;
-        setInterval(function(){update_scale(that)}, 100);
+        setInterval(function(){update_scale(that)}, this._interval);
     };
 
     defineProperties(ScaleWidget.prototype, {
@@ -156,7 +171,9 @@ define([
 
         var distance = this._ellipsoid.cartesianToCartographic(this._camera.position).height;
         if (Math.abs(distance-this._lastDistance)<1.0)
+        {
             return;
+        }
 
         var viewportWidth = this._canvas.width;
         var tanHalfAngle = Math.tan(0.5 * this._camera.frustum.fovy);
@@ -188,13 +205,25 @@ define([
             divSize = 2 * Math.pow(10, pot);
         }
 
-        this._width = 100 * divSize / scaleSize;
+        this._width = this._maxWidth * divSize / scaleSize;
 
 
-        updateLine(this._lineBase, this._X-this._width, this._Y, this._X+this._width, this._Y);
-        updateLine(this._lineLeft, this._X-this._width, this._Y, this._X-this._width, this._Y-this._lineH);
-        updateLine(this._lineRight, this._X+this._width, this._Y, this._X+this._width, this._Y-this._lineH);
-        updateLine(this._lineMiddle, this._X, this._Y, this._X, this._Y-this._lineH*0.5);
+        updateLine(this._lineBase,
+                    this._ofsX -this._width, this._ofsY,
+                    this._ofsX +this._width, this._ofsY);
+
+        updateLine(this._lineLeft,
+                    this._ofsX -this._width, this._ofsY,
+                    this._ofsX -this._width, this._ofsY-this._lineH);
+
+        updateLine(this._lineRight,
+                    this._ofsX + this._width, this._ofsY,
+                    this._ofsX + this._width, this._ofsY-this._lineH);
+
+        updateLine(this._lineMiddle,
+                    this._ofsX , this._ofsY,
+                    this._ofsX , this._ofsY-this._lineH*0.5);
+
         this._myLabel.caption.textContent = divSize + ' '+ unitLabel;
     };
 
