@@ -45,7 +45,11 @@
 		var ellipsoid = scene.globe.ellipsoid;
 		
 		var controller = new Cesium.CameraController(camera);
+		  
+		
 		scene.primitives.add(new Cesium.CompassPrimitive(controller, canvas));	
+		//scene.primitives.add(new Cesium.PathPrimitive(ellipsoid));			
+		scene.primitives.add(new Cesium.DomePrimitive(Cesium.Cartographic.fromDegrees(-9.1394, 38.7138), ellipsoid));	
 			
 		var scaleOptions = {x:10, y:10};
 			
