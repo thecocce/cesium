@@ -80,7 +80,7 @@ define([
     /**
      * A dome
      *
-     * @alias CompassPrimitive
+     * @alias DomePrimitive
      * @constructor
      *
      *  location - Cartographic position
@@ -197,13 +197,13 @@ define([
             var direction = Cartesian3.subtract(apex, basePoint);
             direction =  Cartesian3.normalize(direction, direction);
 
-            // calcular dois eixos paralelos ao cone, e perpendiculares entre si
+            // calculate two axis paralel to cone, and perpendicular against each other
             var axis1 =  Cartesian3.cross(direction, up);
             var axis2 =  Cartesian3.cross(axis1, direction);
             axis1 =  Cartesian3.normalize(axis1, axis1);
             axis2 =  Cartesian3.normalize(axis2, axis2);
 
-            // calcular o centro da base do cone
+            // calculate cone base point
             var middlePoint = Cartesian3.lerp(basePoint, apex, dy);
 
             var pos_ofs = 0;
@@ -211,33 +211,33 @@ define([
             var uv_ofs = 0;
             var v_ofs = 0;
 
-            // arrays para guardar a geometria
+            // arrays to store geometry
             var vertexCount = ((slices+1) * segments)*2;
             var positions = new Float64Array(vertexCount * 3);
             var normals = new Float32Array(vertexCount * 3);
             var uvs = new Float32Array(vertexCount * 2);
 
-            // array para guardar as posicoes e usa-las para calcular uma boundind sphere
+            // temp array to store coords for generating bounding sphere later
             var temp = new Array();
 
-            // calcular incremento do angulo longitudinal da superficie conica
+            // calculate conical surface angle increment
             var dx = (360 * (Math.PI/180.0)) / segments;
 
-            // calcular distancia da origem do cone ao centro da base
+            // distance from cone origin to center of cone base
             var tt = Cartesian3.subtract(middlePoint, basePoint);
             var dist2 = Cartesian3.magnitude(tt);
 
-            // criar geometria da parte conica
+            // generate cone surface geometry
             for (var i = 0; i <= slices; i++)
             {
                 var angle = 0.0;
-                dy = (i/slices); // percentagem da altura actual
+                dy = (i/slices); // cone height percentage
 
-                // calcular raio do cone -> diferente do raio da esfera!!
+                // calculate cone radius -> diferent from sphere radius!
                 var r = Math.sqrt((this._radius * this._radius) - (dist2 * dist2));
                 r = r * dy; // o raio do cone varia em funcao da altura
 
-                // calcular o centro da interseccao imaginaria do cone com altura = (this._radius*dy)
+                // calculate center of imaginary intersection with height = (this._radius*dy)
                 var p = Cartesian3.lerp(basePoint, middlePoint, dy);
 
                 for (var j =0; j<segments; j++)
@@ -245,7 +245,7 @@ define([
                     var sx = Math.cos(angle);
                     var sy = Math.sin(angle);
 
-                    // calcular vector normal a superficie do cone
+                    // calculate normal vector to cone surface
                     var nx = axis1.x * sx +axis2.x*sy;
                     var ny = axis1.y * sx +axis2.y*sy;
                     var nz = axis1.z * sx +axis2.z*sy;
@@ -255,15 +255,15 @@ define([
                     normals[normal_ofs + 2] = nz;
                     normal_ofs += 3;
 
-                    // calcular posicao da superficie do cone
+                    // calculate position of cone surface points
                     positions[pos_ofs+0] = nx * r + p.x;
                     positions[pos_ofs+1] = ny * r + p.y;
                     positions[pos_ofs+2] = nz * r + p.z;
                     temp.push(new Cartesian3(positions[pos_ofs+0], positions[pos_ofs+1], positions[pos_ofs+2]));
                     pos_ofs += 3;
 
-                    // calcular UVs para a superfice do cone
-                    // necessario para materials com texturas
+                    // calculate UVs for cone surface
+                    // note - while this works, a better approach would be to generate contigous UVs for both cone and sphere
                     uvs[uv_ofs+0] = j/segments;
                     uvs[uv_ofs+1] = dy;
                     uv_ofs += 2;
@@ -273,24 +273,24 @@ define([
                 }
             }
 
-            // importante, agora que acabamos de gerar a geometria da superficie conica
-            // guardar o valor do offset dos vertices actual, vai ser necessario mais tarde
+            // important, now that we generated the first geometry part
+            // store the vertex offset, will be used later
             var basevofs = v_ofs;
 
-            // criar cap do cone (superficie curva/seccao duma esfera)
+            // create cone cap (curvature/sphere section)
             for (var i = 0; i <= slices; i++)
             {
                 var angle = 0.0;
                 dy = (i/slices); // percentagem da altura actual
 
-                // calcular o centro da interseccao horizontal da esfera na altura = (this._radius*dy)
+                // get center of horizontal intersection with sphere at height = (this._radius*dy)
                 var p = Cartesian3.lerp(middlePoint, apex, dy);
 
-                // calcular a distancia do centro da interseccao ao centro da base
+                // calculate distance to center of intersection with cone base
                 var tt2 = Cartesian3.subtract(p, basePoint);
                 var dist = Cartesian3.magnitude(tt2);
 
-                // calcular raio da seccao de esfera
+                // calculate radius of sphere intersection
                 var r = Math.sqrt((this._radius * this._radius) - (dist * dist));
 
                 for (var j =0; j<segments; j++)
@@ -298,7 +298,7 @@ define([
                     var sx = Math.cos(angle);
                     var sy = Math.sin(angle);
 
-                    // calcular vector normal a superficie da seccao da esfera
+                    // get normal vector at curved surface
                     var nx = axis1.x * sx +axis2.x*sy;
                     var ny = axis1.y * sx +axis2.y*sy;
                     var nz = axis1.z * sx +axis2.z*sy;
@@ -308,15 +308,14 @@ define([
                     normals[normal_ofs + 2] = nz;
                     normal_ofs += 3;
 
-                    // calcular posicao da superficie do cone
+                    // calculate curved surface position points
                     positions[pos_ofs+0] = nx * r + p.x;
                     positions[pos_ofs+1] = ny * r + p.y;
                     positions[pos_ofs+2] = nz * r + p.z;
                     temp.push(new Cartesian3(positions[pos_ofs+0], positions[pos_ofs+1], positions[pos_ofs+2]));
                     pos_ofs += 3;
 
-                    // calcular UVs para a superfice da esfera
-                    // necessario para materials com texturas
+                    // calculate UVs for curved surface
                     uvs[uv_ofs+0] = j/segments;
                     uvs[uv_ofs+1] = dy;
                     uv_ofs += 2;
@@ -326,7 +325,7 @@ define([
                 }
             }
 
-            // calcular a malha que conecta a geometria
+            // create mesh that connects everything
             // magic goes here...
             var indexcount = (slices * segments *  2  * 2 * 3); // 2 triangles per cycle * 2 shapes * 3 indices per triangle
             var indices = new Uint16Array(indexcount);
@@ -353,7 +352,7 @@ define([
                     index_ofs += 3;
                 }
             }
-            // e agora a superficie curva...
+            // now the curved part...
             for (var i = 0; i < slices; i++)
             {
                 for (var j = 0; j < segments; j++)
@@ -377,7 +376,7 @@ define([
                 }
             }
 
-            // gerar atributos para o cesium...
+            // generated cesium attributes..
             var geoAttribs = function(options) {};
 
             geoAttribs.position = new GeometryAttribute({
@@ -398,11 +397,11 @@ define([
                 values : uvs
             });
 
-            // calcular bounding sphere
+            // get a bounding sphere for this geometry
             var sphere = BoundingSphere.fromPoints(temp);
 
 
-            // criar vertex buffer
+            // create vertex buffer
             var geo = new Geometry({
                 attributes : geoAttribs,
                 indices : indices,
@@ -412,13 +411,6 @@ define([
             });
 
             var attribLoc = GeometryPipeline.createAttributeLocations(geo);
-
-            /*this._vertexArray = context.createVertexArrayFromGeometry({
-                geometry : geo,
-                attributeLocations : attribLoc,
-                bufferUsage : BufferUsage.STATIC_DRAW,
-                interleave : true
-            });*/
 
             this._instance = new GeometryInstance({
                 geometry : geo,
@@ -476,13 +468,13 @@ define([
      * <code>isDestroyed</code> will result in a {@link DeveloperError} exception.  Therefore,
      * assign the return value (<code>undefined</code>) to the object as done in the example.
      *
-     * @memberof CompassPrimitive
+     * @memberof DomePrimitive
      *
      * @returns {undefined}
      *
      * @exception {DeveloperError} This object was destroyed, i.e., destroy() was called.
      *
-     * @see CompassPrimitive#isDestroyed
+     * @see DomePrimitive#isDestroyed
      *
      */
     DomePrimitive.prototype.destroy = function() {
