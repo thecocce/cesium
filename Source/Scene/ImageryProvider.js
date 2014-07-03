@@ -244,6 +244,7 @@ define([
          * be ignored.  If this property is true, any images without an alpha channel will be treated
          * as if their alpha is 1.0 everywhere.  When this property is false, memory usage
          * and texture upload time are reduced.
+         * @memberof ImageryProvider.prototype
          * @type {Boolean}
          */
         hasAlphaChannel : {
@@ -253,13 +254,11 @@ define([
 
     /**
      * Gets the credits to be displayed when a given tile is displayed.
-     * @memberof ImageryProvider
      * @function
      *
      * @param {Number} x The tile X coordinate.
      * @param {Number} y The tile Y coordinate.
      * @param {Number} level The tile level;
-     *
      * @returns {Credit[]} The credits to be displayed when the tile is displayed.
      *
      * @exception {DeveloperError} <code>getTileCredits</code> must not be called before the imagery provider is ready.
@@ -269,13 +268,11 @@ define([
     /**
      * Requests the image for a given tile.  This function should
      * not be called before {@link ImageryProvider#isReady} returns true.
-     * @memberof ImageryProvider
      * @function
      *
      * @param {Number} x The tile X coordinate.
      * @param {Number} y The tile Y coordinate.
      * @param {Number} level The tile level.
-     *
      * @returns {Promise} A promise for the image that will resolve when the image is available, or
      *          undefined if there are too many active requests to the server, and the request
      *          should be retried later.  The resolved image may be either an
@@ -289,9 +286,8 @@ define([
      * Loads an image from a given URL.  If the server referenced by the URL already has
      * too many requests pending, this function will instead return undefined, indicating
      * that the request should be retried later.
-     * @memberof ImageryProvider
      *
-     * @param url {String} The URL of the image.
+     * @param {String} url The URL of the image.
      * @returns {Promise} A promise for the image that will resolve when the image is available, or
      *          undefined if there are too many active requests to the server, and the request
      *          should be retried later.  The resolved image may be either an

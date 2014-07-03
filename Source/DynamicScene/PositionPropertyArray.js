@@ -26,7 +26,7 @@ define([
      * @alias PositionPropertyArray
      * @constructor
      *
-     * @param {Array} [value] An array of Property instances.
+     * @param {Property[]} [value] An array of Property instances.
      */
     var PositionPropertyArray = function(value, referenceFrame) {
         this._value = undefined;
@@ -41,7 +41,9 @@ define([
          * Gets a value indicating if this property is constant.  This property
          * is considered constant if all property items in the array are constant.
          * @memberof PositionPropertyArray.prototype
+         *
          * @type {Boolean}
+         * @readonly
          */
         isConstant : {
             get : function() {
@@ -64,7 +66,9 @@ define([
          * The definition is changed whenever setValue is called with data different
          * than the current value or one of the properties in the array also changes.
          * @memberof PositionPropertyArray.prototype
+         *
          * @type {Event}
+         * @readonly
          */
         definitionChanged : {
             get : function() {
@@ -74,7 +78,7 @@ define([
         /**
          * Gets the reference frame in which the position is defined.
          * @memberof PositionPropertyArray.prototype
-         * @Type {ReferenceFrame}
+         * @type {ReferenceFrame}
          * @default ReferenceFrame.FIXED;
          */
         referenceFrame : {
@@ -86,11 +90,10 @@ define([
 
     /**
      * Gets the value of the property.
-     * @memberof PositionPropertyArray
      *
      * @param {JulianDate} [time] The time for which to retrieve the value.  This parameter is unused since the value does not change with respect to time.
-     * @param {Array} [result] The object to store the value into, if omitted, a new instance is created and returned.
-     * @returns {Array} The modified result parameter or a new instance if the result parameter was not supplied.
+     * @param {Cartesian3[]} [result] The object to store the value into, if omitted, a new instance is created and returned.
+     * @returns {Cartesian3[]} The modified result parameter or a new instance if the result parameter was not supplied.
      */
     PositionPropertyArray.prototype.getValue = function(time, result) {
         return this.getValueInReferenceFrame(time, ReferenceFrame.FIXED, result);
@@ -98,7 +101,6 @@ define([
 
     /**
      * Gets the value of the property at the provided time and in the provided reference frame.
-     * @memberof PositionPropertyArray
      *
      * @param {JulianDate} time The time for which to retrieve the value.
      * @param {ReferenceFrame} referenceFrame The desired referenceFrame of the result.
@@ -142,9 +144,8 @@ define([
     /**
      * Sets the value of the property.
      * If the value is an object, the object must provide clone and equals functions.
-     * @memberof PositionPropertyArray
      *
-     * @param {Array} value An array of Property instances.
+     * @param {Property[]} value An array of Property instances.
      */
     PositionPropertyArray.prototype.setValue = function(value) {
         var eventHelper = this._eventHelper;
@@ -168,7 +169,6 @@ define([
     /**
      * Compares this property to the provided property and returns
      * <code>true</code> if they are equal, <code>false</code> otherwise.
-     * @memberof PositionPropertyArray
      *
      * @param {Property} [other] The other property.
      * @returns {Boolean} <code>true</code> if left and right are equal, <code>false</code> otherwise.

@@ -1,8 +1,10 @@
 /*global define*/
 define([
+        '../Core/freezeObject',
         './BlendEquation',
         './BlendFunction'
     ], function(
+        freezeObject,
         BlendEquation,
         BlendFunction) {
     "use strict";
@@ -22,19 +24,19 @@ define([
          * Blending is disabled.
          *
          * @type {Object}
-         * @readonly
+         * @constant
          */
-        DISABLED : {
+        DISABLED : freezeObject({
             enabled : false
-        },
+        }),
 
         /**
          * Blending is enabled using alpha blending, <code>source(source.alpha) + destination(1 - source.alpha)</code>.
          *
          * @type {Object}
-         * @readonly
+         * @constant
          */
-        ALPHA_BLEND : {
+        ALPHA_BLEND : freezeObject({
             enabled : true,
             equationRgb : BlendEquation.ADD,
             equationAlpha : BlendEquation.ADD,
@@ -42,15 +44,15 @@ define([
             functionSourceAlpha : BlendFunction.SOURCE_ALPHA,
             functionDestinationRgb : BlendFunction.ONE_MINUS_SOURCE_ALPHA,
             functionDestinationAlpha : BlendFunction.ONE_MINUS_SOURCE_ALPHA
-        },
+        }),
 
         /**
          * Blending is enabled using alpha blending with premultiplied alpha, <code>source + destination(1 - source.alpha)</code>.
          *
          * @type {Object}
-         * @readonly
+         * @constant
          */
-        PRE_MULTIPLIED_ALPHA_BLEND : {
+        PRE_MULTIPLIED_ALPHA_BLEND : freezeObject({
             enabled : true,
             equationRgb : BlendEquation.ADD,
             equationAlpha : BlendEquation.ADD,
@@ -58,15 +60,15 @@ define([
             functionSourceAlpha : BlendFunction.ONE,
             functionDestinationRgb : BlendFunction.ONE_MINUS_SOURCE_ALPHA,
             functionDestinationAlpha : BlendFunction.ONE_MINUS_SOURCE_ALPHA
-        },
+        }),
 
         /**
          * Blending is enabled using additive blending, <code>source(source.alpha) + destination</code>.
          *
          * @type {Object}
-         * @readonly
+         * @constant
          */
-        ADDITIVE_BLEND : {
+        ADDITIVE_BLEND : freezeObject({
             enabled : true,
             equationRgb : BlendEquation.ADD,
             equationAlpha : BlendEquation.ADD,
@@ -74,7 +76,7 @@ define([
             functionSourceAlpha : BlendFunction.SOURCE_ALPHA,
             functionDestinationRgb : BlendFunction.ONE,
             functionDestinationAlpha : BlendFunction.ONE
-        }
+        })
     };
 
     return BlendingState;

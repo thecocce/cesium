@@ -135,7 +135,7 @@ define([
 
         /**
          * The {@link TileImagery} attached to this tile.
-         * @type {Array}
+         * @type {TileImagery[]}
          * @default []
          */
         this.imagery = [];
@@ -227,10 +227,8 @@ define([
     /**
      * Creates a rectangular set of tiles for level of detail zero, the coarsest, least detailed level.
      *
-     * @memberof Tile
-     *
      * @param {TilingScheme} tilingScheme The tiling scheme for which the tiles are to be created.
-     * @returns {Array} An array containing the tiles at level of detail zero, starting with the
+     * @returns {Tile[]} An array containing the tiles at level of detail zero, starting with the
      * tile in the northwest corner and followed by the tile (if any) to its east.
      */
     Tile.createLevelZeroTiles = function(tilingScheme) {
@@ -262,7 +260,7 @@ define([
         /**
          * An array of tiles that would be at the next level of the tile tree.
          * @memberof Tile.prototype
-         * @type {Array}
+         * @type {Tile[]}
          */
         children : {
             get : function() {
@@ -515,7 +513,7 @@ define([
 
             // Publish the terrain data on the tile as soon as it is available.
             // We'll potentially need it to upsample child tiles.
-            if (loaded.state.value >= TerrainState.RECEIVED.value) {
+            if (loaded.state >= TerrainState.RECEIVED) {
                 if (tile.terrainData !== loaded.data) {
                     tile.terrainData = loaded.data;
 
@@ -562,7 +560,7 @@ define([
             // We'll potentially need it to upsample child tiles.
             // It's safe to overwrite terrainData because we won't get here after
             // loaded terrain data has been received.
-            if (upsampled.state.value >= TerrainState.RECEIVED.value) {
+            if (upsampled.state >= TerrainState.RECEIVED) {
                 if (tile.terrainData !== upsampled.data) {
                     tile.terrainData = upsampled.data;
 

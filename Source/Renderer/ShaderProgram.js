@@ -34,7 +34,7 @@ define([
         scratchUniformMatrix3 = new Float32Array(9);
         scratchUniformMatrix4 = new Float32Array(16);
     }
-    function setUniform (uniform) {	
+    function setUniform (uniform) {
         var gl = uniform._gl;
         var location = uniform._location;
         switch (uniform._activeUniform.type) {
@@ -359,27 +359,8 @@ define([
          */
         this.maximumTextureUnitIndex = undefined;
 
-        /**
-         * GLSL source for the shader program's vertex shader.  This is the version of
-         * the source provided when the shader program was created, not the final
-         * source provided to WebGL, which includes Cesium bulit-ins.
-         *
-         * @type {String}
-         *
-         * @readonly
-         */
-        this.vertexShaderSource = vertexShaderSource;
-
-        /**
-         * GLSL source for the shader program's fragment shader.  This is the version of
-         * the source provided when the shader program was created, not the final
-         * source provided to WebGL, which includes Cesium bulit-ins.
-         *
-         * @type {String}
-         *
-         * @readonly
-         */
-        this.fragmentShaderSource = fragmentShaderSource;
+        this._vertexShaderSource = vertexShaderSource;
+        this._fragmentShaderSource = fragmentShaderSource;
 
         /**
          * @private
@@ -388,6 +369,36 @@ define([
     };
 
     defineProperties(ShaderProgram.prototype, {
+        /**
+         * GLSL source for the shader program's vertex shader.  This is the version of
+         * the source provided when the shader program was created, not the final
+         * source provided to WebGL, which includes Cesium bulit-ins.
+         *
+         * @memberof ShaderProgram.prototype
+         *
+         * @type {String}
+         * @readonly
+         */
+        vertexShaderSource: {
+            get : function() {
+                return this._vertexShaderSource;
+            }
+        },
+        /**
+         * GLSL source for the shader program's fragment shader.  This is the version of
+         * the source provided when the shader program was created, not the final
+         * source provided to WebGL, which includes Cesium bulit-ins.
+         *
+         * @memberof ShaderProgram.prototype
+         *
+         * @type {String}
+         * @readonly
+         */
+        fragmentShaderSource: {
+            get : function() {
+                return this._fragmentShaderSource;
+            }
+        },
         vertexAttributes: {
             get : function() {
                 initialize(this);
@@ -706,12 +717,12 @@ define([
         for (var i = 0; i < numberOfAttributes; ++i) {
             var attr = gl.getActiveAttrib(program, i);
             var location = gl.getAttribLocation(program, attr.name);
-			
+
             attributes[attr.name] = {
                 name : attr.name,
                 type : attr.type,
                 index : location
-            };			
+            };
         }
 
         return attributes;
@@ -734,16 +745,21 @@ define([
                 if (activeUniform.name.indexOf('[') < 0) {
                     // Single uniform
                     var location = gl.getUniformLocation(program, uniformName);
-                    var uniformValue = gl.getUniform(program, location);
-									
-                    var uniform = new Uniform(gl, activeUniform, uniformName, location, uniformValue);
 
-					uniformsByName[uniformName] = uniform;
-					uniforms.push(uniform);
+                    // IE 11.0.9 needs this check since getUniformLocation can return null
+                    // if the uniform is not active (e.g., it is optimized out).  Looks like
+                    // getActiveUniform() above returns uniforms that are not actually active.
+                    if (location !== null) {
+                        var uniformValue = gl.getUniform(program, location);
+                        var uniform = new Uniform(gl, activeUniform, uniformName, location, uniformValue);
 
-					if (uniform._setSampler) {
-						samplerUniforms.push(uniform);
-					}
+                        uniformsByName[uniformName] = uniform;
+                        uniforms.push(uniform);
+
+                        if (uniform._setSampler) {
+                            samplerUniforms.push(uniform);
+                        }
+                    }
                 } else {
                     // Uniform array
 
@@ -773,16 +789,24 @@ define([
                         if (locations.length <= 1) {
                             value = uniformArray.value;
                             loc = gl.getUniformLocation(program, uniformName);
-                            locations.push(loc);
-                            value.push(gl.getUniform(program, loc));
+
+                            // Workaround for IE 11.0.9.  See above.
+                            if (loc !== null) {
+                                locations.push(loc);
+                                value.push(gl.getUniform(program, loc));
+                            }
                         }
                     } else {
                         locations = [];
                         value = [];
                         for ( var j = 0; j < activeUniform.size; ++j) {
                             loc = gl.getUniformLocation(program, uniformName + '[' + j + ']');
-                            locations.push(loc);
-                            value.push(gl.getUniform(program, loc));
+
+                            // Workaround for IE 11.0.9.  See above.
+                            if (loc !== null) {
+                                locations.push(loc);
+                                value.push(gl.getUniform(program, loc));
+                            }
                         }
                         uniformArray = new UniformArray(gl, activeUniform, uniformName, locations, value);
 
@@ -796,7 +820,6 @@ define([
                 }
             }
         }
-		
 
         return {
             uniformsByName : uniformsByName,
@@ -865,12 +888,11 @@ define([
         var uniforms = this._uniforms;
         var manualUniforms = this._manualUniforms;
         var automaticUniforms = this._automaticUniforms;
-		
-        if (uniformMap) {		
+
+        if (uniformMap) {
             for ( var uniform in manualUniforms) {
-				
-                if (manualUniforms.hasOwnProperty(uniform)) {				
-                    manualUniforms[uniform].value = uniformMap[uniform]();								
+                if (manualUniforms.hasOwnProperty(uniform)) {
+                    manualUniforms[uniform].value = uniformMap[uniform]();
                 }
             }
         }
@@ -882,7 +904,6 @@ define([
 
         ///////////////////////////////////////////////////////////////////
 
-		
         len = uniforms.length;
         for (i = 0; i < len; ++i) {
             uniforms[i]._set();
