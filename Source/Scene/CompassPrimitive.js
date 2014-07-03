@@ -63,7 +63,7 @@ define([
         when) {
     "use strict";
 
-    var compass_texturePath = "compass_da.png";
+    var default_compass_texturePath = "compass_da.png";
 
     /**
      * A renderable compass.
@@ -76,6 +76,7 @@ define([
      *  y : Vertical position on canvas (in percentage, from 0 to 100)
      *  scale : Compass scale (1.0 means normal size, 0.5 means half of the size, etc)
      *  tilt : Compass tilt, default is 45 degrees
+	 *	texturePath: path to compass texture 
      */
     var CompassPrimitive = function(cameraController, canvas, options) {
         //>>includeStart('debug', pragmas.debug);
@@ -97,6 +98,7 @@ define([
         this._X = defaultValue(options.x, 90.0);
         this._Y = defaultValue(options.x, 10.0);
         this._tilt = defaultValue(options.tilt, 45.0);
+		this._texturePath = defaultValue(options.texturePath, default_compass_texturePath);
 
 
         this._scale *= 0.2; // scale down because compass mesh was done with 500x500 size, now we're using 100x100
@@ -564,7 +566,7 @@ define([
 
                 out_texture : function() {
                     if (!defined(that._texture)) {
-                        that._texture = Material._textureCache.getTexture(compass_texturePath);
+                        that._texture = Material._textureCache.getTexture(this._texturePath);
                     }
 
                     if (defined(that._texture)) {
@@ -585,17 +587,17 @@ define([
             };
 
             compassImage.onload = function () {
-                var texture = Material._textureCache.getTexture(compass_texturePath);
+                var texture = Material._textureCache.getTexture(this._texturePath);
                 if (!defined(texture)) {
                     texture = context.createTexture2D({
                     source : compassImage
                     });
-                    Material._textureCache.addTexture(compass_texturePath, texture);
+                    Material._textureCache.addTexture(this._texturePath, texture);
                     //alert('Image '+compass_texturePath+' loaded!');
                 }
             };
 
-            compassImage.src = compass_texturePath;
+            compassImage.src = this._texturePath;
 
 
             this._drawCommand1 = new DrawCommand({ owner : this});

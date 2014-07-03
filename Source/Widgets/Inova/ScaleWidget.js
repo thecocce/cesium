@@ -176,14 +176,20 @@ define([
         }
 
         var viewportWidth = this._canvas.width;
+        var viewportHeight = this._canvas.height;
+        var ratio = viewportWidth / viewportHeight;
         var tanHalfAngle = Math.tan(0.5 * this._camera.frustum.fovy);
         var pixelSizeScale = (2.0 * tanHalfAngle ) / viewportWidth;
 
         var pixelSize = Math.abs(distance) * pixelSizeScale;
 
-        var scale = 1.0; //computeScale(viewport);
-        var scaleSize = pixelSize * this._canvas.width * scale;  // meter
+
+
+        var scaleSize = 2 * pixelSize * this._canvas.width;  // meter
         var unitLabel = "m";
+
+
+        scaleSize = (scaleSize * this._maxWidth) / viewportWidth;
 
         if (scaleSize > 10000)
         {
@@ -223,6 +229,7 @@ define([
         updateLine(this._lineMiddle,
                     this._ofsX , this._ofsY,
                     this._ofsX , this._ofsY-this._lineH*0.5);
+
 
         this._myLabel.caption.textContent = divSize + ' '+ unitLabel;
     };

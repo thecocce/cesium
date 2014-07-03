@@ -115,7 +115,7 @@ define([
     /**
      * A renderable Path.
      *
-     * @alias CompassPrimitive
+     * @alias PathPrimitive
      * @constructor
      *
      *  Options:
@@ -160,11 +160,12 @@ define([
             translucent : true
             });
             // setup animation timer
-            var that = animated_path_material;
-            setInterval(function(){update_animation(that)}, this._speed);
+            //var that = animated_path_material;
+            //setInterval(function(){update_animation(that)}, this._speed);
         }
 
 
+        this._animationOffset = 0.0;
         this._material = defaultValue(options.material, animated_path_material);
 
         this._divisions = defaultValue(options.divisions, 50);
@@ -433,6 +434,12 @@ define([
             this._primitive = new Primitive(options);
         }
 
+        this._animationOffset += 0.025;
+        if (this._animationOffset>1.0)
+            this._animationOffset -= 1.0;
+
+        this._material.uniforms.uvoffset.y = this._animationOffset;
+
         this._material.update(context);
 
         this._primitive.appearance.material = this._material;
@@ -465,13 +472,13 @@ define([
      * <code>isDestroyed</code> will result in a {@link DeveloperError} exception.  Therefore,
      * assign the return value (<code>undefined</code>) to the object as done in the example.
      *
-     * @memberof CompassPrimitive
+     * @memberof PathPrimitive
      *
      * @returns {undefined}
      *
      * @exception {DeveloperError} This object was destroyed, i.e., destroy() was called.
      *
-     * @see CompassPrimitive#isDestroyed
+     * @see PathPrimitive#isDestroyed
      *
      */
     PathPrimitive.prototype.destroy = function() {
