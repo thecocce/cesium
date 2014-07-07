@@ -66,7 +66,7 @@
         points2.push(Cesium.Cartographic.fromDegrees(-7.08, 39.24));		
 		scene.primitives.add(new Cesium.PathPrimitive(points2, ellipsoid));			
 
-		//scene.primitives.add(new Cesium.DomePrimitive(Cesium.Cartographic.fromDegrees(-9.1394, 38.7138), ellipsoid));	
+		scene.primitives.add(new Cesium.DomePrimitive(Cesium.Cartographic.fromDegrees(-9.1394, 38.7138), ellipsoid));	
 			
 		var scaleOptions = {x:10, y:10};			
 		var scalebar = new Cesium.ScaleWidget('appContainer', canvas, camera, ellipsoid, scaleOptions);

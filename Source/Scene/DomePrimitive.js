@@ -114,7 +114,12 @@ define([
             color : new Color(0.0, 0.0, 1.0, 1.0)
         });
 
+        var wirematerial = Material.fromType(Material.ColorType, {
+            color : new Color(1.0, 1.0, 1.0, 1.0)
+        });
+
         this._material = defaultValue(options.material, material);
+        this._wireMaterial = defaultValue(options.material, wirematerial);
 
         this._radius = defaultValue(options.radius, 150.0);
         this._angle = defaultValue(options.angle, 30.0);
@@ -194,17 +199,21 @@ define([
             var dy = (Math.tan(coneAngle) * this._radius) / (this._radius*2);
             dy = 1.0 - dy;
 
-            var direction = Cartesian3.subtract(apex, basePoint);
-            direction =  Cartesian3.normalize(direction, direction);
+            var direction = new Cartesian3(0, 0, 0);
+            Cartesian3.subtract(apex, basePoint, direction);
+            Cartesian3.normalize(direction, direction);
 
             // calculate two axis paralel to cone, and perpendicular against each other
-            var axis1 =  Cartesian3.cross(direction, up);
-            var axis2 =  Cartesian3.cross(axis1, direction);
-            axis1 =  Cartesian3.normalize(axis1, axis1);
-            axis2 =  Cartesian3.normalize(axis2, axis2);
+            var axis1 =  new Cartesian3(0, 0, 0);
+            Cartesian3.cross(direction, up, axis1);
+            var axis2 = new Cartesian3(0, 0, 0);
+            Cartesian3.cross(axis1, direction, axis2);
+            Cartesian3.normalize(axis1, axis1);
+            Cartesian3.normalize(axis2, axis2);
 
             // calculate cone base point
-            var middlePoint = Cartesian3.lerp(basePoint, apex, dy);
+            var middlePoint = new Cartesian3(0,0,0);
+            Cartesian3.lerp(basePoint, apex, dy, middlePoint);
 
             var pos_ofs = 0;
             var normal_ofs = 0;
@@ -224,7 +233,8 @@ define([
             var dx = (360 * (Math.PI/180.0)) / segments;
 
             // distance from cone origin to center of cone base
-            var tt = Cartesian3.subtract(middlePoint, basePoint);
+            var tt = new Cartesian3(0, 0,0);
+            Cartesian3.subtract(middlePoint, basePoint, tt);
             var dist2 = Cartesian3.magnitude(tt);
 
             // generate cone surface geometry
@@ -238,7 +248,8 @@ define([
                 r = r * dy; // o raio do cone varia em funcao da altura
 
                 // calculate center of imaginary intersection with height = (this._radius*dy)
-                var p = Cartesian3.lerp(basePoint, middlePoint, dy);
+                var p = new Cartesian3(0,0,0);
+                Cartesian3.lerp(basePoint, middlePoint, dy, p);
 
                 for (var j =0; j<segments; j++)
                 {
@@ -284,14 +295,18 @@ define([
                 dy = (i/slices); // percentagem da altura actual
 
                 // get center of horizontal intersection with sphere at height = (this._radius*dy)
-                var p = Cartesian3.lerp(middlePoint, apex, dy);
+                var p = new Cartesian3(0,0,0);
+                Cartesian3.lerp(middlePoint, apex, dy, p);
 
                 // calculate distance to center of intersection with cone base
-                var tt2 = Cartesian3.subtract(p, basePoint);
+                var tt2 = new Cartesian3(0, 0, 0);
+                Cartesian3.subtract(p, basePoint, tt2);
                 var dist = Cartesian3.magnitude(tt2);
 
                 // calculate radius of sphere intersection
-                var r = Math.sqrt((this._radius * this._radius) - (dist * dist));
+                var r = (this._radius * this._radius) - (dist * dist);
+                if (r>0)
+                    r = Math.sqrt(r);
 
                 for (var j =0; j<segments; j++)
                 {
@@ -327,11 +342,12 @@ define([
 
             // create mesh that connects everything
             // magic goes here...
-            var indexcount = (slices * segments *  2  * 2 * 3); // 2 triangles per cycle * 2 shapes * 3 indices per triangle
+            var trianglecount = (slices * segments *  2  * 2); // 2 triangles per cycle * 2 shapes
+            var indexcount =  trianglecount * 3; // 3 indices per triangle
             var indices = new Uint16Array(indexcount);
             var index_ofs = 0;
             // primeiro a superficie conica...
-            for (var i = 0; i < slices; i++)
+            for (var i = 0; i <slices; i++)
             {
                 for (var j = 0; j < segments; j++)
                 {
@@ -376,6 +392,29 @@ define([
                 }
             }
 
+            // generate wireframe mesh
+            var indexcount2 = trianglecount * 2;
+            var wireindices = new Uint16Array(indexcount2);
+            index_ofs = 0;
+            var index_ofs2 = 0;
+            for (var i = 0; i < trianglecount; i++)
+            {
+                wireindices[index_ofs2 + 0] = indices[index_ofs + 0];
+                wireindices[index_ofs2 + 1] = indices[index_ofs + 1];
+                index_ofs2 += 2;
+
+                /*wireindices[index_ofs2 + 0] = indices[index_ofs + 1];
+                wireindices[index_ofs2 + 1] = indices[index_ofs + 2];
+                index_ofs2 += 2;*/
+
+                /*wireindices[index_ofs2 + 0] = indices[index_ofs + 2];
+                wireindices[index_ofs2 + 1] = indices[index_ofs + 0];
+                index_ofs2 += 2;*/
+
+                index_ofs += 3;
+            }
+
+
             // generated cesium attributes..
             var geoAttribs = function(options) {};
 
@@ -401,8 +440,8 @@ define([
             var sphere = BoundingSphere.fromPoints(temp);
 
 
-            // create vertex buffer
-            var geo = new Geometry({
+            // create vertex buffer 1
+            var geo1 = new Geometry({
                 attributes : geoAttribs,
                 indices : indices,
                 ellipsoid : this._ellipsoid,
@@ -410,37 +449,68 @@ define([
                 primitiveType : PrimitiveType.TRIANGLES
             });
 
-            var attribLoc = GeometryPipeline.createAttributeLocations(geo);
-
-            this._instance = new GeometryInstance({
-                geometry : geo,
+            this._instance1 = new GeometryInstance({
+                geometry : geo1,
                 id : this.id,
                 modelMatrix : Matrix4.IDENTITY,
                 pickPrimitive : this
             });
 
-            if (defined(this._primitive)) {
-                this._primitive.destroy();
+            if (defined(this._primitive1)) {
+                this._primitive1.destroy();
+            }
+
+
+            // create vertex buffer
+            var geo2 = new Geometry({
+                attributes : geoAttribs,
+                indices : wireindices,
+                ellipsoid : this._ellipsoid,
+                boundingSphere : sphere,
+                primitiveType : PrimitiveType.LINES
+            });
+
+            this._instance2 = new GeometryInstance({
+                geometry : geo2,
+                id : this.id,
+                modelMatrix : Matrix4.IDENTITY,
+                pickPrimitive : this
+            });
+
+            if (defined(this._primitive2)) {
+                this._primitive2.destroy();
             }
 
             this._appearance = new MaterialAppearance();
-            this._appearance.flat = false;
+            this._wireAppearance = new MaterialAppearance();
+            //this._appearance.flat = false;
 
-            var options = {
-                    geometryInstances : this._instance,
+            var options1 = {
+                    geometryInstances : this._instance1,
                     appearance : this._appearance,
                     asynchronous : this.asynchronous
                 };
 
-            this._primitive = new Primitive(options);
+            this._primitive1 = new Primitive(options1);
+
+            var options2 = {
+                    geometryInstances : this._instance2,
+                    appearance : this._wireAppearance,
+                    asynchronous : this.asynchronous
+                };
+
+            this._primitive2 = new Primitive(options2);
 
         }
 
         this._material.update(context);
+        this._primitive1.appearance.material = this._material;
+        this._primitive1.update(context, frameState, commandList);
 
-        this._primitive.appearance.material = this._material;
-        this._primitive.update(context, frameState, commandList);
-     };
+        this._wireMaterial.update(context);
+        this._primitive2.appearance.material = this._wireMaterial;
+        this._primitive2.update(context, frameState, commandList);
+};
 
 
 

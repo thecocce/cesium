@@ -88,7 +88,7 @@ defineSuite([
         rectangle1 = Rectangle.fromDegrees(-80.0, 20.0, -70.0, 30.0);
         rectangle2 = Rectangle.fromDegrees(70.0, 20.0, 80.0, 30.0);
 
-        var translation = Cartesian3.multiplyByScalar(Cartesian3.normalize(ellipsoid.cartographicToCartesian(Rectangle.getCenter(rectangle1))), 2.0);
+        var translation = Cartesian3.multiplyByScalar(Cartesian3.normalize(ellipsoid.cartographicToCartesian(Rectangle.getCenter(rectangle1)), new Cartesian3()), 2.0, new Cartesian3());
         rectangleInstance1 = new GeometryInstance({
             geometry : new RectangleGeometry({
                 vertexFormat : PerInstanceColorAppearance.VERTEX_FORMAT,
@@ -103,7 +103,7 @@ defineSuite([
             }
         });
 
-        translation = Cartesian3.multiplyByScalar(Cartesian3.normalize(ellipsoid.cartographicToCartesian(Rectangle.getCenter(rectangle2))), 3.0);
+        translation = Cartesian3.multiplyByScalar(Cartesian3.normalize(ellipsoid.cartographicToCartesian(Rectangle.getCenter(rectangle2)), new Cartesian3()), 3.0, new Cartesian3());
         rectangleInstance2 = new GeometryInstance({
             geometry : new RectangleGeometry({
                 vertexFormat : PerInstanceColorAppearance.VERTEX_FORMAT,
@@ -292,12 +292,8 @@ defineSuite([
         });
 
         frameState.mode = SceneMode.COLUMBUS_VIEW;
-        frameState.morphTime = frameState.mode.morphTime;
-        frameState.camera.transform = new Matrix4(0.0, 0.0, 1.0, 0.0,
-                                                  1.0, 0.0, 0.0, 0.0,
-                                                  0.0, 1.0, 0.0, 0.0,
-                                                  0.0, 0.0, 0.0, 1.0);
-        frameState.camera.update(frameState.mode, frameState.scene2D);
+        frameState.morphTime = SceneMode.getMorphTime(frameState.mode);
+        frameState.camera.update(frameState.mode);
 
         frameState.camera.viewRectangle(rectangle1);
         us.update(context, frameState);
@@ -330,18 +326,15 @@ defineSuite([
         });
 
         frameState.mode = SceneMode.SCENE2D;
-        frameState.morphTime = frameState.mode.morphTime;
-        frameState.camera.transform = new Matrix4(0.0, 0.0, 1.0, 0.0,
-                                                  1.0, 0.0, 0.0, 0.0,
-                                                  0.0, 1.0, 0.0, 0.0,
-                                                  0.0, 0.0, 0.0, 1.0);
+        frameState.morphTime = SceneMode.getMorphTime(frameState.mode);
+
         var frustum = new OrthographicFrustum();
         frustum.right = Ellipsoid.WGS84.maximumRadius * Math.PI;
         frustum.left = -frustum.right;
         frustum.top = frustum.right;
         frustum.bottom = -frustum.top;
         frameState.camera.frustum = frustum;
-        frameState.camera.update(frameState.mode, frameState.scene2D);
+        frameState.camera.update(frameState.mode);
 
         frameState.camera.viewRectangle(rectangle1);
         us.update(context, frameState);

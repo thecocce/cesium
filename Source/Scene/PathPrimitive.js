@@ -104,8 +104,9 @@ define([
 
         var a = ellipsoid.cartographicToCartesian(p);
         var b = ellipsoid.cartographicToCartesian(temp);
-        var direction = Cartesian3.subtract(a, b);
-        direction =  Cartesian3.normalize(direction, direction);
+        var direction = new Cartesian3(0.0, 0.0, 0.0);
+        Cartesian3.subtract(a, b, direction);
+        Cartesian3.normalize(direction, direction);
         return direction;
     }
 
@@ -294,7 +295,7 @@ define([
 
             for (var i = 0; i <= slices; i++)
             {
-                var direction;
+                var direction = new Cartesian3(0, 0, 0);
                 var axis1, axis2;
                 var up = this._ups[i];
 
@@ -302,11 +303,13 @@ define([
                 // this vector is obtained from the current point and next path point
                 if (i<slices)
                 {
-                  direction = Cartesian3.subtract(this._points3d[i+1], this._points3d[i]);
-                  direction =  Cartesian3.normalize(direction, direction);
+                   Cartesian3.subtract(this._points3d[i+1], this._points3d[i], direction);
+                  Cartesian3.normalize(direction, direction);
 
-                  axis1 =  Cartesian3.cross(direction, up);
-                  axis2 =  Cartesian3.cross(axis1, direction);
+                  axis1 = new Cartesian3(0, 0, 0);
+                  Cartesian3.cross(direction, up, axis1);
+                  axis2 =  new Cartesian3(0, 0, 0);
+                  Cartesian3.cross(axis1, direction, axis2);
 
                   axis1 =  Cartesian3.normalize(axis1, axis1);
                   axis2 =  Cartesian3.normalize(axis2, axis2);
@@ -423,7 +426,7 @@ define([
             }
 
             this._appearance = new MaterialAppearance();
-            this._appearance.flat = false;
+            //this._appearance.flat = false;
 
             var options = {
                     geometryInstances : this._instance,
