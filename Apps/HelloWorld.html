@@ -9,9 +9,13 @@
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
   <title>Hello World!</title>
   <script src="../Build/Cesium/Cesium.js"></script>
+  <script src="Inovaworks/CompassPrimitive.js"></script>  
+  <script src="Inovaworks/DomePrimitive.js"></script>  
+  <script src="Inovaworks/PathPrimitive.js"></script>  
+  <script src="Inovaworks/ScaleWidget.js"></script>  
   <style>
       @import url(../Build/Cesium/Widgets/widgets.css);
-	  @import url(../Build/Cesium/Widgets/Inova/inova.css);
+	  @import url(Inovaworks/inovaworks.css);
 
       #cesiumContainer {
           position: absolute;
@@ -48,7 +52,7 @@
 		
 		var controller = new Cesium.CameraController(camera);		  
 		var compassOptions = {texturePath:"compass_da2.png"};
-		scene.primitives.add(new Cesium.CompassPrimitive(controller, canvas, compassOptions));	
+		scene.primitives.add(new CompassPrimitive(controller, canvas, compassOptions));	
 
         var points = new Array();
         points.push(Cesium.Cartographic.fromDegrees(-9.1394, 38.7138));
@@ -56,20 +60,12 @@
         points.push(Cesium.Cartographic.fromDegrees(-9.3606, 38.8355));
         points.push(Cesium.Cartographic.fromDegrees(-9.16, 39.05));
         points.push(Cesium.Cartographic.fromDegrees(-9.08, 39.24));		
-		scene.primitives.add(new Cesium.PathPrimitive(points, ellipsoid));			
+		scene.primitives.add(new PathPrimitive(points, ellipsoid));			
 
-		var points2 = new Array();
-        points2.push(Cesium.Cartographic.fromDegrees(-7.1394, 38.7138));
-        points2.push(Cesium.Cartographic.fromDegrees(-7.4206, 38.6969));
-        points2.push(Cesium.Cartographic.fromDegrees(-7.3606, 38.8355));
-        points2.push(Cesium.Cartographic.fromDegrees(-7.16, 39.05));
-        points2.push(Cesium.Cartographic.fromDegrees(-7.08, 39.24));		
-		scene.primitives.add(new Cesium.PathPrimitive(points2, ellipsoid));			
-
-		scene.primitives.add(new Cesium.DomePrimitive(Cesium.Cartographic.fromDegrees(-9.1394, 38.7138), ellipsoid));	
+		scene.primitives.add(new DomePrimitive(Cesium.Cartographic.fromDegrees(-9.1394, 38.7138), ellipsoid));	
 			
 		var scaleOptions = {x:10, y:10};			
-		var scalebar = new Cesium.ScaleWidget('appContainer', canvas, camera, ellipsoid, scaleOptions);
+		var scalebar = new ScaleWidget('appContainer', canvas, camera, ellipsoid, scaleOptions);
 	</script>
 </body>
 </html>
