@@ -32,7 +32,7 @@
 
         this._scale = Cesium.defaultValue(options.scale, 1.0);
         this._X = Cesium.defaultValue(options.x, 90.0);
-        this._Y = Cesium.defaultValue(options.x, 10.0);
+        this._Y = Cesium.defaultValue(options.y, 10.0);
         this._tilt = Cesium.defaultValue(options.tilt, 45.0);
 		this._texturePath = Cesium.defaultValue(options.texturePath, default_compass_texturePath);
 
@@ -563,12 +563,13 @@
 
             var heading = this._cameraController.heading;
 
-            var ratio = this._canvas.height/this._canvas.width;
+			var ratio = this._canvas.height/this._canvas.width;
+			this._projectionMatrix = Cesium.Matrix4.computeOrthographicOffCenter(0.0, 100*ratio, 100, 0.0, 0.0, 300);
 
             var rotationX = Cesium.Matrix3.fromRotationX(Cesium.Math.toRadians(this._tilt));
             var rotationY = Cesium.Matrix3.fromRotationY(heading);
             var finalRotation = Cesium.Matrix3.multiply(rotationX, rotationY);
-            var ratioScale = Cesium.Matrix3.fromScale(new Cesium.Cartesian3(this._scale * ratio, this._scale, this._scale * ratio));
+            var ratioScale = Cesium.Matrix3.fromScale(new Cesium.Cartesian3(this._scale, this._scale, this._scale));
             var finalTransform = Cesium.Matrix3.multiply(finalRotation, ratioScale);
 
             var screenOfs = new Cesium.Cartesian3(this._X, this._Y, -100.0);

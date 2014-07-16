@@ -11,6 +11,7 @@
      *      angle   - cone angle (in degrees)
      *      segments - number of horizontal geometry segments
      *      slices  - number of vertical  geometry slices
+	 *		lineWidth - wireframe width
      */
 
     var DomePrimitive = function(location, ellipsoid, options) {
@@ -46,7 +47,8 @@
         this._angle = Cesium.defaultValue(options.angle, 30.0);
         this._slices = Cesium.defaultValue(options.slices, 6);
         this._segments = Cesium.defaultValue(options.segments, 10);
-
+		this._lineWidth = Cesium.defaultValue(options.lineWidth, 1.0);
+		
         this._location =  location;
         this._apex =  new Cesium.Cartographic(this._location.longitude, this._location.latitude, this._location.height + this._radius);
 
@@ -402,8 +404,85 @@
                 this._primitive2.destroy();
             }
 
+             var defaults = {
+                  frontFace : Cesium.WindingOrder.COUNTER_CLOCKWISE,
+                  cull : {
+                      enabled : false,
+                      face : Cesium.CullFace.BACK
+                   },
+                   lineWidth : this._lineWidth,
+                   polygonOffset : {
+                           enabled : false,
+                           factor : 0,
+                           units : 0
+                    },
+                    scissorTest : {
+                        enabled : false,
+                        rectangle : {
+                        x : 0,
+                        y : 0,
+                        width : 0,
+                        height : 0
+                        }
+                    },
+                    depthRange : {
+                        near : 0,
+                        far : 1
+                    },
+                    depthTest : {
+                        enabled : false,
+                        func : Cesium.DepthFunction.LESS
+                    },
+                    colorMask : {
+                        red : true,
+                        green : true,
+                        blue : true,
+                        alpha : true
+                    },
+                    depthMask : true,
+                    stencilMask : ~0,
+                    blending : {
+                        enabled : false,
+                        color : {
+                            red : 0.0,
+                            green : 0.0,
+                            blue : 0.0,
+                            alpha : 0.0
+                    },
+                    equationRgb : Cesium.BlendEquation.ADD,
+                    equationAlpha : Cesium.BlendEquation.ADD,
+                    functionSourceRgb : Cesium.BlendFunction.SOURCE_ALPHA,
+                    functionSourceAlpha : Cesium.BlendFunction.SOURCE_ALPHA,
+                    functionDestinationRgb : Cesium.BlendFunction.ONE_MINUS_SOURCE_ALPHA,
+                    functionDestinationAlpha : Cesium.BlendFunction.ONE_MINUS_SOURCE_ALPHA
+                    },
+                    stencilTest : {
+                        enabled : false,
+                        frontFunction : Cesium.StencilFunction.ALWAYS,
+                        backFunction : Cesium.StencilFunction.ALWAYS,
+                        reference : 0,
+                        mask : ~0,
+                        frontOperation : {
+                            fail : Cesium.StencilOperation.KEEP,
+                            zFail : Cesium.StencilOperation.KEEP,
+                            zPass : Cesium.StencilOperation.KEEP
+                        },
+                        backOperation : {
+                            fail : Cesium.StencilOperation.KEEP,
+                            zFail : Cesium.StencilOperation.KEEP,
+                            zPass : Cesium.StencilOperation.KEEP
+                        }
+                    },
+                    sampleCoverage : {
+                        enabled : false,
+                        value : 1.0,
+                        invert : false
+                    },
+                    dither : false
+             };
+			
             this._appearance = new Cesium.MaterialAppearance();
-            this._wireAppearance = new Cesium.MaterialAppearance();
+            this._wireAppearance = new Cesium.MaterialAppearance({renderState: defaults});
             //this._appearance.flat = false;
 
             var options1 = {
@@ -427,9 +506,9 @@
         this._material.update(context);
         this._primitive1.appearance.material = this._material;
         this._primitive1.update(context, frameState, commandList);
-
+		
         this._wireMaterial.update(context);
-        this._primitive2.appearance.material = this._wireMaterial;
+        this._primitive2.appearance.material = this._wireMaterial;		
         this._primitive2.update(context, frameState, commandList);
 };
 
