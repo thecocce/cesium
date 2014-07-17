@@ -7,6 +7,7 @@
      *  location - Cartographic position
      *  options : can contain the following
      *      material - any Cesium material
+	 *      wireMaterial - any Cesium material
      *      radius  - dome radius
      *      angle   - cone angle (in degrees)
      *      segments - number of horizontal geometry segments
@@ -41,7 +42,7 @@
         });
 
         this._material = Cesium.defaultValue(options.material, material);
-        this._wireMaterial = Cesium.defaultValue(options.material, wirematerial);
+        this._wireMaterial = Cesium.defaultValue(options.wireMaterial, wirematerial);
 
         this._radius = Cesium.defaultValue(options.radius, 150.0);
         this._angle = Cesium.defaultValue(options.angle, 30.0);
@@ -430,7 +431,7 @@
                         far : 1
                     },
                     depthTest : {
-                        enabled : false,
+                        enabled : true,
                         func : Cesium.DepthFunction.LESS
                     },
                     colorMask : {

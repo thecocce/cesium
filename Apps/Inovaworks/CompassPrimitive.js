@@ -82,8 +82,7 @@
         }
 
 
-        if (!Cesium.defined(this._drawCommand)) {
-
+        if (!Cesium.defined(this._drawCommand1)) {
              var defaults = {
                   frontFace : Cesium.WindingOrder.COUNTER_CLOCKWISE,
                   cull : {
@@ -489,9 +488,20 @@
             this._modelMatrix = Cesium.Matrix4.IDENTITY;
 
             this._texture = undefined;
+			
+			var that = this;
 
-            var that = this;
+			var compassImage = new Image();	
+			compassImage.onerror = function () { console.log("image loading error: "+that._texturePath);};
+			compassImage.onload = function () {
+				that._texture = context.createTexture2D({source : compassImage});                    
+				console.log('Image '+that._texturePath+' loaded: '+that._texture);               
+			};
+			compassImage.src = that._texturePath;
+		
+			
             this._uniforms = {
+						
                 customProjMatrix : function() {
                     return that._projectionMatrix;
                 },
@@ -501,39 +511,18 @@
                 },
 
                 out_texture : function() {
-                    if (!Cesium.defined(that._texture)) {
-                        that._texture = Cesium.Material._textureCache.getTexture(this._texturePath);
-                    }
-
-                    if (Cesium.defined(that._texture)) {
+				
+					console.log(that._texture);
+					if (Cesium.defined(that._texture)) {
                         return that._texture;
                     }
                     else
-                    {
+                    {					
                         return 0;
                     }
 
                 }
             };
-
-
-            var compassImage = new Image();
-            compassImage.onerror = function () {
-                //alert("image loading error: "+compass_texturePath);
-            };
-
-            compassImage.onload = function () {
-                var texture = Cesium.Material._textureCache.getTexture(this._texturePath);
-                if (!Cesium.defined(texture)) {
-                    texture = context.createTexture2D({
-                    source : compassImage
-                    });
-                    Cesium.Material._textureCache.addTexture(this._texturePath, texture);
-                    //alert('Image '+compass_texturePath+' loaded!');
-                }
-            };
-
-            compassImage.src = this._texturePath;
 
 
             this._drawCommand1 = new Cesium.DrawCommand({ owner : this});
@@ -564,14 +553,14 @@
             var heading = this._cameraController.heading;
 
 			var ratio = this._canvas.height/this._canvas.width;
-			console.log(ratio);
+			//console.log(ratio);
 			
 			this._projectionMatrix = Cesium.Matrix4.computeOrthographicOffCenter(0.0, 100, 100, 0.0, 0.0, 300);
 
             var rotationX = Cesium.Matrix3.fromRotationX(Cesium.Math.toRadians(this._tilt));
             var rotationY = Cesium.Matrix3.fromRotationY(heading);
             var finalRotation = Cesium.Matrix3.multiply(rotationX, rotationY);
-            var ratioScale = Cesium.Matrix3.fromScale(new Cesium.Cartesian3(this._scale*ratio, this._scale, this._scale));
+            var ratioScale = Cesium.Matrix3.fromScale(new Cesium.Cartesian3(this._scale*ratio, this._scale, this._scale*ratio));
             var finalTransform = Cesium.Matrix3.multiply(finalRotation, ratioScale);
 
             var screenOfs = new Cesium.Cartesian3(this._X, this._Y, -100.0);
