@@ -83,11 +83,12 @@
         this._camera = camera;
         this._ellipsoid = ellipsoid;
 
-        this._maxWidth = 100.0;
+	  
         this._X = Cesium.defaultValue(options.x, 0.0);
         this._Y = Cesium.defaultValue(options.y, 0.0);
         this._color = Cesium.defaultValue(options.color, defaultColor);
         this._interval = Cesium.defaultValue(options.interval, 100);
+		this._maxWidth = Cesium.defaultValue(options.maxWidth, 100.0);
 
         this._ofsX = this._maxWidth;
         this._ofsY = 50;
@@ -127,7 +128,7 @@
         this._lastDistance = 0.0;
 
         var that = this;
-        setInterval(function(){update_scale(that)}, this._interval);
+        this._timer = setInterval(function(){update_scale(that)}, this._interval);
     };
 
     Cesium.defineProperties(ScaleWidget.prototype, {
@@ -158,6 +159,10 @@
 
         var viewportWidth = this._canvas.width;
         var viewportHeight = this._canvas.height;
+		
+		if (viewportWidth<=0 || viewportHeight<=0)
+			return;
+		
         var ratio = viewportWidth / viewportHeight;
         var tanHalfAngle = Math.tan(0.5 * this._camera.frustum.fovy);
         var pixelSizeScale = (2.0 * tanHalfAngle ) / viewportWidth;
@@ -166,7 +171,7 @@
 
 
 
-        var scaleSize = 2 * pixelSize * this._canvas.width;  // meter
+        var scaleSize = ratio * pixelSize * this._canvas.width;  // meter
         var unitLabel = "m";
 
 
@@ -216,20 +221,13 @@
     };
 
     /**
-     * @memberof ScaleWidget
-     * @returns {Boolean} true if object has been destroyed, false otherwise.
-     */
-    ScaleWidget.prototype.isDestroyed = function() {
-        return false;
-    };
-
-    /**
      * Destroys the ScaleWidget. Should be called if permanently
      * removing the widget from layout.
      * @memberof ScaleWidget
      */
-    ScaleWidget.prototype.destroy = function() {
-        this._container.removeChild(this._svgNode);
-        return destroyObject(this);
+    ScaleWidget.prototype.destroy = function() {		
+		clearInterval(this._timer);
+        this._container.removeChild(this._div);
+        //return Cesium.destroyObject(this);
     };
 

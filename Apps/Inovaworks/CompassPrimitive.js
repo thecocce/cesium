@@ -1,4 +1,126 @@
 
+    var scratchHeadingMatrix4 = new Cesium.Matrix4();
+    var scratchHeadingMatrix3 = new Cesium.Matrix3();
+    var scratchHeadingCartesian3 = new Cesium.Cartesian3();
+
+    function getHeading3D(camera) 
+	{
+        var ellipsoid = camera._projection.ellipsoid;
+        var toFixedFrame = Cesium.Transforms.eastNorthUpToFixedFrame(camera.position, ellipsoid, scratchHeadingMatrix4);
+        var transform = Cesium.Matrix4.getRotation(toFixedFrame, scratchHeadingMatrix3);
+        Cesium.Matrix3.transpose(transform, transform);
+
+        var right = Cesium.Matrix3.multiplyByVector(transform, camera.right, scratchHeadingCartesian3);
+        return Math.atan2(right.y, right.x);
+    }
+
+    function getTiltCV(camera) {
+        // CesiumMath.acosClamped(dot(camera.direction, Cartesian3.negate(Cartesian3.UNIT_Z))
+        return Cesium.Math.PI_OVER_TWO - Cesium.Math.acosClamped(-camera.direction.z);
+    }
+	
+function MatrixLookAt(eye, lookAt, up)
+{
+	var proj = new Cesium.Cartesian3(0,0,0);
+	
+	Cesium.Cartesian3.subtract(eye, lookAt, lookAt);	
+	Cesium.Cartesian3.normalize(lookAt, lookAt);
+
+	var d = Cesium.Cartesian3.dot(up, lookAt);
+
+	Cesium.Cartesian3.multiplyByScalar(lookAt, d, proj);
+
+	Cesium.Cartesian3.subtract(up, proj, up);
+	Cesium.Cartesian3.normalize(up, up);
+
+	var right = new Cesium.Cartesian3(0,0,0);
+	Cesium.Cartesian3.cross(up, lookAt, right);
+
+	var m00 = right.x;
+	var m01 = up.x;
+	var m02 = lookAt.x;
+	var m10 = right.y;
+	var m11 = up.y;
+	var m12 = lookAt.y;
+	var m20 = right.z;
+	var m21 = up.z;
+	var m22 = lookAt.z;
+
+	var Q = new Cesium.Quaternion(0,0,0,0);
+	Q.w = Math.sqrt(1.0 + m00 + m11 + m22) * 0.5;
+	var w4_recip = 1.0 / (4.0 * Q.w);
+	Q.x = (m21 - m12) * w4_recip;
+	Q.y = (m02 - m20) * w4_recip;
+	Q.z = (m10 - m01) * w4_recip;
+
+	var Result = new Cesium.Matrix4();
+
+  Result[0] = 1.0 - 2.0*Q.y*Q.y -2.0 *Q.z*Q.z;
+  Result[1] = 2.0 * Q.x*Q.y + 2.0 * Q.w*Q.z;
+  Result[2] = 2.0 * Q.x*Q.z - 2.0 * Q.w*Q.y;
+  Result[3] = 0;
+
+  Result[4] = 2.0 * Q.x*Q.y - 2.0 * Q.w*Q.z;
+  Result[5] = 1.0 - 2.0 * Q.x*Q.X - 2.0 * Q.z*Q.z;
+  Result[6] = 2.0 * Q.y*Q.z + 2.0 * Q.w*Q.x;
+  Result[7] = 0;
+
+  Result[8] = 2.0 * Q.x*Q.z + 2.0 * Q.w*Q.y;
+  Result[9] = 2.0 * Q.y*Q.z - 2.0 * Q.w*Q.x;
+  Result[10] = 1.0 - 2.0 * Q.x*Q.x - 2.0 * Q.y*Q.y;
+  Result[11] = 0;
+
+  Result[12] = 0.0;
+  Result[13] = 0.0;
+  Result[14] = 0.0;
+  Result[15] = 1.0;
+
+	return Result;  
+}
+
+/*function MatrixLookAt(Eye, LookAt, Roll)
+{
+	var xaxis = new Cesium.Cartesian3(0,0,0);
+	var yaxis = new Cesium.Cartesian3(0,0,0);
+	var zaxis = new Cesium.Cartesian3(0,0,0);
+
+	Cesium.Cartesian3.subtract(Eye, LookAt, zaxis);
+	Cesium.Cartesian3.normalize(zaxis, zaxis);
+
+	Cesium.Cartesian3.cross(Roll, zaxis, xaxis);
+	Cesium.Cartesian3.normalize(xaxis, xaxis);
+
+	if (xaxis.magnitudeSquared<=0)
+	{
+		Roll = new Cesium.Cartesian3(-Roll.Z, -Roll.X, -Roll.Y);
+		Cesium.Cartesian3.cross(Roll, zaxis, xaxis);
+		Cesium.Cartesian3.normalize(xaxis, xaxis);
+	}
+
+	Cesium.Cartesian3.cross( zaxis, xaxis, yaxis);
+
+	var Result = new Cesium.Matrix4();
+
+	Result[0] = xaxis.x;
+	Result[1] = yaxis.x;
+	Result[2] = zaxis.x;
+	Result[3] = 0.0;
+	Result[4] = xaxis.y;
+	Result[5] = yaxis.y;
+	Result[6] = zaxis.y;
+	Result[7] = 0.0;
+	Result[8] = xaxis.z;
+	Result[9] = yaxis.z;
+	Result[10] = zaxis.z;
+	Result[11] = 0.0;
+	Result[12] = -Cesium.Cartesian3.dot(xaxis, Eye);
+	Result[13] = -Cesium.Cartesian3.dot(yaxis, Eye);
+	Result[14] = -Cesium.Cartesian3.dot(zaxis, Eye);
+	Result[15] = 1.0;
+
+	return Result;
+}*/
+
     var default_compass_texturePath = "compass_da.png";
 
     /**
@@ -12,12 +134,16 @@
      *  y : Vertical position on canvas (in percentage, from 0 to 100)
      *  scale : Compass scale (1.0 means normal size, 0.5 means half of the size, etc)
      *  tilt : Compass tilt, default is 45 degrees
-	 *	texturePath: path to compass texture 
+	 *	texturePath: path to compass texture
      */
-    var CompassPrimitive = function(cameraController, canvas, options) {
+    var CompassPrimitive = function(camera, ellipsoid, canvas, options) {
         //>>includeStart('debug', pragmas.debug);
-        if (!Cesium.defined(cameraController)) {
-            throw new Cesium.DeveloperError('cameraController is required');
+        if (!Cesium.defined(camera)) {
+            throw new Cesium.DeveloperError('camera is required');
+        }
+
+        if (!Cesium.defined(ellipsoid)) {
+            throw new Cesium.DeveloperError('ellipsoid is required');
         }
 
         if (!Cesium.defined(canvas)) {
@@ -27,7 +153,8 @@
 
         options = Cesium.defaultValue(options, Cesium.defaultValue.EMPTY_OBJECT);
 
-        this._cameraController = cameraController;
+        this._camera = camera;
+		this._ellipsoid = ellipsoid;
         this._canvas = canvas;
 
         this._scale = Cesium.defaultValue(options.scale, 1.0);
@@ -488,20 +615,20 @@
             this._modelMatrix = Cesium.Matrix4.IDENTITY;
 
             this._texture = undefined;
-			
+
 			var that = this;
 
-			var compassImage = new Image();	
+			var compassImage = new Image();
 			compassImage.onerror = function () { console.log("image loading error: "+that._texturePath);};
 			compassImage.onload = function () {
-				that._texture = context.createTexture2D({source : compassImage});                    
-				console.log('Image '+that._texturePath+' loaded: '+that._texture);               
+				that._texture = context.createTexture2D({source : compassImage});
+				console.log('Image '+that._texturePath+' loaded: '+that._texture);
 			};
 			compassImage.src = that._texturePath;
-		
-			
+
+
             this._uniforms = {
-						
+
                 customProjMatrix : function() {
                     return that._projectionMatrix;
                 },
@@ -511,13 +638,13 @@
                 },
 
                 out_texture : function() {
-				
+
 					console.log(that._texture);
 					if (Cesium.defined(that._texture)) {
                         return that._texture;
                     }
                     else
-                    {					
+                    {
                         return 0;
                     }
 
@@ -550,17 +677,32 @@
 
         if (passes.render) {
 
-            var heading = this._cameraController.heading;
+            var heading = getHeading3D(this._camera);
+			var tilt = getTiltCV(this._camera);
 
 			var ratio = this._canvas.height/this._canvas.width;
 			//console.log(ratio);
-			
+
 			this._projectionMatrix = Cesium.Matrix4.computeOrthographicOffCenter(0.0, 100, 100, 0.0, 0.0, 300);
 
-            var rotationX = Cesium.Matrix3.fromRotationX(Cesium.Math.toRadians(this._tilt));
+            var rotationX = Cesium.Matrix3.fromRotationX(Cesium.Math.toRadians(this._tilt) + tilt);
             var rotationY = Cesium.Matrix3.fromRotationY(heading);
             var finalRotation = Cesium.Matrix3.multiply(rotationX, rotationY);
-            var ratioScale = Cesium.Matrix3.fromScale(new Cesium.Cartesian3(this._scale*ratio, this._scale, this._scale*ratio));
+            
+
+			/*var p = new Cesium.Cartesian3(0,0,0);
+			var dir = new Cesium.Cartesian3(0,0,0);
+			Cesium.Cartesian3.multiplyByScalar(camera.direction	, 10, dir);
+			Cesium.Cartesian3.add(camera.position, dir, p);
+
+			var northPole = new Cesium.Cartographic(0, 90, 0.0);
+			var LookAt = ellipsoid.cartographicToCartesian(northPole);
+
+			var finalRotation = MatrixLookAt(p, LookAt, camera.up);
+
+			ratio = 1.0;*/
+			
+			var ratioScale = Cesium.Matrix3.fromScale(new Cesium.Cartesian3(this._scale*ratio, this._scale, this._scale*ratio));
             var finalTransform = Cesium.Matrix3.multiply(finalRotation, ratioScale);
 
             var screenOfs = new Cesium.Cartesian3(this._X, this._Y, -100.0);
@@ -606,6 +748,6 @@
      *
      */
     CompassPrimitive.prototype.destroy = function() {
-        return destroyObject(this);
+        return Cesium.destroyObject(this);
     };
 

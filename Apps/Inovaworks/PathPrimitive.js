@@ -11,15 +11,6 @@
        return (a0 * mu * mu2) + (a1 * mu2) + (a2 * mu) + a3;
     }
 
-    function update_animation(obj)
-    {
-        obj.uniforms.uvoffset.y += 0.025;
-        if (obj.uniforms.uvoffset.y>1.0)
-        {
-            obj.uniforms.uvoffset.y -= 1.0;
-        }
-    }
-
     // p is a Cesium.Cartographic point
     function getUpVector(p, ellipsoid)
     {
@@ -32,9 +23,6 @@
         Cesium.Cartesian3.normalize(direction, direction);
         return direction;
     }
-
-    var animated_path_material;
-
 
     /**
      * A renderable Path.
@@ -66,8 +54,7 @@
 
 
         // create shared material if necessary
-        if (!Cesium.defined(animated_path_material)) {
-            animated_path_material = new Cesium.Material({
+        var animated_path_material = new Cesium.Material({
             fabric : {
                 type : 'AnimatedImage',
                 uniforms : {
@@ -86,7 +73,7 @@
             // setup animation timer
             //var that = animated_path_material;
             //setInterval(function(){update_animation(that)}, this._speed);
-        }
+        
 
 
         this._animationOffset = 0.0;
@@ -406,5 +393,5 @@
      *
      */
     PathPrimitive.prototype.destroy = function() {
-        return destroyObject(this);
+        return Cesium.destroyObject(this);
     };

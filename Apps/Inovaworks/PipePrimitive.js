@@ -425,5 +425,5 @@ define([
         return destroyObject(this);
     };
 
-    return PipePrimitive;
+    return Cesium.PipePrimitive;
 });
