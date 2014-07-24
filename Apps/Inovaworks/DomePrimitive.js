@@ -13,6 +13,7 @@
      *      segments - number of horizontal geometry segments
      *      slices  - number of vertical  geometry slices
 	 *		lineWidth - wireframe width
+	 *		depthTest - bool (on/off)
      */
 
     var DomePrimitive = function(location, ellipsoid, options) {
@@ -49,6 +50,19 @@
         this._slices = Cesium.defaultValue(options.slices, 6);
         this._segments = Cesium.defaultValue(options.segments, 10);
 		this._lineWidth = Cesium.defaultValue(options.lineWidth, 1.0);
+		this._depthTest = Cesium.defaultValue(options.depthTest, false);
+		
+		if (this._angle<0)
+        {
+			this._angle *= -1.0;
+            this._inverted = true;
+        }
+		else
+		{
+			this._inverted = false;
+		}
+		
+		this._angle = 90 - this._angle;
 		
         this._location =  location;
         this._apex =  new Cesium.Cartographic(this._location.longitude, this._location.latitude, this._location.height + this._radius);
@@ -107,25 +121,34 @@
             var basePoint = this._ellipsoid.cartographicToCartesian(this._location);
             var apex = this._ellipsoid.cartographicToCartesian(this._apex);
 
-            var inverted = false;
-            if (coneAngle<0)
-            {
-              coneAngle *= -1.0;
-              inverted = true;
-            }
-
+            
+			
             // nota: usar um vector-up constante dá problemas se o apex do cone for paralelo a este vector
             // a corrigir depois~~
             var up = new Cesium.Cartesian3(0.0, 1.0, 0.0);
 
             // calcula percentagem de altura da intersecao da base do cone com a esfera
             // resultado esta no range 0.0 a 1.0
-            var dy = (Math.tan(coneAngle) * this._radius) / (this._radius*2);
-            dy = 1.0 - dy;
+            var dy = 0;
+			
+			if (this._angle<90)
+			{
+				//dy = (Math.tan(coneAngle) * this._radius) / (this._radius*2);
+				dy = (this._angle/90);
+				dy = 1.0 - dy;
+			}
 
             var direction = new Cesium.Cartesian3(0, 0, 0);
             Cesium.Cartesian3.subtract(apex, basePoint, direction);
             Cesium.Cartesian3.normalize(direction, direction);
+			
+			if (this._inverted)
+			{
+				Cesium.Cartesian3.multiplyByScalar(direction, -1, direction);
+				var dpr = new Cesium.Cartesian3(0, 0, 0);
+				Cesium.Cartesian3.multiplyByScalar(direction, this._radius, dpr);
+				Cesium.Cartesian3.add(basePoint, dpr, apex);			
+			}
 
             // calculate two axis paralel to cone, and perpendicular against each other
             var axis1 =  new Cesium.Cartesian3(0, 0, 0);
@@ -408,7 +431,7 @@
              var defaults = {
                   frontFace : Cesium.WindingOrder.COUNTER_CLOCKWISE,
                   cull : {
-                      enabled : false,
+                      enabled : true,
                       face : Cesium.CullFace.BACK
                    },
                    lineWidth : this._lineWidth,
@@ -431,7 +454,7 @@
                         far : 1
                     },
                     depthTest : {
-                        enabled : true,
+                        enabled : this._depthTest,
                         func : Cesium.DepthFunction.LESS
                     },
                     colorMask : {
@@ -482,8 +505,85 @@
                     dither : false
              };
 			
-            this._appearance = new Cesium.MaterialAppearance();
-            this._wireAppearance = new Cesium.MaterialAppearance({renderState: defaults});
+             var defaults_wire = {
+                  frontFace : Cesium.WindingOrder.COUNTER_CLOCKWISE,
+                  cull : {
+                      enabled : false,
+                      face : Cesium.CullFace.BACK
+                   },
+                   lineWidth : this._lineWidth,
+                   polygonOffset : {
+                           enabled : false,
+                           factor : 0,
+                           units : 0
+                    },
+                    scissorTest : {
+                        enabled : false,
+                        rectangle : {
+                        x : 0,
+                        y : 0,
+                        width : 0,
+                        height : 0
+                        }
+                    },
+                    depthRange : {
+                        near : 0,
+                        far : 1
+                    },
+                    depthTest : {
+                        enabled : false,
+                        func : Cesium.DepthFunction.LESS
+                    },
+                    colorMask : {
+                        red : true,
+                        green : true,
+                        blue : true,
+                        alpha : true
+                    },
+                    depthMask : true,
+                    stencilMask : ~0,
+                    blending : {
+                        enabled : false,
+                        color : {
+                            red : 0.0,
+                            green : 0.0,
+                            blue : 0.0,
+                            alpha : 0.0
+                    },
+                    equationRgb : Cesium.BlendEquation.ADD,
+                    equationAlpha : Cesium.BlendEquation.ADD,
+                    functionSourceRgb : Cesium.BlendFunction.SOURCE_ALPHA,
+                    functionSourceAlpha : Cesium.BlendFunction.SOURCE_ALPHA,
+                    functionDestinationRgb : Cesium.BlendFunction.ONE_MINUS_SOURCE_ALPHA,
+                    functionDestinationAlpha : Cesium.BlendFunction.ONE_MINUS_SOURCE_ALPHA
+                    },
+                    stencilTest : {
+                        enabled : false,
+                        frontFunction : Cesium.StencilFunction.ALWAYS,
+                        backFunction : Cesium.StencilFunction.ALWAYS,
+                        reference : 0,
+                        mask : ~0,
+                        frontOperation : {
+                            fail : Cesium.StencilOperation.KEEP,
+                            zFail : Cesium.StencilOperation.KEEP,
+                            zPass : Cesium.StencilOperation.KEEP
+                        },
+                        backOperation : {
+                            fail : Cesium.StencilOperation.KEEP,
+                            zFail : Cesium.StencilOperation.KEEP,
+                            zPass : Cesium.StencilOperation.KEEP
+                        }
+                    },
+                    sampleCoverage : {
+                        enabled : false,
+                        value : 1.0,
+                        invert : false
+                    },
+                    dither : false
+             };
+			
+            this._appearance = new Cesium.MaterialAppearance({renderState: defaults, flat : true});
+            this._wireAppearance = new Cesium.MaterialAppearance({renderState: defaults_wire, flat : true});
             //this._appearance.flat = false;
 
             var options1 = {
