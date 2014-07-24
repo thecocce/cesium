@@ -10,13 +10,13 @@
         var transform = Cesium.Matrix4.getRotation(toFixedFrame, scratchHeadingMatrix3);
         Cesium.Matrix3.transpose(transform, transform);
 
-        var right = Cesium.Matrix3.multiplyByVector(transform, camera.right, scratchHeadingCartesian3);
+        var right = Cesium.Matrix3.multiplyByVector(transform, camera.rightWC, scratchHeadingCartesian3);
         return Math.atan2(right.y, right.x);
     }
 
     function getTiltCV(camera) {
         // CesiumMath.acosClamped(dot(camera.direction, Cartesian3.negate(Cartesian3.UNIT_Z))
-        return Cesium.Math.PI_OVER_TWO - Cesium.Math.acosClamped(-camera.direction.z);
+        return Cesium.Math.PI_OVER_TWO - Cesium.Math.acosClamped(-camera.directionWC.z);
     }
 	
 function MatrixLookAt(eye, lookAt, up)
@@ -160,7 +160,7 @@ function MatrixLookAt(eye, lookAt, up)
         this._scale = Cesium.defaultValue(options.scale, 1.0);
         this._X = Cesium.defaultValue(options.x, 90.0);
         this._Y = Cesium.defaultValue(options.y, 10.0);
-        this._tilt = Cesium.defaultValue(options.tilt, 45.0);
+        this._tilt = Cesium.defaultValue(options.tilt, 0.0);
 		this._texturePath = Cesium.defaultValue(options.texturePath, default_compass_texturePath);
 
 
@@ -236,7 +236,7 @@ function MatrixLookAt(eye, lookAt, up)
                         far : 1
                     },
                     depthTest : {
-                        enabled : false,
+                        enabled : true,
                         func : Cesium.DepthFunction.LESS
                     },
                     colorMask : {
@@ -287,6 +287,83 @@ function MatrixLookAt(eye, lookAt, up)
                     dither : false
                     };
 
+             var defaults2 = {
+                  frontFace : Cesium.WindingOrder.COUNTER_CLOCKWISE,
+                  cull : {
+                      enabled : true,
+                      face : Cesium.CullFace.BACK
+                   },
+                   lineWidth : 1,
+                   polygonOffset : {
+                           enabled : false,
+                           factor : 0,
+                           units : 0
+                    },
+                    scissorTest : {
+                        enabled : false,
+                        rectangle : {
+                        x : 0,
+                        y : 0,
+                        width : 0,
+                        height : 0
+                        }
+                    },
+                    depthRange : {
+                        near : 0,
+                        far : 1
+                    },
+                    depthTest : {
+                        enabled : false,
+                        func : Cesium.DepthFunction.LESS
+                    },
+                    colorMask : {
+                        red : true,
+                        green : true,
+                        blue : true,
+                        alpha : true
+                    },
+                    depthMask : true,
+                    stencilMask : ~0,
+                    blending : {
+                        enabled : true,
+                        color : {
+                            red : 0.0,
+                            green : 0.0,
+                            blue : 0.0,
+                            alpha : 0.0
+                    },
+                    equationRgb : Cesium.BlendEquation.ADD,
+                    equationAlpha : Cesium.BlendEquation.ADD,
+                    functionSourceRgb : Cesium.BlendFunction.SOURCE_ALPHA,
+                    functionSourceAlpha : Cesium.BlendFunction.SOURCE_ALPHA,
+                    functionDestinationRgb : Cesium.BlendFunction.ONE_MINUS_SOURCE_ALPHA,
+                    functionDestinationAlpha : Cesium.BlendFunction.ONE_MINUS_SOURCE_ALPHA
+                    },
+                    stencilTest : {
+                        enabled : false,
+                        frontFunction : Cesium.StencilFunction.ALWAYS,
+                        backFunction : Cesium.StencilFunction.ALWAYS,
+                        reference : 0,
+                        mask : ~0,
+                        frontOperation : {
+                            fail : Cesium.StencilOperation.KEEP,
+                            zFail : Cesium.StencilOperation.KEEP,
+                            zPass : Cesium.StencilOperation.KEEP
+                        },
+                        backOperation : {
+                            fail : Cesium.StencilOperation.KEEP,
+                            zFail : Cesium.StencilOperation.KEEP,
+                            zPass : Cesium.StencilOperation.KEEP
+                        }
+                    },
+                    sampleCoverage : {
+                        enabled : false,
+                        value : 1.0,
+                        invert : false
+                    },
+                    dither : false
+                    };
+					
              var vs =
                  'uniform mat4 customModelMatrix;\n'+
                  'uniform mat4 customProjMatrix;\n'+
@@ -322,9 +399,8 @@ function MatrixLookAt(eye, lookAt, up)
             var color_ofs = 0;
             var uv_ofs = 0;
 
-            var vertexCount1 = (lats+1) * (longs+1) * 6 ;
+            var vertexCount1 = ((lats+1) * (longs+1)) * 6 ;
             var baseOfs = vertexCount1;
-            vertexCount1 += 6;
             var positions1 = new Float32Array(vertexCount1 * 3);
             var colors1 = new Float32Array(vertexCount1 * 4);
             var uvs1 = new Float32Array(vertexCount1 * 2);
@@ -368,7 +444,7 @@ function MatrixLookAt(eye, lookAt, up)
                     {
                         for (var k = 0; k < 6*4; k++)
                         {
-                            colors1[color_ofs+k] = 0.5;
+							colors1[color_ofs+k] = 0.5;
                         }
 
                         for (k = 0; k < 6*2; k++)
@@ -382,31 +458,31 @@ function MatrixLookAt(eye, lookAt, up)
                                 uvs1[uv_ofs+0+k] = WU;
                             }
                         }
-
+						
                         positions1[pos_ofs+0] = BX1;
                         positions1[pos_ofs+1] = BY1;
-                        positions1[pos_ofs+2] = BZ1;
+                        positions1[pos_ofs+2] = - BZ1;
 
                         positions1[pos_ofs+3] = BX0;
                         positions1[pos_ofs+4] = BY0;
-                        positions1[pos_ofs+5] = BZ0;
+                        positions1[pos_ofs+5] =  - BZ0;
 
                         positions1[pos_ofs+6] = AX1;
                         positions1[pos_ofs+7] = AY1;
-                        positions1[pos_ofs+8] = AZ1;
+                        positions1[pos_ofs+8] =  - AZ1;
 
                         positions1[pos_ofs+9] = AX0;
                         positions1[pos_ofs+10] = AY0;
-                        positions1[pos_ofs+11] = AZ0;
+                        positions1[pos_ofs+11] = - AZ0;
 
                         positions1[pos_ofs+12] = AX1;
                         positions1[pos_ofs+13] = AY1;
-                        positions1[pos_ofs+14] = AZ1;
+                        positions1[pos_ofs+14] = - AZ1;
 
                         positions1[pos_ofs+15] = BX0;
                         positions1[pos_ofs+16] = BY0;
-                        positions1[pos_ofs+17] = BZ0;
-
+                        positions1[pos_ofs+17] =  - BZ0;
+				
                         pos_ofs += 6*3;
                         uv_ofs += 6*2;
                         color_ofs += 6*4;
@@ -414,51 +490,6 @@ function MatrixLookAt(eye, lookAt, up)
                 }
             }
 
-            var size = radius;
-            var start_ofs = baseOfs * 3;
-            uv_ofs =  baseOfs * 2;
-
-            positions1[start_ofs] = -size;  start_ofs++;
-            positions1[start_ofs] = 0;      start_ofs++;
-            positions1[start_ofs] = -size;  start_ofs++;
-            uvs1[uv_ofs] = 0.0; uv_ofs++;
-            uvs1[uv_ofs] = 0.0; uv_ofs++;
-
-            positions1[start_ofs] = size;  start_ofs++;
-            positions1[start_ofs] = 0;     start_ofs++;
-            positions1[start_ofs] = -size; start_ofs++;
-            uvs1[uv_ofs] = 1.0; uv_ofs++;
-            uvs1[uv_ofs] = 0.0; uv_ofs++;
-
-            positions1[start_ofs] = size;  start_ofs++;
-            positions1[start_ofs] = 0;     start_ofs++;
-            positions1[start_ofs] = size;  start_ofs++;
-            uvs1[uv_ofs] = 1.0; uv_ofs++;
-            uvs1[uv_ofs] = 1.0; uv_ofs++;
-
-            positions1[start_ofs] = -size; start_ofs++;
-            positions1[start_ofs] = 0;     start_ofs++;
-            positions1[start_ofs] = -size; start_ofs++;
-            uvs1[uv_ofs] = 0.0; uv_ofs++;
-            uvs1[uv_ofs] = 0.0; uv_ofs++;
-
-            positions1[start_ofs] = size;  start_ofs++;
-            positions1[start_ofs] = 0;     start_ofs++;
-            positions1[start_ofs] = size;  start_ofs++;
-            uvs1[uv_ofs] = 1.0; uv_ofs++;
-            uvs1[uv_ofs] = 1.0; uv_ofs++;
-
-            positions1[start_ofs] = -size; start_ofs++;
-            positions1[start_ofs] = 0;     start_ofs++;
-            positions1[start_ofs] = size;  start_ofs++;
-            uvs1[uv_ofs] = 0.0; uv_ofs++;
-            uvs1[uv_ofs] = 1.0; uv_ofs++;
-
-            start_ofs =  baseOfs * 4;
-            for (var k=start_ofs; k<start_ofs+6*4; k++)
-            {
-                colors1[k] = 1.0;
-            }
 
             var geoAttribs1 = function(options) {};
 
@@ -608,6 +639,128 @@ function MatrixLookAt(eye, lookAt, up)
                 interleave : true
             });
 
+            var vertexCount3 = 12;
+            var positions3 = new Float32Array(vertexCount3 * 3);
+            var colors3 = new Float32Array(vertexCount3 * 4);
+            var uvs3 = new Float32Array(vertexCount3 * 2);
+
+            var size = radius;
+            var start_ofs = 0;
+            uv_ofs =  0;
+
+            positions3[start_ofs] = -size;  start_ofs++;
+            positions3[start_ofs] = 0;      start_ofs++;
+            positions3[start_ofs] = -size;  start_ofs++;
+            uvs3[uv_ofs] = 0.0; uv_ofs++;
+            uvs3[uv_ofs] = 0.0; uv_ofs++;
+
+            positions3[start_ofs] = size;  start_ofs++;
+            positions3[start_ofs] = 0;     start_ofs++;
+            positions3[start_ofs] = -size; start_ofs++;
+            uvs3[uv_ofs] = 1.0; uv_ofs++;
+            uvs3[uv_ofs] = 0.0; uv_ofs++;
+
+            positions3[start_ofs] = size;  start_ofs++;
+            positions3[start_ofs] = 0;     start_ofs++;
+            positions3[start_ofs] = size;  start_ofs++;
+            uvs3[uv_ofs] = 1.0; uv_ofs++;
+            uvs3[uv_ofs] = 1.0; uv_ofs++;
+
+            positions3[start_ofs] = -size; start_ofs++;
+            positions3[start_ofs] = 0;     start_ofs++;
+            positions3[start_ofs] = -size; start_ofs++;
+            uvs3[uv_ofs] = 0.0; uv_ofs++;
+            uvs3[uv_ofs] = 0.0; uv_ofs++;
+
+            positions3[start_ofs] = size;  start_ofs++;
+            positions3[start_ofs] = 0;     start_ofs++;
+            positions3[start_ofs] = size;  start_ofs++;
+            uvs3[uv_ofs] = 1.0; uv_ofs++;
+            uvs3[uv_ofs] = 1.0; uv_ofs++;
+
+            positions3[start_ofs] = -size; start_ofs++;
+            positions3[start_ofs] = 0;     start_ofs++;
+            positions3[start_ofs] = size;  start_ofs++;
+            uvs3[uv_ofs] = 0.0; uv_ofs++;
+            uvs3[uv_ofs] = 1.0; uv_ofs++;
+
+			// inverted part
+            positions3[start_ofs] = size;  start_ofs++;
+            positions3[start_ofs] = 0;     start_ofs++;
+            positions3[start_ofs] = size;  start_ofs++;
+            uvs3[uv_ofs] = 1.0; uv_ofs++;
+            uvs3[uv_ofs] = 0.0; uv_ofs++;
+
+            positions3[start_ofs] = size;  start_ofs++;
+            positions3[start_ofs] = 0;     start_ofs++;
+            positions3[start_ofs] = -size; start_ofs++;
+            uvs3[uv_ofs] = 1.0; uv_ofs++;
+            uvs3[uv_ofs] = 1.0; uv_ofs++;
+
+			positions3[start_ofs] = -size;  start_ofs++;
+            positions3[start_ofs] = 0;      start_ofs++;
+            positions3[start_ofs] = -size;  start_ofs++;
+            uvs3[uv_ofs] = 0.0; uv_ofs++;
+            uvs3[uv_ofs] = 1.0; uv_ofs++;
+
+            positions3[start_ofs] = -size; start_ofs++;
+            positions3[start_ofs] = 0;     start_ofs++;
+            positions3[start_ofs] = size;  start_ofs++;
+            uvs3[uv_ofs] = 0.0; uv_ofs++;
+            uvs3[uv_ofs] = 0.0; uv_ofs++;
+
+            positions3[start_ofs] = size;  start_ofs++;
+            positions3[start_ofs] = 0;     start_ofs++;
+            positions3[start_ofs] = size;  start_ofs++;
+            uvs3[uv_ofs] = 1.0; uv_ofs++;
+            uvs3[uv_ofs] = 0.0; uv_ofs++;
+
+            positions3[start_ofs] = -size; start_ofs++;
+            positions3[start_ofs] = 0;     start_ofs++;
+            positions3[start_ofs] = -size; start_ofs++;
+            uvs3[uv_ofs] = 0.0; uv_ofs++;
+            uvs3[uv_ofs] = 1.0; uv_ofs++;
+			
+			
+            for (var k=0; k<vertexCount3*4; k++)
+            {
+                colors3[k] = 1.0;
+            }
+
+            var geoAttribs3 = function(options) {};
+
+            geoAttribs3.position = new Cesium.GeometryAttribute({
+                    componentDatatype : Cesium.ComponentDatatype.FLOAT,
+                    componentsPerAttribute : 3,
+                    values : positions3
+            });
+
+            geoAttribs3.uv = new Cesium.GeometryAttribute({
+                    componentDatatype : Cesium.ComponentDatatype.FLOAT,
+                    componentsPerAttribute : 2,
+                    values : uvs3
+            });
+
+            geoAttribs3.color = new Cesium.GeometryAttribute({
+                    componentDatatype : Cesium.ComponentDatatype.FLOAT,
+                    componentsPerAttribute : 4,
+                    values : colors3
+            });
+
+            var geo3 = new Cesium.Geometry({
+                attributes : geoAttribs3,
+                primitiveType : Cesium.PrimitiveType.TRIANGLES
+            });
+
+            var attribLoc3 = Cesium.GeometryPipeline.createAttributeLocations(geo3);
+
+            var vertexArray3 = context.createVertexArrayFromGeometry({
+                geometry : geo3,
+                attributeLocations : attribLoc3,
+                bufferUsage : Cesium.BufferUsage.STATIC_DRAW,
+                interleave : true
+            });
+			
 //            this._shaderProgram2 = context.createShaderProgram(vs, fs, attribLoc2);
 
             this._projectionMatrix = Cesium.Matrix4.computeOrthographicOffCenter(0.0, 100, 100, 0.0, 0.0, 300);
@@ -655,7 +808,6 @@ function MatrixLookAt(eye, lookAt, up)
             this._drawCommand1 = new Cesium.DrawCommand({ owner : this});
             this._drawCommand1.vertexArray = vertexArray1;
             this._drawCommand1.count = vertexCount1;
-            this._drawCommand1.cull = false;
             this._drawCommand1.renderState = context.createRenderState(defaults);
             this._drawCommand1.shaderProgram = this._shaderProgram1;
             this._drawCommand1.uniformMap = this._uniforms;
@@ -664,13 +816,20 @@ function MatrixLookAt(eye, lookAt, up)
             this._drawCommand2 = new Cesium.DrawCommand({ owner : this});
             this._drawCommand2.vertexArray = vertexArray2;
             this._drawCommand2.count = vertexCount2;
-            this._drawCommand2.cull = false;
             this._drawCommand2.primitiveType = Cesium.PrimitiveType.LINES;
             this._drawCommand2.renderState = context.createRenderState(defaults);
             this._drawCommand2.shaderProgram = this._shaderProgram1;
             this._drawCommand2.uniformMap = this._uniforms;
             this._drawCommand2.pass = Cesium.Pass.OVERLAY;
-        }
+
+            this._drawCommand3 = new Cesium.DrawCommand({ owner : this});
+            this._drawCommand3.vertexArray = vertexArray3;
+            this._drawCommand3.count = vertexCount3;
+            this._drawCommand3.renderState = context.createRenderState(defaults2);
+            this._drawCommand3.shaderProgram = this._shaderProgram1;
+            this._drawCommand3.uniformMap = this._uniforms;
+            this._drawCommand3.pass = Cesium.Pass.OVERLAY;
+		}
 
 
         var passes = frameState.passes;
@@ -702,13 +861,15 @@ function MatrixLookAt(eye, lookAt, up)
 
 			ratio = 1.0;*/
 			
+		
 			var ratioScale = Cesium.Matrix3.fromScale(new Cesium.Cartesian3(this._scale*ratio, this._scale, this._scale*ratio));
-            var finalTransform = Cesium.Matrix3.multiply(finalRotation, ratioScale);
+            var finalTransform = Cesium.Matrix3.multiply(ratioScale, finalRotation);
 
             var screenOfs = new Cesium.Cartesian3(this._X, this._Y, -100.0);
             this._modelMatrix = Cesium.Matrix4.fromRotationTranslation(finalTransform, screenOfs);
 
             commandList.push(this._drawCommand1);
+			commandList.push(this._drawCommand3);
             commandList.push(this._drawCommand2);
         }
     };
