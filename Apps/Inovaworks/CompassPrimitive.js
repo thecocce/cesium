@@ -792,7 +792,7 @@ function MatrixLookAt(eye, lookAt, up)
 
                 out_texture : function() {
 
-					console.log(that._texture);
+					//console.log(that._texture);
 					if (Cesium.defined(that._texture)) {
                         return that._texture;
                     }

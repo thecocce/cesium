@@ -67,6 +67,7 @@
 
 		var domeOptions = {
 			lineWidth:1.0,
+			angle:45,
 			wireMaterial: Cesium.Material.fromType(Cesium.Material.ColorType, {color : new Cesium.Color(1.0, 1.0, 1.0, 1.0)}),
 			material: Cesium.Material.fromType(Cesium.Material.ColorType, {color : new Cesium.Color(0.85, 0.72, 0.2, 0.5)})
 					   };
@@ -76,7 +77,7 @@
 		var scaleOptions = {x:10, y:10};			
 		var scalebar = new ScaleWidget('appContainer', canvas, camera, ellipsoid, scaleOptions);
 		
-		//var myNavigator = new SpaceNavigator(scene);
+		var myNavigator = new SpaceNavigator(scene);
 	</script>
 </body>
 </html>	

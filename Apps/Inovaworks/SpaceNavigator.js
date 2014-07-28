@@ -3,6 +3,24 @@ function update_navigator(obj)
    obj.update();
 };
 
+function getSaneValue(x)
+{
+	console.log("axis: "+x);
+	if (x>100000)
+	{
+		return -1;
+	}
+	else
+	if (x>1)
+	{
+		return 1;	
+	}
+	else
+	{
+		return x;
+	}
+}
+
 var SpaceNavigator = function(scene, options) 
 {
         //>>includeStart('debug', pragmas.debug);
@@ -48,7 +66,7 @@ var SpaceNavigator = function(scene, options)
 	
     SpaceNavigator.prototype.update = function() 
 	{
-        if (!Cesium.defined(this._gamepad)) 
+        if (!Cesium.defined(this._gamepad) || this._gamepad==null) 
 		{
 			var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads() : []);
 			if (gamepads.length>0)
@@ -62,12 +80,15 @@ var SpaceNavigator = function(scene, options)
 				
 		var cameraHeight = this._ellipsoid.cartesianToCartographic(camera.position).height;
 		var moveRate = cameraHeight / 100.0;
-
+		var lookRate = 0.01;
+		var dir = 0;
 		
-		var dir = this._gamepad.axes[0];
-
-		console.log("axis: "+dir);
-
+		var zoomAxis = 0;
+		var lookAroundAxis = 1;
+		var lookVerticalAxis = 2;
+		
+		dir = getSaneValue(this._gamepad.axes[zoomAxis]);
+	
 		var speed = moveRate * Math.abs(dir);
 		
 		if (dir<0.0)
@@ -79,6 +100,34 @@ var SpaceNavigator = function(scene, options)
 			camera.moveForward(speed);
 		}
         
+		
+		dir = getSaneValue(this._gamepad.axes[lookAroundAxis]);		
+
+		var rot = lookRate * Math.abs(dir);
+		
+		if (dir<0.0)
+		{
+			camera.lookLeft(rot);
+		}
+		if (dir>0.0)
+		{
+			camera.lookRight(rot);
+		}
+
+		dir = getSaneValue(this._gamepad.axes[lookVerticalAxis]);		
+
+		var rot = lookRate * Math.abs(dir);
+		
+		if (dir<0.0)
+		{
+			camera.lookDown(rot);
+		}
+		if (dir>0.0)
+		{
+			camera.lookUp(rot);
+		}
+		
+		
     };
 
 /*    SpaceNavigator.prototype.isDestroyed = function() {
