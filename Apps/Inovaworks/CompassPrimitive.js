@@ -763,7 +763,8 @@ function MatrixLookAt(eye, lookAt, up)
 			
 //            this._shaderProgram2 = context.createShaderProgram(vs, fs, attribLoc2);
 
-            this._projectionMatrix = Cesium.Matrix4.computeOrthographicOffCenter(0.0, 100, 100, 0.0, 0.0, 300);
+            this._projectionMatrix = new Cesium.Matrix4();
+			Cesium.Matrix4.computeOrthographicOffCenter(0.0, 100, 100, 0.0, 0.0, 300, this._projectionMatrix);
 
             this._modelMatrix = Cesium.Matrix4.IDENTITY;
 
@@ -842,11 +843,12 @@ function MatrixLookAt(eye, lookAt, up)
 			var ratio = this._canvas.height/this._canvas.width;
 			//console.log(ratio);
 
-			this._projectionMatrix = Cesium.Matrix4.computeOrthographicOffCenter(0.0, 100, 100, 0.0, 0.0, 300);
+			Cesium.Matrix4.computeOrthographicOffCenter(0.0, 100, 100, 0.0, 0.0, 300, this._projectionMatrix);
 
             var rotationX = Cesium.Matrix3.fromRotationX(Cesium.Math.toRadians(this._tilt) + tilt);
             var rotationY = Cesium.Matrix3.fromRotationY(heading);
-            var finalRotation = Cesium.Matrix3.multiply(rotationX, rotationY);
+            var finalRotation = new Cesium.Matrix3();
+			Cesium.Matrix3.multiply(rotationX, rotationY, finalRotation);
             
 
 			/*var p = new Cesium.Cartesian3(0,0,0);
@@ -863,7 +865,8 @@ function MatrixLookAt(eye, lookAt, up)
 			
 		
 			var ratioScale = Cesium.Matrix3.fromScale(new Cesium.Cartesian3(this._scale*ratio, this._scale, this._scale*ratio));
-            var finalTransform = Cesium.Matrix3.multiply(ratioScale, finalRotation);
+            var finalTransform = new Cesium.Matrix3();
+			Cesium.Matrix3.multiply(ratioScale, finalRotation, finalTransform);
 
             var screenOfs = new Cesium.Cartesian3(this._X, this._Y, -100.0);
             this._modelMatrix = Cesium.Matrix4.fromRotationTranslation(finalTransform, screenOfs);
