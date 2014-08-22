@@ -17,29 +17,32 @@ define([
     /*global WebGLRenderingContext*/
 
 
-    var ModelResourcesCache = function(options) {
+    var ModelResourceCache = function(options) {
         options = Cesium.defaultValue(options, Cesium.defaultValue.EMPTY_OBJECT);
 
         this._modelList = [];
     };
 
-    ModelResourcesCache.prototype.getModel = function(modelUrl) {
+    ModelResourceCache.prototype.putModel = function(modelResources, url) {
+		this._modelList.push({
+			url:url,
+			modelResources:modelResources,			
+		});		
+	}
+	
+    ModelResourceCache.prototype.getModel = function(url) {
         
 		var arrayLength = this._modelList.length;
 		for (var i = 0; i < arrayLength; i++) {
-			if (this._modelList[i]._url == modelUrl)
+			if (this._modelList[i].url == url)
 			{
-				return this._modelList[i];
+				return this._modelList[i].modelResources;
 			}
 		}
-		
-		var result = ModelResources.fromGltf({
-			url : modelUrl
-		});
-		
-		this._modelList[i].push(result);
-		
-		return result;
+
+		return undefined;
     };
-	
+
+    return ModelResourceCache;
+
 });
