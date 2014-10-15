@@ -13,7 +13,6 @@ defineSuite([
         'Specs/createContext',
         'Specs/createFrameState',
         'Specs/destroyContext',
-        'Specs/frameState',
         'Specs/render'
     ], function(
         Material,
@@ -29,12 +28,12 @@ defineSuite([
         createContext,
         createFrameState,
         destroyContext,
-        frameState,
         render) {
     "use strict";
     /*global jasmine,describe,xdescribe,it,xit,expect,beforeEach,afterEach,beforeAll,afterAll,spyOn,runs,waits,waitsFor*/
 
     var context;
+    var frameState;
     var polygon;
     var polylines;
     var polyline;
@@ -42,6 +41,7 @@ defineSuite([
 
     beforeAll(function() {
         context = createContext();
+        frameState = createFrameState();
     });
 
     afterAll(function() {
@@ -347,6 +347,33 @@ defineSuite([
                     '    material.diffuse = textureCube(cubeMap, vec3(1.0)).xyz;\n' +
                     '    return material;\n' +
                     '}\n'
+            }
+        });
+        var pixel = renderMaterial(material);
+        expect(pixel).not.toEqual([0, 0, 0, 0]);
+    });
+
+    it('does not crash if source uniform is formatted differently', function() {
+        var material = new Material({
+            strict : true,
+            fabric : {
+                uniforms : {
+                    cubeMap : {
+                        positiveX : './Data/Images/Blue.png',
+                        negativeX : './Data/Images/Blue.png',
+                        positiveY : './Data/Images/Blue.png',
+                        negativeY : './Data/Images/Blue.png',
+                        positiveZ : './Data/Images/Blue.png',
+                        negativeZ : './Data/Images/Blue.png'
+                    }
+                },
+                source : 'uniform   samplerCube   cubeMap  ;\r\n' +
+                    'czm_material czm_getMaterial(czm_materialInput materialInput)\r\n' +
+                    '{\r\n' +
+                    '    czm_material material = czm_getDefaultMaterial(materialInput);\r\n' +
+                    '    material.diffuse = textureCube(cubeMap, vec3(1.0)).xyz;\r\n' +
+                    '    return material;\r\n' +
+                    '}'
             }
         });
         var pixel = renderMaterial(material);

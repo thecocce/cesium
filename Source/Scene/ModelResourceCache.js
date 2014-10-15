@@ -2,6 +2,7 @@
 define([
         '../Core/Cartesian3',
         '../Core/defined',
+        '../Core/defaultValue',
         '../Core/LinearSpline',
         '../Core/Quaternion',
         '../Core/QuaternionSpline',
@@ -9,6 +10,7 @@ define([
     ], function(
         Cartesian3,
         defined,
+        defaultValue,
         LinearSpline,
         Quaternion,
         QuaternionSpline,
@@ -18,7 +20,7 @@ define([
 
 
     var ModelResourceCache = function(options) {
-        options = Cesium.defaultValue(options, Cesium.defaultValue.EMPTY_OBJECT);
+        options = defaultValue(options, defaultValue.EMPTY_OBJECT);
 
         this._modelList = [];
     };
@@ -26,15 +28,15 @@ define([
     ModelResourceCache.prototype.putModel = function(modelResources, url) {
 		this._modelList.push({
 			url:url,
-			modelResources:modelResources,			
-		});		
-	}
+			modelResources:modelResources
+		});
+	};
 	
     ModelResourceCache.prototype.getModel = function(url) {
         
 		var arrayLength = this._modelList.length;
 		for (var i = 0; i < arrayLength; i++) {
-			if (this._modelList[i].url == url)
+			if (this._modelList[i].url === url)
 			{
 				return this._modelList[i].modelResources;
 			}
@@ -43,6 +45,11 @@ define([
 		return undefined;
     };
 
+    ModelResourceCache.prototype.getNumberOfCachedModels = function() {
+		return this._modelList.length;
+	};
+	
+    
     return ModelResourceCache;
 
 });

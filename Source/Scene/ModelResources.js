@@ -101,7 +101,7 @@ define([
 
         this.createSamplers = true;
         this.createVertexArrays = true;
-        this.createRenderStates = true;        
+        this.createRenderStates = true;
     }
 
     LoadResources.prototype.finishedPendingLoads = function() {
@@ -128,7 +128,7 @@ define([
         return ((this.pendingTextureLoads === 0) && (this.texturesToCreate.length === 0));
     };
 
-    var ModelResources = function(url, headers) {
+    var ModelResources = function(options) {
         this._state = ModelState.NEEDS_LOAD;
         this._loadError = undefined;
         this._loadResources = undefined;
@@ -143,26 +143,45 @@ define([
             textures : {},
 
             samplers : {},
-            renderStates : {},            
+            renderStates : {}
         };
+        
+        var url = options.url;
+        var headers = options.headers;
 
-        var basePath = '';
-        var i = url.lastIndexOf('/');
-        if (i !== -1) {
-            basePath = url.substring(0, i + 1);
+        if (defined(url))
+        {
+            var basePath = '';
+            var i = url.lastIndexOf('/');
+            if (i !== -1) {
+                basePath = url.substring(0, i + 1);
+            }
+            
+            this._basePath = basePath;
+         }
+         else
+         {
+            this._basePath = defaultValue(options.basePath, '');
+         }
+               
+
+        var docUri = new Uri(document.location.href);
+        var modelUri = new Uri(this._basePath);
+        this._baseUri = modelUri.resolve(docUri);
+        
+        if (defined(url))
+        {
+            var that = this;
+            loadText(url, headers).then(function(data) {
+                var src = JSON.parse(data);
+                that._gltf = gltfDefaults(src);
+        
+            }).otherwise(getFailedLoadFunction(that, 'gltf', url));
         }
-
-		var that = this;
-        loadText(url, headers).then(function(data) {
-			var src = JSON.parse(data);
-            that._gltf = gltfDefaults(src);
-            that._basePath = basePath;
-
-            var docUri = new Uri(document.location.href);
-            var modelUri = new Uri(that._basePath);
-            that._baseUri = modelUri.resolve(docUri);
-        }).otherwise(getFailedLoadFunction(that, 'gltf', url));
-
+        else
+        {
+            this._gltf = options.gltf;
+        }
     };
 
     defineProperties(ModelResources.prototype, {
@@ -201,7 +220,7 @@ define([
             get : function() {
                 return this._basePath;
             }
-        },
+        }
 
 
     });
@@ -240,8 +259,7 @@ define([
 
          this._loadResources = new LoadResources();
          parse(this);
-	}
-
+	};
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -576,29 +594,6 @@ define([
         return attributeLocations;
     }
 
-    function searchForest(forest, jointName) {
-        var length = forest.length;
-        for (var i = 0; i < length; ++i) {
-            var stack = [forest[i]]; // Push root node of tree
-
-            while (stack.length > 0) {
-                var n = stack.pop();
-
-                if (n.jointName === jointName) {
-                    return n;
-                }
-
-                var children = n.children;
-                var childrenLength = children.length;
-                for (var k = 0; k < childrenLength; ++k) {
-                    stack.push(children[k]);
-                }
-            }
-        }
-
-        // This should never happen; the skeleton should have a node for all joints in the skin.
-        return undefined;
-    }
 
 
 
@@ -778,18 +773,12 @@ define([
     }
 
 
-
-
-    function createJointMatricesFunction(runtimeNode) {
-        return function() {
-            return runtimeNode.computedJointMatrices;
-        };
-    }
-
-	function clone(obj) 
+	function clone(obj)
 	{
-		if(obj == null || typeof(obj) != 'object')
+		if(obj === null || typeof(obj) !== 'object')
+        {
 			return obj;
+        }
 
 		var temp = obj.constructor(); // changed
 
@@ -799,7 +788,7 @@ define([
 			}
 		}
 		return temp;
-	}	
+	}
 	
 
     function createResources(modelResources, context) {
@@ -821,8 +810,6 @@ define([
             parse(this);
         }
 
-        var justLoaded = false;
-
         if (this._state === ModelState.FAILED) {
             throw this._loadError;
         }
@@ -838,13 +825,10 @@ define([
 				this.skinnedNodesName = loadResources.skinnedNodesNames;
 				this.buffers = loadResources.buffers;
 			
-                this._state = ModelState.LOADED;			
-                this._loadResources = undefined;  // Clear CPU memory since WebGL resources were created.
-                justLoaded = true;
+                this._state = ModelState.LOADED;
+                this._loadResources = undefined;  // Clear CPU memory since WebGL resources were created.                
             }
         }
-
-        return justLoaded;
     };
 
     /**

@@ -1,4 +1,32 @@
 
+    function addPolyLine(grid, x1, y1, x2, y2)
+    {
+        if (x2>=grid._divX)
+        {
+            return;
+        }
+
+        if (y2>=grid._divY)
+        {
+            return;
+        }
+
+        var ofs1 = y1 * grid._divX + x1;
+        var ofs2 = y2 * grid._divX + x2;
+        
+        var posArray = new Array();
+        posArray.push(grid._points3d[ofs1]);
+        posArray.push(grid._points3d[ofs2]);
+        
+        var polyline = grid._polylines.add({
+                        positions : posArray,
+                        width: 3.0,
+                        material : Cesium.Material.fromType('Color', {
+                            color : new Cesium.Color(1.0, 1.0, 1.0, 1.0)
+                        })
+                    });
+                    
+    }
 
     /**
      * A renderable Grid with subdivisions.
@@ -30,28 +58,68 @@
         this._bottomEastCoord = bottomEastCoord;
         this._ellipsoid = ellipsoid;
 
-        this._divX = Cesium.defaultValue(options.divX, 10);
-        this._divY = Cesium.defaultValue(options.divY, 10);
+        this._divX = Cesium.defaultValue(options.divX, 10) + 1;
+        this._divY = Cesium.defaultValue(options.divY, 10) + 1;
         this._maxLevels = Cesium.defaultValue(options.maxLevels, 10);
 
-        this._points3d = new Array();
+        this._points3d = new Array((this._divX+1) * (this._divY+1));
+        
+        this._polylines = new Cesium.PolylineCollection();
+        this._labels = new Cesium.LabelCollection();
         
         // the following code generates a grid using the source points as guidelines
-        for (var j = 0; j < this._divY; j++)        
-        {
-            var deltaY = (j+1) / this._divY;
-        
-            for (var i = 0; i < this._divX; i++)
-            {
-                var deltaX = (i+1) / this._divX;
+        for (var j = 0; j <= this._divY; j++)        
+        {    
+            var deltaY = j / this._divY;        
+            for (var i = 0; i <= this._divX; i++)
+            {                
+                var deltaX = i / this._divX;
 
-                var cx = (this._topWestCoord.x * deltaX) + (this._bottomEastCoord.x * (1.0 - deltaX));
-                var cy = (this._topWestCoord.y * deltaY) + (this._bottomEastCoord.y * (1.0 - deltaY));
+                var lat = (this._topWestCoord.longitude * deltaX) + (this._bottomEastCoord.longitude * (1.0 - deltaX));
+                var lon = (this._topWestCoord.latitude * deltaY) + (this._bottomEastCoord.latitude * (1.0 - deltaY));
                 
-                this._points3d.push(this._ellipsoid.cartographicToCartesian(new Cartographic(cx, cy, 0.0)));
-            }
+                var ofs = j * this._divX + i;
+                this._points3d[ofs] = this._ellipsoid.cartographicToCartesian(new Cesium.Cartographic(lon, lat, 0.0));
+                
+                if (i==0 && j<this._divY-1)
+                {
+                    tempDeltaY = (j+0.5) / this._divY;
+                    lon = (this._topWestCoord.latitude * tempDeltaY) + (this._bottomEastCoord.latitude * (1.0 - tempDeltaY));
+                    var pp = this._ellipsoid.cartographicToCartesian(new Cesium.Cartographic(lon, lat, 0.0));
+
+                    this._labels.add({
+                        position : pp,
+                        text     : String.fromCharCode(65 + j)
+                    });
+                }
+
+                if (j==0 && i<this._divX-1)
+                {
+                    tempDeltaX = (i+0.5) / this._divX;
+                    lat = (this._topWestCoord.longitude * tempDeltaX) + (this._bottomEastCoord.longitude * (1.0 - tempDeltaX));
+                    lon = (this._topWestCoord.latitude * deltaY) + (this._bottomEastCoord.latitude * (1.0 - deltaY));
+                    var pp = this._ellipsoid.cartographicToCartesian(new Cesium.Cartographic(lon, lat, 0.0));
+
+                    var n = (i+1);
+                    this._labels.add({
+                        position : pp,
+                        text     : n.toString()
+                    });
+                }
+                
+            }                        
         }
 
+        for (var j = 0; j < this._divY; j++)
+        {
+            for (var i = 0; i < this._divX; i++)
+            {
+                addPolyLine(this, i, j, i+1, j);
+                addPolyLine(this, i, j, i, j+1);
+            }
+        }
+        
+        
         /**
          * Determines if this primitive will be shown.
          *
@@ -94,133 +162,8 @@
         }
 
 
-        if (!Cesium.defined(this._instance)) {
-            var vertexCount = this._divX * this._divY;
-            var temp = new Array();
-            var positions = new Float64Array(vertexCount * 3);
-            var normals = new Float32Array(vertexCount * 3);
-            var uvs = new Float32Array(vertexCount * 2);
-
-
-            for (var i = 0; i < vertexCount; i++)
-            {
-                // calculate left normal
-                var nx = 0.0;
-                var ny = 1.0;
-                var nz = 0.0;
-
-                normals[normal_ofs + 0] = nx;
-                normals[normal_ofs + 1] = ny;
-                normals[normal_ofs + 2] = nz;
-                normal_ofs += 3;
-
-                // calculate left position
-                positions[pos_ofs+0] = this._points3d[i].x;
-                positions[pos_ofs+1] = this._points3d[i].y;
-                positions[pos_ofs+2] = this._points3d[i].z;
-                temp.push(new Cesium.Cartesian3(this._points3d[i]));
-                pos_ofs += 3;
-
-                // uvs multiply along the path
-                var u = i % this._divX;
-                var v = i / this._divX;
-
-                uvs[uv_ofs+0] = u;
-                uvs[uv_ofs+1] = v;
-                uv_ofs += 2;
-            }
-
-            // 3 indices per triangle
-            // 2 triangles per segment
-            var indexcount = (this._divX+1) * (this._divY+1);
-            var gridIndices = new Uint16Array(indexcount);
-            var index_ofs = 0;
-            for (var j = 0; j < this._divY; j++)
-            {
-                for (var i = 0; i < this._divX; i++)
-                {
-                    if (i<this._divX-1)
-                    {
-                        gridIndices[index_ofs+0] = getGridVertexIndex(i, j);
-                        gridIndices[index_ofs+1] = getGridVertexIndex(i+1, j);
-                        index_ofs += 2;
-                    }
-
-                    if (j<this._divY-1)
-                    {
-                        gridIndices[index_ofs+0] = getGridVertexIndex(i, j);
-                        gridIndices[index_ofs+1] = getGridVertexIndex(i, j+1);
-                        index_ofs += 2;
-                    }
-                }
-            }
-
-            // create cesium renderer stuff
-            var geoAttribs = function(options) {};
-
-            geoAttribs.position = new Cesium.GeometryAttribute({
-                    componentDatatype : Cesium.ComponentDatatype.DOUBLE,
-                    componentsPerAttribute : 3,
-                    values : positions
-            });
-
-            geoAttribs.normal = new Cesium.GeometryAttribute({
-                    componentDatatype : Cesium.ComponentDatatype.FLOAT,
-                    componentsPerAttribute : 3,
-                    values : normals
-            });
-
-            geoAttribs.st = new Cesium.GeometryAttribute({
-                componentDatatype : Cesium.ComponentDatatype.FLOAT,
-                componentsPerAttribute : 2,
-                values : uvs
-            });
-
-            // bounding sphere from collected 3d points
-            var sphere = Cesium.BoundingSphere.fromPoints(temp);
-
-            // vertex array creation
-            var geo = new Cesium.Geometry({
-                attributes : geoAttribs,
-                indices : gridIndices,
-                ellipsoid : this._ellipsoid,
-                boundingSphere : sphere,
-                primitiveType : Cesium.PrimitiveType.TRIANGLES
-            });
-
-            this._instance = new Cesium.GeometryInstance({
-                geometry : geo,
-                id : this.id,
-                modelMatrix : Cesium.Matrix4.IDENTITY,
-                pickPrimitive : this
-            });
-
-            if (Cesium.defined(this._primitive)) {
-                this._primitive.destroy();
-            }
-
-            this._appearance = new Cesium.MaterialAppearance();
-            //this._appearance.flat = false;
-
-            var options = {
-                    geometryInstances : this._instance,
-                    appearance : this._appearance,
-                    asynchronous : this.asynchronous
-                };
-
-            this._primitive = new Cesium.Primitive(options);
-        }
-
-        this._animationOffset += 0.025;
-        if (this._animationOffset>1.0)
-            this._animationOffset -= 1.0;
-
-        this._material.uniforms.uvoffset.y = this._animationOffset;
-
-        this._material.update(context);
-
-        this._primitive.appearance.material = this._material;
-        this._primitive.update(context, frameState, commandList);
+        this._polylines.update(context, frameState, commandList);
+        this._labels.update(context, frameState, commandList);
      };
 
 

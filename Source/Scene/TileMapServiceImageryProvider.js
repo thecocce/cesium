@@ -11,7 +11,6 @@ define([
         '../Core/GeographicTilingScheme',
         '../Core/loadXML',
         '../Core/Rectangle',
-        '../Core/RuntimeError',
         '../Core/TileProviderError',
         '../Core/WebMercatorTilingScheme',
         '../ThirdParty/when',
@@ -28,7 +27,6 @@ define([
         GeographicTilingScheme,
         loadXML,
         Rectangle,
-        RuntimeError,
         TileProviderError,
         WebMercatorTilingScheme,
         when,
@@ -63,6 +61,7 @@ define([
      * @see BingMapsImageryProvider
      * @see GoogleEarthImageryProvider
      * @see OpenStreetMapImageryProvider
+     * @see WebMapTileServiceImageryProvider
      * @see SingleTileImageryProvider
      * @see WebMapServiceImageryProvider
      *
@@ -251,7 +250,7 @@ define([
             that._tileHeight = defaultValue(options.tileHeight, 256);
             that._minimumLevel = defaultValue(options.minimumLevel, 0);
             that._maximumLevel = defaultValue(options.maximumLevel, 18);
-            that._tilingScheme = defaultValue(options.tilingScheme, new WebMercatorTilingScheme());
+            that._tilingScheme = defined(options.tilingScheme) ? options.tilingScheme : new WebMercatorTilingScheme();
             that._rectangle = defaultValue(options.rectangle, that._tilingScheme.rectangle);
             that._ready = true;
         }
@@ -515,6 +514,24 @@ define([
 
         var url = buildImageUrl(this, x, y, level);
         return ImageryProvider.loadImage(this, url);
+    };
+
+    /**
+     * Picking features is not currently supported by this imagery provider, so this function simply returns
+     * undefined.
+     *
+     * @param {Number} x The tile X coordinate.
+     * @param {Number} y The tile Y coordinate.
+     * @param {Number} level The tile level.
+     * @param {Number} longitude The longitude at which to pick features.
+     * @param {Number} latitude  The latitude at which to pick features.
+     * @return {Promise} A promise for the picked features that will resolve when the asynchronous
+     *                   picking completes.  The resolved value is an array of {@link ImageryLayerFeatureInfo}
+     *                   instances.  The array may be empty if no features are found at the given location.
+     *                   It may also be undefined if picking is not supported.
+     */
+    TileMapServiceImageryProvider.prototype.pickFeatures = function() {
+        return undefined;
     };
 
     return TileMapServiceImageryProvider;

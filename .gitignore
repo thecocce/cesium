@@ -19,4 +19,5 @@ Thumbs.db
 !/Source/Shaders/Shaders.profile.js
 
 /Specs/SpecList.js
-/nbproject/private/
+
+/node_modules
