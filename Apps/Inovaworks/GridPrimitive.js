@@ -38,6 +38,15 @@
         result._divX = divX;
         result._divY = divY;
         result._distance = distance;
+        
+        var textScale = 0.25;
+        
+        var corners = [];
+        corners.push(new Cesium.BoundingSphere(ellipsoid.cartographicToCartesian(topWestCoord), 0.0));
+        corners.push(new Cesium.BoundingSphere(ellipsoid.cartographicToCartesian(new Cesium.Cartographic(topWestCoord.longitude, bottomEastCoord.latitude, 0.0)), 0.0));
+        corners.push(new Cesium.BoundingSphere(ellipsoid.cartographicToCartesian(bottomEastCoord), 0.0));
+        corners.push(new Cesium.BoundingSphere(ellipsoid.cartographicToCartesian(new Cesium.Cartographic(bottomEastCoord.longitude, topWestCoord.latitude, 0.0)), 0.0));
+        result._corners = corners;
                 
         if (labelsType !=0)
         {
@@ -68,6 +77,7 @@
 
                         result._labels.add({
                             position : pp,
+                            scale: textScale,
                             text     : String.fromCharCode(65 + j)
                         });
                     }
@@ -82,6 +92,7 @@
                         var n = (i+1);
                         result._labels.add({
                             position : pp,
+                            scale: textScale,
                             text     : n.toString()
                         });
                     }
@@ -143,6 +154,7 @@
                             
                             result._labels.add({
                                 position : pp,
+                                scale: textScale,
                                 text     : n.toString()
                             });
                         }
@@ -201,14 +213,32 @@
     }
     
     // calculates exactly what grid (or subgrid) is closest to the camera and returns it    
-    function calculateCurrentSublevel(grid, ellipsoid, camera)
+    function calculateCurrentSublevel(grid, ellipsoid, frameState)
     {
+        var camera = frameState.camera;
+        
         var distance = ellipsoid.cartesianToCartographic(camera.position).height;
         console.log(distance);
         
-        if (distance>grid._distance)
+        /*if (distance>grid._distance)
         {
             return grid; // we're not too close to subdivide, so use this level
+        }*/
+        
+        var cullingVolume = frameState.cullingVolume;
+        var cornerPoints = grid._corners; 
+        var cornerCount = cornerPoints.length;
+        var insideView = true;
+        for (var i=0; i<cornerCount; i++) {        
+            if (cullingVolume.computeVisibility(cornerPoints[i]) != Cesium.Intersect.INSIDE) {
+                insideView = false;
+                break;
+            }
+        }    
+
+        if (insideView)
+        {
+            return grid;
         }
         
         // we got too close, so let's 
@@ -252,7 +282,7 @@
             target.grid.parent = grid;
         }
         
-        return calculateCurrentSublevel(target.grid, ellipsoid, camera);
+        return calculateCurrentSublevel(target.grid, ellipsoid, frameState);
     }
 
     /**
@@ -335,7 +365,7 @@
         }
 
         
-        var target = calculateCurrentSublevel(this._grid, this._ellipsoid, frameState.camera);
+        var target = calculateCurrentSublevel(this._grid, this._ellipsoid, frameState);
         
         //drawGrid(this._grid, context, frameState, commandList);
         target._polylines.update(context, frameState, commandList);               
