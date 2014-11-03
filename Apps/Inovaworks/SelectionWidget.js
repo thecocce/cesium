@@ -70,10 +70,6 @@
 
     });
 
-    SelectionWidget.prototype.add = function(target) {             
-        this._targets.push(new SelectionBox(this._container, this._canvas, this._camera, this._ellipsoid, target, this._options));
-    };
-
     SelectionWidget.prototype.update  = function() {
               
         var len = this._targets.length;
@@ -82,6 +78,23 @@
         }        
     };
 
+   SelectionWidget.prototype.add = function(target) {             
+        this._targets.push(new SelectionBox(this._container, this._canvas, this._camera, this._ellipsoid, target, this._options));
+    };
+
+    SelectionWidget.prototype.remove = function(target) {             
+        var len = this._targets.length;
+        for (var i=0; i<len; i++) {
+            if (this._targets[i]._target ===target){
+                var temp = this._targets[i];
+                this._targets.splice(i, 1);
+                
+                temp.destroy();
+                return;
+            }
+        };    
+    }    
+    
     SelectionWidget.prototype.clear  = function() {             
         var len = this._targets.length;
         for (var i=0; i<len; i++) {

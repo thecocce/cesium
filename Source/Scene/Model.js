@@ -359,7 +359,9 @@ define([
                 }
                 //>>includeEnd('debug');
 
-                this._boundingSphere.radius = (this.scale * Matrix4.getMaximumScale(this.modelMatrix)) * this._initialRadius;
+                if (defined(this._boundingSphere)){                
+                    this._boundingSphere.radius = (this.scale * Matrix4.getMaximumScale(this.modelMatrix)) * this._initialRadius;
+                 }
                 return this._boundingSphere;
             }
         },
