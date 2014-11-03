@@ -81,6 +81,17 @@
             this._targets[i].update();
         }        
     };
+
+    SelectionWidget.prototype.clear  = function() {             
+        var len = this._targets.length;
+        for (var i=0; i<len; i++) {
+            this._targets[i].destroy();
+            this._targets[i] = undefined;
+        }
+        
+        this._targets = [];
+    };
+    
     
     /**
      * Destroys the SelectionWidget. Should be called if permanently
@@ -88,12 +99,8 @@
      * @memberof SelectionWidget
      */
     SelectionWidget.prototype.destroy = function() {		
-		
-        var len = this._targets.length;
-        for (var i=0; i<len; i++) {
-            this._targets[i].destroy();
-            this._targets[i] = undefined;
-        }
+
+        this.clear();
         
         //return Cesium.destroyObject(this);
     };

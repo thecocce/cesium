@@ -45,7 +45,7 @@
 
         var defaultColor = new Cesium.Color(255, 255, 255, 255);
 
-        this._container = document.getElementById(container);
+        this._container = container;
         this._canvas = canvas;
         this._camera = camera;
         this._ellipsoid = ellipsoid;
@@ -118,6 +118,7 @@
         var frustum = this._camera.frustum;
                 
         var isBillboard = Cesium.defined(this._target.pixelOffset); // test if billboard (change this later)
+        var isModel = Cesium.defined(this._target.modelMatrix); // test if model (change this later)
         
         var minSize;
         var model;
@@ -127,9 +128,13 @@
             minSize = 50;
         }
         else
+        if (isModel)
         {
             model = this._target.modelMatrix;
             minSize = 5;
+        }
+        else {
+            return;
         }
         
         var view = this._camera.viewMatrix;
@@ -146,8 +151,14 @@
             positions.push(new Cesium.Cartesian4(pos.x, pos.y, pos.z, 0));        
         }
         else
+        if (isModel)
         {
-            var sphere = this._target.boundingSphere;
+        
+            if (!Cesium.defined(this._target.boundingSphere))
+            return;
+        
+            var sphere = this._target.boundingSphere;            
+            
             var radius = sphere.radius;
             positions.push(new Cesium.Cartesian4( radius, 0,0, 0));
             positions.push(new Cesium.Cartesian4(- radius, 0, 0, 0));
@@ -155,6 +166,9 @@
             positions.push(new Cesium.Cartesian4(0,  - radius, 0, 0));
             positions.push(new Cesium.Cartesian4(0, 0,  radius, 0));
             positions.push(new Cesium.Cartesian4(0, 0, - radius, 0));
+        }
+        else {
+            return;
         }
         //positions.push(new Cesium.Cartesian4(sphere.center.x, sphere.center.y, sphere.center.z, 0));
                 
@@ -237,7 +251,13 @@
      * @memberof SelectionBox
      */
     SelectionBox.prototype.destroy = function() {		
-        this._container.removeChild(this._div);
+    
+        if (Cesium.defined(this._container))
+        {
+            this._container.removeChild(this._div);
+            this._container = undefined;
+        }
+        
         //return Cesium.destroyObject(this);
     };
 
