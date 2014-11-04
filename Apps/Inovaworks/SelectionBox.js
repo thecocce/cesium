@@ -65,6 +65,43 @@
         return scale;
     }
 
+
+    // more duplicates, this time because Cesium returns a 2d vector instead of the full 4d vector when calculating world to screen coords
+    var pointToWindowCoordinatesTemp = new Cesium.Cartesian4();
+    function pointToGLWindowCoordinates(modelViewProjectionMatrix, viewportTransformation, point, result) {
+        //>>includeStart('debug', pragmas.debug);
+        if (!Cesium.defined(modelViewProjectionMatrix)) {
+            throw new Cesium.DeveloperError('modelViewProjectionMatrix is required.');
+        }
+
+        if (!Cesium.defined(viewportTransformation)) {
+            throw new Cesium.DeveloperError('viewportTransformation is required.');
+        }
+
+        if (!Cesium.defined(point)) {
+            throw new Cesium.DeveloperError('point is required.');
+        }
+        //>>includeEnd('debug');
+
+        if (!Cesium.defined(result)) {
+            result = new Cesium.Cartesian2();
+        }
+
+        var tmp = pointToWindowCoordinatesTemp;
+
+        Cesium.Matrix4.multiplyByVector(modelViewProjectionMatrix, Cesium.Cartesian4.fromElements(point.x, point.y, point.z, 1, tmp), tmp);
+        Cesium.Cartesian4.multiplyByScalar(tmp, 1.0 / tmp.w, tmp);
+        Cesium.Matrix4.multiplyByVector(viewportTransformation, tmp, tmp);
+        return tmp; // the only line that really changed!!!!!!
+    };
+
+    function pointToWindowCoordinates(modelViewProjectionMatrix, viewportTransformation, point, result) {
+        result = pointToGLWindowCoordinates(modelViewProjectionMatrix, viewportTransformation, point, result);
+        result.y = 2.0 * viewportTransformation[5] - result.y;
+        return result;
+    };
+    
+
     var SelectionBox = function(container, canvas, camera, ellipsoid, target, options) {
         //>>includeStart('debug', pragmas.debug);
         if (!Cesium.defined(container)) {
@@ -249,18 +286,40 @@
             return;
         }
         //positions.push(new Cesium.Cartesian4(sphere.center.x, sphere.center.y, sphere.center.z, 0));
-                
+        
+        
+        // test if any point of this object is inside current view frustum
+        /*var cullingVolume = this._camera.frustum.computeCullingVolume(this._camera.positionWC, this._camera.directionWC, this._camera.upWC);
+        var insideView = false;
+        var posCount = positions.length;
+        for (var i=0; i<posCount; i++) {        
+            if (cullingVolume.computeVisibility(new Cesium.BoundingSphere(positions[i])) != Cesium.Intersect.OUTSIDE) {
+                insideView = true;
+                break;
+            }
+        }    
+        
+        if (!insideView)
+        {
+            this._div.style.display = 'none';
+            this._show = false;
+            return;
+        }
+*/
+
         var pos = new Cesium.Cartesian4(0, 0, 0);
         var count = positions.length;
+        
         var minx = 99999;
         var miny = 99999;
+        var minz = 99999;
+        
         var maxx = -99999;
         var maxy = -99999;
-        var minz = -99999;
         var maxz = -99999;
         for (var i=0; i<count; i++)
         {
-            var tempPos = Cesium.Transforms.pointToWindowCoordinates(modelViewProjectionMatrix, viewportTransformation, positions[i]);            
+            var tempPos = pointToWindowCoordinates(modelViewProjectionMatrix, viewportTransformation, positions[i]);            
             if (tempPos.x>maxx) { maxx = tempPos.x; }
             if (tempPos.x<minx) { minx = tempPos.x; }
             if (tempPos.y>maxy) { maxy = tempPos.y; }
@@ -269,7 +328,7 @@
             if (tempPos.z<minz) { minz = tempPos.z; }
         }                      
         
-        if (minz<-1 || maxz>1)
+        if (minz>1.0 || maxz<0)
         {
             this._div.style.display = 'none';
             this._show = false;
