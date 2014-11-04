@@ -17,6 +17,53 @@
        line.setAttribute('y2', y2);
    }
 
+   // duplicated code...because Cesium does not expose the modified scale 
+    var scratchDrawingBufferDimensions = new Cesium.Cartesian2();
+    var scratchToCenter = new Cesium.Cartesian3();
+    var scratchProj = new Cesium.Cartesian3();
+   
+    function scaleInPixels(positionWC, radius, canvasWidth, canvasHeight, camera) {
+        var frustum = camera.frustum;
+
+        var toCenter = Cesium.Cartesian3.subtract(camera.positionWC, positionWC, scratchToCenter);
+        var proj = Cesium.Cartesian3.multiplyByScalar(camera.directionWC, Cesium.Cartesian3.dot(toCenter, camera.directionWC), scratchProj);
+        var distance = Math.max(frustum.near, Cesium.Cartesian3.magnitude(proj) - radius);
+
+        scratchDrawingBufferDimensions.x = canvasWidth;
+        scratchDrawingBufferDimensions.y = canvasHeight;
+        var pixelSize = frustum.getPixelSize(scratchDrawingBufferDimensions, distance);
+        var pixelScale = Math.max(pixelSize.x, pixelSize.y);
+
+        return pixelScale;
+    }
+   
+    var scratchPosition = new Cesium.Cartesian3();
+   
+   function getScale(model,  canvasWidth, canvasHeight, camera) {
+        var scale = model._scale;
+
+        if (model.minimumPixelSize !== 0.0) {
+            // Compute size of bounding sphere in pixels
+            var maxPixelSize = Math.max(canvasWidth, canvasHeight);
+            var m = model.modelMatrix;
+            scratchPosition.x = m[12];
+            scratchPosition.y = m[13];
+            scratchPosition.z = m[14];
+            var radius = model.boundingSphere.radius;
+            var metersPerPixel = scaleInPixels(scratchPosition, radius,  canvasWidth, canvasHeight, camera);
+
+            // metersPerPixel is always > 0.0
+            var pixelsPerMeter = 1.0 / metersPerPixel;
+            var diameterInPixels = Math.min(pixelsPerMeter * (2.0 * radius), maxPixelSize);
+
+            // Maintain model's minimum pixel size
+            if (diameterInPixels < model.minimumPixelSize) {
+                scale = (model.minimumPixelSize * metersPerPixel) / (2.0 * model._initialRadius);
+            }
+        }
+
+        return scale;
+    }
 
     var SelectionBox = function(container, canvas, camera, ellipsoid, target, options) {
         //>>includeStart('debug', pragmas.debug);
@@ -66,6 +113,8 @@
 
         this._div = document.createElement('div');
         this._div.setAttribute("id", "SelectionBox");
+        
+        this._show = true;
 
         this._svg = document.createElementNS (xmlns, "svg");
         //this._svg.setAttributeNS (null, "viewBox", "0 0 " + boxWidth + " " + boxHeight);
@@ -103,13 +152,35 @@
      */
     SelectionBox.prototype.update = function() {
 
-        var viewportWidth = this._canvas.width;
-        var viewportHeight = this._canvas.height;
-		
+        var viewportWidth = this._container.parentNode.clientWidth;
+        var viewportHeight = this._container.parentNode.clientHeight;
+
+		if (viewportHeight<=0) {
+            viewportHeight = this._container.clientHeight;
+        }
+
 		if (viewportWidth<=0 || viewportHeight<=0)
 			return;
         
         if (!Cesium.defined(this._target) || this._target.ready==false) {
+            return;
+        }
+        
+        if (this._target.show !== this._show)
+        {
+            this._show = this._target.show;
+            
+            if (this._show)
+            {
+                this._div.style.display = 'block';
+            }
+            else
+            {
+                this._div.style.display = 'none';
+            }
+        }
+        
+        if (!this._show) {
             return;
         }
         
@@ -154,12 +225,19 @@
         if (isModel)
         {
         
-            if (!Cesium.defined(this._target.boundingSphere))
-            return;
+            if (!Cesium.defined(this._target.boundingSphere)) {
+                return;
+            }
         
-            var sphere = this._target.boundingSphere;            
-            
+            var sphere = this._target.boundingSphere;                       
             var radius = sphere.radius;
+            
+            var changedScale = getScale(this._target,  this._canvas.width, this._canvas.height, this._camera);            
+            if (changedScale!=this._target.scale)
+            {
+                radius *= (changedScale / this._target.scale);
+            }
+            
             positions.push(new Cesium.Cartesian4( radius, 0,0, 0));
             positions.push(new Cesium.Cartesian4(- radius, 0, 0, 0));
             positions.push(new Cesium.Cartesian4(0,  radius, 0, 0));
@@ -178,6 +256,8 @@
         var miny = 99999;
         var maxx = -99999;
         var maxy = -99999;
+        var minz = -99999;
+        var maxz = -99999;
         for (var i=0; i<count; i++)
         {
             var tempPos = Cesium.Transforms.pointToWindowCoordinates(modelViewProjectionMatrix, viewportTransformation, positions[i]);            
@@ -185,7 +265,16 @@
             if (tempPos.x<minx) { minx = tempPos.x; }
             if (tempPos.y>maxy) { maxy = tempPos.y; }
             if (tempPos.y<miny) { miny = tempPos.y; }
+            if (tempPos.z>maxz) { maxz = tempPos.z; }
+            if (tempPos.z<minz) { minz = tempPos.z; }
         }                      
+        
+        if (minz<-1 || maxz>1)
+        {
+            this._div.style.display = 'none';
+            this._show = false;
+            return;
+        }
         
         var sizex = maxx - minx; 
         var sizey = maxy - miny;
