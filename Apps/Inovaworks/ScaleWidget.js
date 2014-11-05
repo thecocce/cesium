@@ -164,7 +164,7 @@
 			return;
 		
         var ratio = viewportWidth / viewportHeight;
-        var tanHalfAngle = Math.tan(0.5 * this._camera.frustum.fovy);
+        var tanHalfAngle = Math.tan(this._camera.frustum.fovy);
         var pixelSizeScale = (2.0 * tanHalfAngle ) / viewportWidth;
 
         var pixelSize = Math.abs(distance) * pixelSizeScale;
