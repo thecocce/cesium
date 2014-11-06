@@ -172,6 +172,7 @@ define([
         var scene3DOnly = parameters.scene3DOnly;
         var allowPicking = parameters.allowPicking;
         var vertexCacheOptimize = parameters.vertexCacheOptimize;
+        var compressVertices = parameters.compressVertices;
         var modelMatrix = parameters.modelMatrix;
 
         var i;
@@ -238,6 +239,11 @@ define([
                     GeometryPipeline.encodeAttribute(geometry, name, name + '3DHigh', name + '3DLow');
                 }
             }
+        }
+
+        // oct encode and pack normals, compress texture coordinates
+        if (compressVertices) {
+            GeometryPipeline.compressVertices(geometry);
         }
 
         if (!uintIndexSupport) {
@@ -431,7 +437,7 @@ define([
             var geometry = items[i];
             var attributes = geometry.attributes;
 
-            count += 3 + BoundingSphere.packedLength + (defined(geometry.indices) ? geometry.indices.length : 0);
+            count += 4 + BoundingSphere.packedLength + (defined(geometry.indices) ? geometry.indices.length : 0);
 
             for ( var property in attributes) {
                 if (attributes.hasOwnProperty(property) && defined(attributes[property])) {
@@ -459,6 +465,7 @@ define([
             var geometry = items[i];
 
             packedData[count++] = geometry.primitiveType;
+            packedData[count++] = geometry.geometryType;
 
             BoundingSphere.pack(geometry.boundingSphere, packedData, count);
             count += BoundingSphere.packedLength;
@@ -519,6 +526,7 @@ define([
         var packedGeometryIndex = 1;
         while (packedGeometryIndex < packedGeometry.length) {
             var primitiveType = packedGeometry[packedGeometryIndex++];
+            var geometryType = packedGeometry[packedGeometryIndex++];
 
             var boundingSphere = BoundingSphere.unpack(packedGeometry, packedGeometryIndex);
             packedGeometryIndex += BoundingSphere.packedLength;
@@ -561,6 +569,7 @@ define([
 
             result[resultIndex++] = new Geometry({
                 primitiveType : primitiveType,
+                geometryType : geometryType,
                 boundingSphere : boundingSphere,
                 indices : indices,
                 attributes : attributes
@@ -836,6 +845,7 @@ define([
             scene3DOnly : parameters.scene3DOnly,
             allowPicking : parameters.allowPicking,
             vertexCacheOptimize : parameters.vertexCacheOptimize,
+            compressVertices : parameters.compressVertices,
             modelMatrix : parameters.modelMatrix
         };
     };
@@ -870,6 +880,7 @@ define([
             scene3DOnly : packedParameters.scene3DOnly,
             allowPicking : packedParameters.allowPicking,
             vertexCacheOptimize : packedParameters.vertexCacheOptimize,
+            compressVertices : packedParameters.compressVertices,
             modelMatrix : Matrix4.clone(packedParameters.modelMatrix)
         };
     };
