@@ -15,9 +15,24 @@
         var ofs2 = y2 * (grid._divX+1) + x2;
         
         var posArray = new Array();
-        posArray.push(grid._points3d[ofs1]);
-        posArray.push(grid._points3d[ofs2]);
         
+        var pA = grid._points[ofs1];
+        var pB = grid._points[ofs2];
+        
+        var lineDivisions = 8;
+        
+        for (var i=0; i<=lineDivisions; i++)
+        {
+            var alpha = i/lineDivisions;
+            var beta = 1.0 - alpha;
+
+            var lat = (pA.latitude * beta) + (pB.latitude * alpha);
+            var lon = (pA.longitude * beta) + (pB.longitude * alpha);
+                
+            var p = new Cesium.Cartographic(lon, lat, 0.0);
+            posArray.push(ellipsoid.cartographicToCartesian(p));
+        }
+                               
         var polyline = grid._polylines.add({
                         positions : posArray,
                         width: 3.0,
@@ -32,7 +47,7 @@
     {
         var result = {};
         result._polylines = new Cesium.PolylineCollection();
-        result._points3d = new Array((divX+1) * (divY+1));
+        result._points = new Array((divX+1) * (divY+1));
         result._indexX = indexX;
         result._indexY = indexY;
         result._divX = divX;
@@ -70,7 +85,7 @@
                 var lon = (topWestCoord.longitude * deltaX) + (bottomEastCoord.longitude * (1.0 - deltaX));                
                 
                 var ofs = j * (divX+1) + i;
-                result._points3d[ofs] = ellipsoid.cartographicToCartesian(new Cesium.Cartographic(lon, lat, 0.0));
+                result._points[ofs] = new Cesium.Cartographic(lon, lat, 0.0);
             }                        
         }
 
