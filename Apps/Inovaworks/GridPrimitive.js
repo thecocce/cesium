@@ -43,7 +43,27 @@
                     
     }
     
-    function createGrid(ellipsoid, topWestCoord, bottomEastCoord, indexX, indexY, divX, divY, subLevels, distance, parent, owner)
+    //coord order
+    //A B
+    //C D
+    
+    function interpLat(coordA, coordB, coordC, coordD, deltaX, deltaY) {
+        var lat1 = (coordA.latitude * (1.0-deltaY)) + (coordB.latitude * deltaY);
+        var lat2 = (coordC.latitude * (1.0-deltaY)) + (coordD.latitude * deltaY);
+        return  (lat1 * (1.0-deltaX)) + (lat2 * deltaX);
+        
+        //return  (coordA.latitude * (1.0-deltaX)) + (coordD.latitude * deltaX);
+    }
+
+    function interpLon(coordA, coordB, coordC, coordD, deltaX, deltaY) {
+        var lon1 = (coordA.longitude * (1.0 -deltaX)) + (coordC.longitude * deltaX);
+        var lon2 = (coordB.longitude * (1.0 -deltaX)) + (coordD.longitude * deltaX);
+        return (lon1 * (1.0 -deltaY)) + (lon2 * deltaY);
+        
+    // return  (coordA.longitude * (1.0-deltaY)) + (coordD.longitude * deltaY);
+    }
+    
+    function createGrid(ellipsoid, coordA, coordB, coordC, coordD, indexX, indexY, divX, divY, subLevels, parent, owner)
     {
         var result = {};
         result._polylines = new Cesium.PolylineCollection();
@@ -52,7 +72,6 @@
         result._indexY = indexY;
         result._divX = divX;
         result._divY = divY;
-        result._distance = distance;
         result.parent = parent;
         
         var textScale = 0.5;
@@ -65,10 +84,10 @@
         }
         
         var corners = [];
-        corners.push(new Cesium.BoundingSphere(ellipsoid.cartographicToCartesian(topWestCoord), 0.0));
-        corners.push(new Cesium.BoundingSphere(ellipsoid.cartographicToCartesian(new Cesium.Cartographic(topWestCoord.longitude, bottomEastCoord.latitude, 0.0)), 0.0));
-        corners.push(new Cesium.BoundingSphere(ellipsoid.cartographicToCartesian(bottomEastCoord), 0.0));
-        corners.push(new Cesium.BoundingSphere(ellipsoid.cartographicToCartesian(new Cesium.Cartographic(bottomEastCoord.longitude, topWestCoord.latitude, 0.0)), 0.0));
+        corners.push(new Cesium.BoundingSphere(ellipsoid.cartographicToCartesian(coordA), 0.0));
+        corners.push(new Cesium.BoundingSphere(ellipsoid.cartographicToCartesian(coordB), 0.0));
+        corners.push(new Cesium.BoundingSphere(ellipsoid.cartographicToCartesian(coordC), 0.0));
+        corners.push(new Cesium.BoundingSphere(ellipsoid.cartographicToCartesian(coordD), 0.0));
         result._corners = corners;
 
         result._labels = new Cesium.LabelCollection();
@@ -81,9 +100,9 @@
             {                
                 var deltaX = i / divX;
 
-                var lat = (topWestCoord.latitude * deltaY) + (bottomEastCoord.latitude * (1.0 - deltaY));
-                var lon = (topWestCoord.longitude * deltaX) + (bottomEastCoord.longitude * (1.0 - deltaX));                
-                
+                var lon = interpLon(coordA, coordB, coordC, coordD, deltaX, deltaY);
+                var lat = interpLat(coordA, coordB, coordC, coordD, deltaX, deltaY);
+                               
                 var ofs = j * (divX+1) + i;
                 result._points[ofs] = new Cesium.Cartographic(lon, lat, 0.0);
             }                        
@@ -120,15 +139,18 @@
            
                     if (i>0 && j>0)
                     {
-                        var lon1 = (topWestCoord.longitude * prevDeltaX) + (bottomEastCoord.longitude * (1.0 - prevDeltaX));
-                        var lat1 = (topWestCoord.latitude * prevDeltaY) + (bottomEastCoord.latitude * (1.0 - prevDeltaY));
+                        var lonA = interpLon(coordA, coordB, coordC, coordD, prevDeltaX, prevDeltaY);
+                        var lonB = interpLon(coordA, coordB, coordC, coordD, prevDeltaX, deltaY);
+                        var lonC = interpLon(coordA, coordB, coordC, coordD, deltaX, prevDeltaY);
+                        var lonD = interpLon(coordA, coordB, coordC, coordD, deltaX, deltaY);
 
-                        var lon2 = (topWestCoord.longitude * deltaX) + (bottomEastCoord.longitude * (1.0 - deltaX));
-                        var lat2 = (topWestCoord.latitude * deltaY) + (bottomEastCoord.latitude * (1.0 - deltaY));
-
-                        var coord1 = new Cesium.Cartographic(lon1, lat1, 0.0);
-                        var coord2 = new Cesium.Cartographic(lon2, lat2, 0.0);
-                        var center = new Cesium.Cartographic((lon1+lon2)*0.5, (lat1+lat2)*0.5, 0.0);
+                        var latA = interpLat(coordA, coordB, coordC, coordD, prevDeltaX, prevDeltaY);
+                        var latB = interpLat(coordA, coordB, coordC, coordD, prevDeltaX, deltaY);
+                        var latC = interpLat(coordA, coordB, coordC, coordD, deltaX, prevDeltaY);
+                        var latD = interpLat(coordA, coordB, coordC, coordD, deltaX, deltaY);
+                        
+                        
+                        var center = new Cesium.Cartographic((lonA+lonD)*0.5, (latA+latD)*0.5, 0.0);
 
                         var n = 1 + (j-1)*divX + (i-1);
                         if (subLevels & 1)
@@ -147,7 +169,7 @@
                             name = String.fromCharCode(65 + j - 1) + i.toString();
                         }
 
-                        var labelPos = new Cesium.Cartographic((lon1*(1.0-textX)+lon2*textX), (lat1*(1.0-textY)+lat2*textY), 0.0);
+                        var labelPos = new Cesium.Cartographic((lonA*(1.0-textX)+lonB*textX), (latA*(1.0-textY)+latB*textY), 0.0);
                         //var labelPos = new Cesium.Cartographic(lon1, lat1, 0.0);
                         var pp = ellipsoid.cartographicToCartesian(labelPos);
                                                     
@@ -161,8 +183,10 @@
                         {
                         
                             var child = {};                                                
-                            child.coord1 = coord1;
-                            child.coord2 = coord2;
+                            child.coordA = new Cesium.Cartographic(lonA, latA, 0.0);
+                            child.coordB = new Cesium.Cartographic(lonB, latB, 0.0);
+                            child.coordC = new Cesium.Cartographic(lonC, latC, 0.0);
+                            child.coordD = new Cesium.Cartographic(lonD, latD, 0.0);
                             child.indexX = i;
                             child.indexY = j;
                             child.subLevels = subLevels - 1;
@@ -175,7 +199,7 @@
                 }
             }
         }
-
+        
         return result;
     }
     
@@ -204,12 +228,6 @@
         if (distance<250000) {
             grid._labels.update(context, frameState, commandList);          
         }
-    }
-    
-    // calculates next distance to subdivide
-    function getNextDistance(baseDistance)
-    {
-        return baseDistance * 0.5;
     }
     
     // calculates exactly what grid (or subgrid) is closest to the camera and returns it    
@@ -283,11 +301,12 @@
             }
         }
         
+               
         var target = children[minIndex];
         
         if (!Cesium.defined(target.grid))
         {   // we don't have a subgrid yet, so lets create one
-            target.grid = createGrid(ellipsoid, target.coord1, target.coord2, target.indexX, target.indexY, grid._divX, grid._divY, target.subLevels, getNextDistance(grid._distance), grid, target);              
+            target.grid = createGrid(ellipsoid, target.coordA, target.coordB, target.coordC, target.coordD, target.indexX, target.indexY, grid._divX, grid._divY, target.subLevels, grid, target);              
         }
         
         return calculateCurrentSublevel(target.grid, ellipsoid, frameState);
@@ -323,13 +342,37 @@
         this._bottomEastCoord = bottomEastCoord;
         this._ellipsoid = ellipsoid;
 
+        var rotAngle = Cesium.defaultValue(options.rotation, 45.0);
+        rotAngle = rotAngle * (180 / Math.PI);
+        var sinRot = Math.sin(rotAngle);
+        var cosRot = Math.sin(rotAngle);
+        
         this._divX = Cesium.defaultValue(options.divX, 3);
         this._divY = Cesium.defaultValue(options.divY, 3);
         this._maxLevels = Cesium.defaultValue(options.maxLevels, 10);
         this._subDivDistance = Cesium.defaultValue(options.subDivDistance, 19000);
 
         
-        this._grid = createGrid(ellipsoid, topWestCoord, bottomEastCoord, 0, 0, this._divX, this._divY,  this._maxLevels, this._subDivDistance);
+        var coords = [];
+        coords.push(new Cesium.Cartographic(topWestCoord.longitude, topWestCoord.latitude, 0.0));
+        coords.push(new Cesium.Cartographic(bottomEastCoord.longitude, topWestCoord.latitude, 0.0));
+        coords.push(new Cesium.Cartographic(topWestCoord.longitude, bottomEastCoord.latitude, 0.0));
+        coords.push(new Cesium.Cartographic(bottomEastCoord.longitude, bottomEastCoord.latitude, 0.0));
+        
+        var center = new Cesium.Cartographic((topWestCoord.longitude + bottomEastCoord.longitude) * 0.5, (topWestCoord.latitude + bottomEastCoord.latitude) * 0.5, 0.0)
+        
+        // apply 2d rotation
+        for (var i=0; i<4; i++)
+        {
+            coords[i].longitude -= center.longitude;
+            coords[i].latitude -= center.latitude;
+            var temp = coords[i];
+            coords[i] = new Cesium.Cartographic(temp.longitude * cosRot + temp.latitude * sinRot, temp.longitude * -sinRot + temp.latitude * cosRot, 0.0)
+            coords[i].longitude += center.longitude;
+            coords[i].latitude += center.latitude;
+        }
+        
+        this._grid = createGrid(ellipsoid, coords[0], coords[1], coords[2], coords[3], 0, 0, this._divX, this._divY,  this._maxLevels);
                      
         /**
          * Determines if this primitive will be shown.
