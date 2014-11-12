@@ -77,22 +77,32 @@
             this._targets[i].update();
         }        
     };
+    
+    SelectionWidget.prototype.exists  = function(target) {
+        return (this._targets.indexOf(target) > -1);
+    };    
 
-   SelectionWidget.prototype.add = function(target) {             
-        this._targets.push(new SelectionBox(this._container, this._canvas, this._camera, this._ellipsoid, target, this._options));
+    SelectionWidget.prototype.add = function(target) {      
+        if (this._targets.indexOf(target) > -1) {
+           // exists
+            console.log ('asked to add a previously existing element - ignoring');
+        } else {
+           // does not exist
+            this._targets.push(new SelectionBox(this._container, this._canvas, this._camera, this._ellipsoid, target, this._options));
+       }
     };
 
-    SelectionWidget.prototype.remove = function(target) {             
-        var len = this._targets.length;
-        for (var i=0; i<len; i++) {
-            if (this._targets[i]._target ===target){
-                var temp = this._targets[i];
-                this._targets.splice(i, 1);
-                
-                temp.destroy();
-                return;
-            }
-        };    
+    SelectionWidget.prototype.remove = function(target) {   
+        var targetIdx = this._targets.indexOf(target);
+        if (targetIdx > -1) {
+            // exists
+            var target = this._targets[targetIdx];
+            this._targets.splice(targetIdx, 1);
+            target.destroy();
+        } else { 
+            // does not exist
+            console.log ('asked to remove a non-existing element - ignoring');
+        }   
     }    
     
     SelectionWidget.prototype.clear  = function() {             
@@ -101,7 +111,6 @@
             this._targets[i].destroy();
             this._targets[i] = undefined;
         }
-        
         this._targets = [];
     };
     
@@ -117,4 +126,3 @@
         
         //return Cesium.destroyObject(this);
     };
-

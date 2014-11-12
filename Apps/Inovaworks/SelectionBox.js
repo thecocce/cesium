@@ -158,7 +158,8 @@
         this._svg.setAttributeNS (null, "width", this._boxWidth);
         this._svg.setAttributeNS (null, "height", this._boxHeight);
         this._svg.style.display = "block";
-
+        
+        this._div.setAttribute("style", "position:absolute; pointer-events: none; z-index: 9999");
 
         this._lineA1 = svgLine(this._color, 2);
         this._lineB1 = svgLine(this._color, 2);
@@ -198,14 +199,26 @@
 
 		if (viewportWidth<=0 || viewportHeight<=0)
 			return;
-        
+          
         if (!Cesium.defined(this._target) || this._target.ready==false) {
             return;
         }
         
         if (this._target.show !== this._show)
         {
-            this._show = this._target.show;
+            var proxy =  this._target.proxy;
+            if (Cesium.defined(proxy))
+            {                
+                this._show = proxy.show;
+                             
+                if (this._show && Cesium.defined(proxy.currentObject)) {
+                    this._target = proxy.currentObject;
+                }
+            }
+            else
+            {
+                this._show = this._target.show;
+            }
             
             if (this._show)
             {
@@ -233,7 +246,7 @@
         if (isBillboard)    
         {
             model = Cesium.Matrix4.IDENTITY; 
-            minSize = 50;
+            minSize = 20;
         }
         else
         if (isModel)
@@ -390,7 +403,10 @@
         this._boxHeight = sizey+5;
         this._svg.setAttributeNS (null, "width", this._boxWidth);
         this._svg.setAttributeNS (null, "height", this._boxHeight);
-        this._div.setAttribute("style", "position:absolute; top:"+this._Y+"px; left:"+this._X+"px; width:"+this._boxWidth+"px;height:"+this._boxHeight+"px; pointer-events: none; z-index: 9999");
+        this._div.style.left = this._X +"px";
+        this._div.style.top = this._Y +"px";
+        this._div.style.width = this._boxWidth +"px";
+        this._div.style.height  = this._boxHeight +"px";
     };
 
     /**
