@@ -1,5 +1,5 @@
 
-    function addPolyLine(grid, x1, y1, x2, y2)
+    function addPolyLine(grid, x1, y1, x2, y2, ellipsoid)
     {
         if (x2>grid._divX)
         {
@@ -113,8 +113,8 @@
         {
             for (var i = 0; i <= divX; i++)
             {
-                addPolyLine(result, i, j, i+1, j);
-                addPolyLine(result, i, j, i, j+1);
+                addPolyLine(result, i, j, i+1, j, ellipsoid);
+                addPolyLine(result, i, j, i, j+1, ellipsoid);
             }
         }
 
