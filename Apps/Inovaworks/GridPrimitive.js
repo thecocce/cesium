@@ -312,6 +312,7 @@
         return calculateCurrentSublevel(target.grid, ellipsoid, frameState);
     }
 
+    
     /**
      * A renderable Grid with subdivisions.
      *
@@ -320,15 +321,11 @@
      *
      *  Options:
      */
-    var GridPrimitive = function(topWestCoord, bottomEastCoord, ellipsoid, options) {
+    var GridPrimitive = function(A, B, C, D, ellipsoid, options) {
         //>>includeStart('debug', pragmas.debug);
 
-        if (!Cesium.defined(topWestCoord)) {
-            throw new DeveloperError('topWestCoord is required');
-        }
-
-        if (!Cesium.defined(bottomEastCoord)) {
-            throw new DeveloperError('bottomEastCoord is required');
+        if (!Cesium.defined(A) || !Cesium.defined(B) || !Cesium.defined(C) || !Cesium.defined(D)) {
+            throw new DeveloperError('A,B, C and D coords are required');
         }
 
         if (!Cesium.defined(ellipsoid)) {
@@ -338,14 +335,7 @@
 
         options = Cesium.defaultValue(options, Cesium.defaultValue.EMPTY_OBJECT);
 
-        this._topWestCoord = topWestCoord;
-        this._bottomEastCoord = bottomEastCoord;
         this._ellipsoid = ellipsoid;
-
-        var rotAngle = Cesium.defaultValue(options.rotation, 45.0);
-        rotAngle = rotAngle * (180 / Math.PI);
-        var sinRot = Math.sin(rotAngle);
-        var cosRot = Math.sin(rotAngle);
         
         this._divX = Cesium.defaultValue(options.divX, 3);
         this._divY = Cesium.defaultValue(options.divY, 3);
@@ -353,26 +343,7 @@
         this._subDivDistance = Cesium.defaultValue(options.subDivDistance, 19000);
 
         
-        var coords = [];
-        coords.push(new Cesium.Cartographic(topWestCoord.longitude, topWestCoord.latitude, 0.0));
-        coords.push(new Cesium.Cartographic(bottomEastCoord.longitude, topWestCoord.latitude, 0.0));
-        coords.push(new Cesium.Cartographic(topWestCoord.longitude, bottomEastCoord.latitude, 0.0));
-        coords.push(new Cesium.Cartographic(bottomEastCoord.longitude, bottomEastCoord.latitude, 0.0));
-        
-        var center = new Cesium.Cartographic((topWestCoord.longitude + bottomEastCoord.longitude) * 0.5, (topWestCoord.latitude + bottomEastCoord.latitude) * 0.5, 0.0)
-        
-        // apply 2d rotation
-        for (var i=0; i<4; i++)
-        {
-            coords[i].longitude -= center.longitude;
-            coords[i].latitude -= center.latitude;
-            var temp = coords[i];
-            coords[i] = new Cesium.Cartographic(temp.longitude * cosRot + temp.latitude * sinRot, temp.longitude * -sinRot + temp.latitude * cosRot, 0.0)
-            coords[i].longitude += center.longitude;
-            coords[i].latitude += center.latitude;
-        }
-        
-        this._grid = createGrid(ellipsoid, coords[0], coords[1], coords[2], coords[3], 0, 0, this._divX, this._divY,  this._maxLevels);
+        this._grid = createGrid(ellipsoid, A, B, C, D, 0, 0, this._divX, this._divY,  this._maxLevels);
                      
         /**
          * Determines if this primitive will be shown.
@@ -445,7 +416,52 @@
      };
 
 
+    GridPrimitive.fromTwoPoints = function(topWestCoord, bottomEastCoord, ellipsoid, options) {
+        //>>includeStart('debug', pragmas.debug);
 
+        if (!Cesium.defined(topWestCoord)) {
+            throw new DeveloperError('topWestCoord is required');
+        }
+
+        if (!Cesium.defined(bottomEastCoord)) {
+            throw new DeveloperError('bottomEastCoord is required');
+        }
+
+        if (!Cesium.defined(ellipsoid)) {
+            throw new DeveloperError('ellipsoid is required');
+        }
+        //>>includeEnd('debug');
+        
+        options = Cesium.defaultValue(options, Cesium.defaultValue.EMPTY_OBJECT);
+
+        var rotAngle = Cesium.defaultValue(options.rotation, 180.0);
+        rotAngle = rotAngle * (180 / Math.PI);
+        var sinRot = Math.sin(rotAngle);
+        var cosRot = Math.sin(rotAngle);
+       
+        var coords = [];
+        coords.push(new Cesium.Cartographic(topWestCoord.longitude, topWestCoord.latitude, 0.0));
+        coords.push(new Cesium.Cartographic(bottomEastCoord.longitude, topWestCoord.latitude, 0.0));
+        coords.push(new Cesium.Cartographic(topWestCoord.longitude, bottomEastCoord.latitude, 0.0));
+        coords.push(new Cesium.Cartographic(bottomEastCoord.longitude, bottomEastCoord.latitude, 0.0));
+        
+        var center = new Cesium.Cartographic((topWestCoord.longitude + bottomEastCoord.longitude) * 0.5, (topWestCoord.latitude + bottomEastCoord.latitude) * 0.5, 0.0)
+        
+        // apply 2d rotation
+        for (var i=0; i<4; i++)
+        {
+            coords[i].longitude -= center.longitude;
+            coords[i].latitude -= center.latitude;
+            var temp = coords[i];
+            coords[i] = new Cesium.Cartographic(temp.longitude * cosRot + temp.latitude * sinRot, temp.longitude * -sinRot + temp.latitude * cosRot, 0.0)
+            coords[i].longitude += center.longitude;
+            coords[i].latitude += center.latitude;
+        }        
+
+        return new GridPrimitive(coords[0], coords[1], coords[2], coords[3], ellipsoid, options);
+    };    
+    
+    
     /**
      * Returns true if this object was destroyed; otherwise, false.
      * <br /><br />
