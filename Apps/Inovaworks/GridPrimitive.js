@@ -153,7 +153,7 @@
                     var n = 1 + (j-1)*divX + (i-1);
                     if (subLevels & 1)
                     {
-                        n = (divX * divY) - n;
+                        n = ((divX * divY)+1) - n;
                     }
                     
                     var name = n.toString();
