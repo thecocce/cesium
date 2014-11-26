@@ -120,81 +120,78 @@
 
         // recursively create sublevels
         result._children = [];
-        if (subLevels>0)
+        var prevDeltaX = 0;
+        var deltaX = 0;
+        
+        var prevDeltaY = 0;
+        var deltaY = 0;
+        
+        for (var j = 0; j <= divY; j++)
         {
-            var prevDeltaX = 0;
-            var deltaX = 0;
-            
-            var prevDeltaY = 0;
-            var deltaY = 0;
-            
-            for (var j = 0; j <= divY; j++)
+            prevDeltaY = deltaY;
+            deltaY = j / divY;        
+            for (var i = 0; i <= divX; i++)
             {
-                prevDeltaY = deltaY;
-                deltaY = j / divY;        
-                for (var i = 0; i <= divX; i++)
+                prevDeltaX = deltaX;
+                deltaX = i / divX;
+       
+                if (i>0 && j>0)
                 {
-                    prevDeltaX = deltaX;
-                    deltaX = i / divX;
-           
-                    if (i>0 && j>0)
+                    var lonA = interpLon(coordA, coordB, coordC, coordD, prevDeltaX, prevDeltaY);
+                    var lonB = interpLon(coordA, coordB, coordC, coordD, prevDeltaX, deltaY);
+                    var lonC = interpLon(coordA, coordB, coordC, coordD, deltaX, prevDeltaY);
+                    var lonD = interpLon(coordA, coordB, coordC, coordD, deltaX, deltaY);
+
+                    var latA = interpLat(coordA, coordB, coordC, coordD, prevDeltaX, prevDeltaY);
+                    var latB = interpLat(coordA, coordB, coordC, coordD, prevDeltaX, deltaY);
+                    var latC = interpLat(coordA, coordB, coordC, coordD, deltaX, prevDeltaY);
+                    var latD = interpLat(coordA, coordB, coordC, coordD, deltaX, deltaY);
+                    
+                    
+                    var center = new Cesium.Cartographic((lonA+lonD)*0.5, (latA+latD)*0.5, 0.0);
+
+                    var n = 1 + (j-1)*divX + (i-1);
+                    if (subLevels & 1)
                     {
-                        var lonA = interpLon(coordA, coordB, coordC, coordD, prevDeltaX, prevDeltaY);
-                        var lonB = interpLon(coordA, coordB, coordC, coordD, prevDeltaX, deltaY);
-                        var lonC = interpLon(coordA, coordB, coordC, coordD, deltaX, prevDeltaY);
-                        var lonD = interpLon(coordA, coordB, coordC, coordD, deltaX, deltaY);
+                        n = 10 - n;
+                    }
+                    
+                    var name = n.toString();
+                        
+                    if (Cesium.defined(owner) && Cesium.defined(owner.name))
+                    {
+                        name = owner.name + '/' + n;
+                    }
+                    else
+                    {
+                        name = String.fromCharCode(65 + j - 1) + i.toString();
+                    }
 
-                        var latA = interpLat(coordA, coordB, coordC, coordD, prevDeltaX, prevDeltaY);
-                        var latB = interpLat(coordA, coordB, coordC, coordD, prevDeltaX, deltaY);
-                        var latC = interpLat(coordA, coordB, coordC, coordD, deltaX, prevDeltaY);
-                        var latD = interpLat(coordA, coordB, coordC, coordD, deltaX, deltaY);
-                        
-                        
-                        var center = new Cesium.Cartographic((lonA+lonD)*0.5, (latA+latD)*0.5, 0.0);
+                    var labelPos = new Cesium.Cartographic((lonA*(1.0-textX)+lonB*textX), (latA*(1.0-textY)+latB*textY), 0.0);
+                    //var labelPos = new Cesium.Cartographic(lon1, lat1, 0.0);
+                    var pp = ellipsoid.cartographicToCartesian(labelPos);
+                                                
+                    result._labels.add({
+                        position : pp,
+                        scale: textScale,
+                        text     : name
+                    });
 
-                        var n = 1 + (j-1)*divX + (i-1);
-                        if (subLevels & 1)
-                        {
-                            n = 10 - n;
-                        }
+                    if (subLevels>1)
+                    {
+                    
+                        var child = {};                                                
+                        child.coordA = new Cesium.Cartographic(lonA, latA, 0.0);
+                        child.coordB = new Cesium.Cartographic(lonB, latB, 0.0);
+                        child.coordC = new Cesium.Cartographic(lonC, latC, 0.0);
+                        child.coordD = new Cesium.Cartographic(lonD, latD, 0.0);
+                        child.indexX = i;
+                        child.indexY = j;
+                        child.subLevels = subLevels - 1;
+                        child.center = center;                                                    
+                        child.name = name;
                         
-                        var name = n.toString();
-                            
-                        if (Cesium.defined(owner) && Cesium.defined(owner.name))
-                        {
-                            name = owner.name + '/' + n;
-                        }
-                        else
-                        {
-                            name = String.fromCharCode(65 + j - 1) + i.toString();
-                        }
-
-                        var labelPos = new Cesium.Cartographic((lonA*(1.0-textX)+lonB*textX), (latA*(1.0-textY)+latB*textY), 0.0);
-                        //var labelPos = new Cesium.Cartographic(lon1, lat1, 0.0);
-                        var pp = ellipsoid.cartographicToCartesian(labelPos);
-                                                    
-                        result._labels.add({
-                            position : pp,
-                            scale: textScale,
-                            text     : name
-                        });
-                        
-                        if (subLevels>0)
-                        {
-                        
-                            var child = {};                                                
-                            child.coordA = new Cesium.Cartographic(lonA, latA, 0.0);
-                            child.coordB = new Cesium.Cartographic(lonB, latB, 0.0);
-                            child.coordC = new Cesium.Cartographic(lonC, latC, 0.0);
-                            child.coordD = new Cesium.Cartographic(lonD, latD, 0.0);
-                            child.indexX = i;
-                            child.indexY = j;
-                            child.subLevels = subLevels - 1;
-                            child.center = center;                                                    
-                            child.name = name;
-                            
-                            result._children.push(child);
-                        }
+                        result._children.push(child);
                     }
                 }
             }
@@ -342,7 +339,6 @@
         this._divY = Cesium.defaultValue(options.divY, 3);
         this._maxLevels = Cesium.defaultValue(options.maxLevels, 10);
         this._subDivDistance = Cesium.defaultValue(options.subDivDistance, 19000);
-
         
         this._grid = createGrid(ellipsoid, A, B, C, D, 0, 0, this._divX, this._divY,  this._maxLevels);
                      
