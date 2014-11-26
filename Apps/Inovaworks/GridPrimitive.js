@@ -187,6 +187,8 @@
                         child.coordD = new Cesium.Cartographic(lonD, latD, 0.0);
                         child.indexX = i;
                         child.indexY = j;
+                        child.divX = divX;
+                        child.divY = divY;
                         child.subLevels = subLevels - 1;
                         child.center = center;                                                    
                         child.name = name;
@@ -304,7 +306,7 @@
         
         if (!Cesium.defined(target.grid))
         {   // we don't have a subgrid yet, so lets create one
-            target.grid = createGrid(ellipsoid, target.coordA, target.coordB, target.coordC, target.coordD, target.indexX, target.indexY, grid._divX, grid._divY, target.subLevels, grid, target);              
+            target.grid = createGrid(ellipsoid, target.coordA, target.coordB, target.coordC, target.coordD, target.indexX, target.indexY, 3/*target.divX*/, 3/*target.divY*/, target.subLevels, grid, target);              
         }
         
         return calculateCurrentSublevel(target.grid, ellipsoid, frameState);
