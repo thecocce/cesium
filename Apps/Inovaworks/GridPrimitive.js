@@ -151,10 +151,10 @@
                     var center = new Cesium.Cartographic((lonA+lonD)*0.5, (latA+latD)*0.5, 0.0);
 
                     var n = 1 + (j-1)*divX + (i-1);
-                    if (subLevels & 1)
+                    /*if (subLevels & 1)
                     {
                         n = ((divX * divY)+1) - n;
-                    }
+                    }*/
                     
                     var name = n.toString();
                         
