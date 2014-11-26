@@ -225,9 +225,9 @@
         
         grid._polylines.show = true;
         grid._polylines.update(context, frameState, commandList);
-        if (distance<250000) {
+        //if (distance<250000) {
             grid._labels.update(context, frameState, commandList);          
-        }
+        //}
     }
     
     // calculates exactly what grid (or subgrid) is closest to the camera and returns it    
@@ -244,7 +244,8 @@
         }
         else
         {
-            grid.labelScale = ((grid._distance*200) / distance);
+            //grid.labelScale = ((grid._distance*200) / distance);
+            grid.labelScale = 1.0;
         }
                               
         /*if (distance>grid._distance)
@@ -399,17 +400,17 @@
             next = next.parent;
         }
         
-        if (Cesium.defined(target._labels) && target.labelScale>0.1)
+        if (Cesium.defined(target._labels) /*&& target.labelScale>0.1*/)
         {
-            if (target._labels._labelsToUpdate.length<=0)
+            /*if (target._labels._labelsToUpdate.length<=0)
             {
                 var labelCount = target._labels._labels.length;
                 for (var i=0; i<labelCount; i++)
                 {
-                    target._labels._labels._scale = target.labelScale;
+                    //target._labels._labels._scale = target.labelScale;
                     target._labels._labelsToUpdate.push(target._labels._labels[i]);                
                 }
-            }
+            }*/
             
             target._labels.update(context, frameState, commandList);
         }
