@@ -75,13 +75,6 @@
         result.parent = parent;
         
         var textScale = 0.5;
-        var textX = 0.1;
-        var textY = 0.25;
-        if (subLevels & 1)
-        {
-            textX = 1.0 - textX;
-            textY = 1.0 - textY;
-        }
         
         var corners = [];
         corners.push(new Cesium.BoundingSphere(ellipsoid.cartographicToCartesian(coordA), 0.0));
@@ -120,17 +113,89 @@
 
         // recursively create sublevels
         result._children = [];
-        var prevDeltaX = 0;
-        var deltaX = 0;
+        var prevDeltaX;
+        var deltaX;
         
-        var prevDeltaY = 0;
-        var deltaY = 0;
+        var prevDeltaY;
+        var deltaY;
         
-        for (var j = 0; j <= divY; j++)
+        var pp;
+        var labelPos;
+        
+        var i;
+        var j;
+        
+        if (Cesium.defined(owner)) {        
+            result._letter =  owner._letter;
+            
+            i = -0.5;
+            j = 1.5;
+            prevDeltaX = (i / divX);
+            deltaX = ((i+1) / divX);
+
+            prevDeltaY = (j / divY);
+            deltaY = ((j+1) / divY);
+            
+            var lonA = interpLon(coordA, coordB, coordC, coordD, prevDeltaX, prevDeltaY);
+            var lonB = interpLon(coordA, coordB, coordC, coordD, prevDeltaX, deltaY);
+            var lonC = interpLon(coordA, coordB, coordC, coordD, deltaX, prevDeltaY);
+            var lonD = interpLon(coordA, coordB, coordC, coordD, deltaX, deltaY);
+
+            var latA = interpLat(coordA, coordB, coordC, coordD, prevDeltaX, prevDeltaY);
+            var latB = interpLat(coordA, coordB, coordC, coordD, prevDeltaX, deltaY);
+            var latC = interpLat(coordA, coordB, coordC, coordD, deltaX, prevDeltaY);
+            var latD = interpLat(coordA, coordB, coordC, coordD, deltaX, deltaY);
+        
+            labelPos = new Cesium.Cartographic(lonA, latA, 0.0);
+            pp = ellipsoid.cartographicToCartesian(labelPos);
+            result._labels.add({
+                position : pp,
+                scale: 1.5,
+                verticalOrigin: Cesium.VerticalOrigin.CENTER,
+                horizontalOrigin: Cesium.HorizontalOrigin.RIGHT,
+                text     : owner.name
+            });
+            
+            i = 1.5;
+            j = -0.5;
+            prevDeltaX = (i / divX);
+            deltaX = ((i+1) / divX);
+
+            prevDeltaY = (j / divY);
+            deltaY = ((j+1) / divY);
+            
+            var lonA = interpLon(coordA, coordB, coordC, coordD, prevDeltaX, prevDeltaY);
+            var lonB = interpLon(coordA, coordB, coordC, coordD, prevDeltaX, deltaY);
+            var lonC = interpLon(coordA, coordB, coordC, coordD, deltaX, prevDeltaY);
+            var lonD = interpLon(coordA, coordB, coordC, coordD, deltaX, deltaY);
+
+            var latA = interpLat(coordA, coordB, coordC, coordD, prevDeltaX, prevDeltaY);
+            var latB = interpLat(coordA, coordB, coordC, coordD, prevDeltaX, deltaY);
+            var latC = interpLat(coordA, coordB, coordC, coordD, deltaX, prevDeltaY);
+            var latD = interpLat(coordA, coordB, coordC, coordD, deltaX, deltaY);
+        
+            labelPos = new Cesium.Cartographic(lonA, latA, 0.0);
+            pp = ellipsoid.cartographicToCartesian(labelPos);
+            result._labels.add({
+                position : pp,
+                scale: 1.5,
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+                text     : owner.letter
+            });            
+        }
+        
+        prevDeltaX = 0;
+        deltaX = 0;
+        
+        prevDeltaY = 0;
+        deltaY = 0;
+
+        for (j = 0; j <= divY; j++)
         {
             prevDeltaY = deltaY;
             deltaY = j / divY;        
-            for (var i = 0; i <= divX; i++)
+            for (i = 0; i <= divX; i++)
             {
                 prevDeltaX = deltaX;
                 deltaX = i / divX;
@@ -157,24 +222,32 @@
                     }*/
                     
                     var name = n.toString();
+                    var letter;
+                    var labelText;
                         
                     if (Cesium.defined(owner) && Cesium.defined(owner.name))
-                    {
-                        name = owner.name + '/' + n;
+                    {                                               
+                        letter = owner.letter;
+                        labelText = n.toString();                        
+                        name = owner.name + '.' + labelText;
                     }
                     else
                     {
-                        name = String.fromCharCode(65 + j - 1) + i.toString();
+                        letter = String.fromCharCode(65 + j - 1);
+                        name = i.toString();
+                        labelText = letter + i.toString();
                     }
-
-                    var labelPos = new Cesium.Cartographic((lonA*(1.0-textX)+lonB*textX), (latA*(1.0-textY)+latB*textY), 0.0);
-                    //var labelPos = new Cesium.Cartographic(lon1, lat1, 0.0);
-                    var pp = ellipsoid.cartographicToCartesian(labelPos);
+                    
+                    //labelPos = new Cesium.Cartographic((lonA+lonB)*0.5, (latA+latB)*0.5, 0.0);
+                    labelPos = new Cesium.Cartographic(lonB, latA, 0.0);
+                    pp = ellipsoid.cartographicToCartesian(labelPos);
                                                 
                     result._labels.add({
                         position : pp,
+                        verticalOrigin: Cesium.VerticalOrigin.CENTER,
+                        horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
                         scale: textScale,
-                        text     : name
+                        text     : labelText
                     });
 
                     if (subLevels>1)
@@ -192,6 +265,7 @@
                         child.subLevels = subLevels - 1;
                         child.center = center;                                                    
                         child.name = name;
+                        child.letter = letter;
                         
                         result._children.push(child);
                     }

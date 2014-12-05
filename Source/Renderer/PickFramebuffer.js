@@ -124,6 +124,48 @@ define([
         return undefined;
     };
 
+   PickFramebuffer.prototype.endWithRect = function(screenSpaceRectangle) {
+        var width = defaultValue(screenSpaceRectangle.width, 1.0);
+        var height = defaultValue(screenSpaceRectangle.height, 1.0);
+
+        var context = this._context;
+        var pixels = context.readPixels({
+            x : screenSpaceRectangle.x,
+            y : screenSpaceRectangle.y,
+            width : width,
+            height : height,
+            framebuffer : this._fb
+        });
+
+        var temp = [];
+        var length = width * height * 4;
+
+        // Collect all objects in the captured buffer
+        var i = 0;
+        while (i < length) {
+            colorScratch.red = Color.byteToFloat(pixels[i]);
+            colorScratch.green = Color.byteToFloat(pixels[i + 1]);
+            colorScratch.blue = Color.byteToFloat(pixels[i + 2]);
+            colorScratch.alpha = Color.byteToFloat(pixels[i + 3]);
+
+            var object = context.getObjectByPickColor(colorScratch);
+            if (defined(object)) {
+                temp.push(object);
+            }
+            
+            i+=4;
+        }
+
+        // now copy only unique objects to result
+        var result = [];
+        for (var i = 0; i < temp.length; i++ ) {
+            var current = temp[i];
+            if (result.indexOf(current) < 0) result.push(current);
+        }        
+        
+        return result;
+    };
+     
     PickFramebuffer.prototype.isDestroyed = function() {
         return false;
     };

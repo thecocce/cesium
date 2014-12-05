@@ -1,6 +1,7 @@
 /*global defineSuite*/
 defineSuite([
         'Scene/Model',
+        'Scene/ModelResourceCache',
         'Core/Cartesian2',
         'Core/Cartesian3',
         'Core/Cartesian4',
@@ -16,6 +17,7 @@ defineSuite([
         'Specs/destroyScene'
     ], function(
         Model,
+        ModelResourceCache,
         Cartesian2,
         Cartesian3,
         Cartesian4,
@@ -42,6 +44,8 @@ defineSuite([
     var duckModel;
     var customDuckModel;
     var separateDuckModel;
+    var cachedDuckModel;
+    var anotherCachedDuckModel;
     var cesiumAirModel;
     var animBoxesModel;
     var riggedFigureModel;
@@ -61,7 +65,7 @@ defineSuite([
     function addZoomTo(model) {
         model.zoomTo = function() {
             var center = Matrix4.multiplyByPoint(model.modelMatrix, model.boundingSphere.center, new Cartesian3());
-            var transform = Transforms.northEastDownToFixedFrame(center);
+            var transform = Transforms.eastNorthUpToFixedFrame(center);
 
             // View in east-north-up frame
             var camera = scene.camera;
@@ -71,7 +75,7 @@ defineSuite([
             // Zoom in
             var r = Math.max(model.boundingSphere.radius, camera.frustum.near);
             camera.lookAt(
-                new Cartesian3(r, r, r),
+                new Cartesian3(r, -r, -r),
                 Cartesian3.ZERO,
                 Cartesian3.UNIT_Z);
         };
@@ -82,11 +86,12 @@ defineSuite([
 
         var model = primitives.add(Model.fromGltf({
             url : url,
-            modelMatrix : Transforms.northEastDownToFixedFrame(Cartesian3.fromDegrees(0.0, 0.0, 100.0)),
+            modelMatrix : Transforms.eastNorthUpToFixedFrame(Cartesian3.fromDegrees(0.0, 0.0, 100.0)),
             show : false,
             scale : options.scale,
             minimumPixelSize : options.minimumPixelSize,
             id : url,        // for picking tests
+            cache: options.cache,
             asynchronous : options.asynchronous
         }));
         addZoomTo(model);
@@ -95,7 +100,7 @@ defineSuite([
             // Render scene to progressively load the model
             scene.renderForSpecs();
             return model.ready;
-        }, url + ' readyToRender', 10000);
+        }, url + ' ready', 10000);
 
         return model;
     }
@@ -117,7 +122,7 @@ defineSuite([
     });
 
     it('sets model properties', function() {
-        var modelMatrix = Transforms.northEastDownToFixedFrame(Cartesian3.fromDegrees(0.0, 0.0, 100.0));
+        var modelMatrix = Transforms.eastNorthUpToFixedFrame(Cartesian3.fromDegrees(0.0, 0.0, 100.0));
 
        expect(duckModel.gltf).toBeDefined();
        expect(duckModel.basePath).toEqual('./Data/Models/duck/');
@@ -147,7 +152,7 @@ defineSuite([
         // Simulate using procedural glTF as opposed to loading it from a file
         var model = primitives.add(new Model({
             gltf : duckModel.gltf,
-            modelMatrix : Transforms.northEastDownToFixedFrame(Cartesian3.fromDegrees(0.0, 0.0, 100.0)),
+            modelMatrix : Transforms.eastNorthUpToFixedFrame(Cartesian3.fromDegrees(0.0, 0.0, 100.0)),
             show : false
         }));
         addZoomTo(model);
@@ -232,16 +237,12 @@ defineSuite([
                 functionSourceAlpha : WebGLRenderingContext.ONE,
                 functionDestinationRgb : WebGLRenderingContext.ZERO,
                 functionDestinationAlpha : WebGLRenderingContext.ZERO
-            },
-            sampleCoverage : {
-                enabled : false,
-                value : 0.0,
-                invert : 0.0
             }
         };
 
         runs(function() {
             expect(scene.context.createRenderState).toHaveBeenCalledWith(rs);
+            primitives.remove(model);
         });
     });
 
@@ -369,7 +370,7 @@ defineSuite([
     });
 
     it('getMesh returns undefined when mesh does not exist', function() {
-        expect(duckModel.getNode('name-of-mesh-that-does-not-exist')).not.toBeDefined();
+        expect(duckModel.getMesh('name-of-mesh-that-does-not-exist')).not.toBeDefined();
     });
 
     it('getMesh returns returns a mesh', function() {
@@ -394,7 +395,7 @@ defineSuite([
     });
 
     it('getMaterial returns undefined when mesh does not exist', function() {
-        expect(duckModel.getNode('name-of-material-that-does-not-exist')).not.toBeDefined();
+        expect(duckModel.getMaterial('name-of-material-that-does-not-exist')).not.toBeDefined();
     });
 
     it('getMaterial returns returns a material', function() {
@@ -452,7 +453,7 @@ defineSuite([
 
     it('boundingSphere returns the bounding sphere', function() {
         var boundingSphere = duckModel.boundingSphere;
-        expect(boundingSphere.center).toEqualEpsilon(new Cartesian3(0.134, -0.037, -0.869), CesiumMath.EPSILON3);
+        expect(boundingSphere.center).toEqualEpsilon(new Cartesian3(0.134, 0.037, 0.869), CesiumMath.EPSILON3);
         expect(boundingSphere.radius).toEqualEpsilon(1.268, CesiumMath.EPSILON3);
     });
 
@@ -496,6 +497,49 @@ defineSuite([
         separateDuckModel.show = false;
     });
 
+    
+    ///////////////////////////////////////////////////////////////////////////
+
+    var testCache = new ModelResourceCache();
+
+    it('loads cached duck', function() {
+        cachedDuckModel = loadModel(duckUrl, {
+            cache : testCache
+        });
+    });
+
+    it('loads second cached duck', function() {
+        anotherCachedDuckModel = loadModel(duckUrl, {
+            cache : testCache
+        });
+    });
+
+    it('renders cachedDuckModel', function() {
+        expect(scene.renderForSpecs()).toEqual([0, 0, 0, 255]);
+
+        cachedDuckModel.show = true;
+        cachedDuckModel.zoomTo();
+        expect(scene.renderForSpecs()).not.toEqual([0, 0, 0, 255]);
+        cachedDuckModel.show = false;
+    });
+
+    it('renders second cachedDuckModel', function() {
+        expect(scene.renderForSpecs()).toEqual([0, 0, 0, 255]);
+
+        anotherCachedDuckModel.show = true;
+        anotherCachedDuckModel.zoomTo();
+        expect(scene.renderForSpecs()).not.toEqual([0, 0, 0, 255]);
+        anotherCachedDuckModel.show = false;
+    });
+
+    it('checks ducks are really cached', function() {
+        expect(testCache.getNumberOfCachedModels()).toEqual(1);
+    });
+
+    it('checks ducks share resources', function() {
+        expect(cachedDuckModel.isSharingResources(anotherCachedDuckModel)).toEqual(true);
+    });
+    
     ///////////////////////////////////////////////////////////////////////////
 
     it('loads cesiumAir', function() {
@@ -881,28 +925,39 @@ defineSuite([
     });
 
     it('Animates and renders', function() {
-        var node = animBoxesModel.getNode('Geometry-mesh020Node');
-        var matrix;
-
-        var time = JulianDate.fromDate(new Date('January 1, 2014 12:00:00 UTC'));
-        var animations = animBoxesModel.activeAnimations;
-        var a = animations.add({
-            name : 'animation_1',
-            startTime : time
+        var m = loadModel(animBoxesUrl, {
+            scale : 2.0
         });
 
-        animBoxesModel.zoomTo();
+        runs(function() {
+            var node = m.getNode('inner_box');
+            var time = JulianDate.fromDate(new Date('January 1, 2014 12:00:00 UTC'));
+            var animations = m.activeAnimations;
+            var a = animations.add({
+                name : 'animation_1',
+                startTime : time
+            });
 
-        for (var i = 0; i < 4; ++i) {
-            var t = JulianDate.addSeconds(time, i, new JulianDate());
-            expect(scene.renderForSpecs(t)).toEqual([0, 0, 0, 255]);
+            expect(node.matrix).toEqual(Matrix4.IDENTITY);
+            var previousMatrix = Matrix4.clone(node.matrix);
 
-            animBoxesModel.show = true;
-            expect(scene.renderForSpecs(t)).not.toEqual([0, 0, 0, 255]);
-            animBoxesModel.show = false;
-        }
+            m.zoomTo();
 
-        expect(animations.remove(a)).toEqual(true);
+            for (var i = 1; i < 4; ++i) {
+                var t = JulianDate.addSeconds(time, i, new JulianDate());
+                expect(scene.renderForSpecs(t)).toEqual([0, 0, 0, 255]);
+
+                m.show = true;
+                expect(scene.renderForSpecs(t)).not.toEqual([0, 0, 0, 255]);
+                m.show = false;
+
+                expect(node.matrix).not.toEqual(previousMatrix);
+                previousMatrix = Matrix4.clone(node.matrix);
+            }
+
+            expect(animations.remove(a)).toEqual(true);
+            primitives.remove(m);
+        });
     });
 
     ///////////////////////////////////////////////////////////////////////////
@@ -941,4 +996,10 @@ defineSuite([
         animations.removeAll();
         riggedFigureModel.show = false;
     });
+
+    it('should load a model where WebGL shader optimizer removes an attribute (linux)', function() {
+        var url = './Data/Models/test-shader-optimize/test-shader-optimize.gltf';
+        var m = loadModel(url);
+    });
+
 }, 'WebGL');

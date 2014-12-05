@@ -3,20 +3,16 @@ defineSuite([
         'Scene/SceneTransforms',
         'Core/Cartesian2',
         'Core/Cartesian3',
-        'Core/Cartographic',
         'Core/Ellipsoid',
         'Core/Math',
-        'Scene/SceneMode',
         'Specs/createScene',
         'Specs/destroyScene'
     ], function(
         SceneTransforms,
         Cartesian2,
         Cartesian3,
-        Cartographic,
         Ellipsoid,
         CesiumMath,
-        SceneMode,
         createScene,
         destroyScene) {
     "use strict";
@@ -45,7 +41,7 @@ defineSuite([
 
     it('throws an exception without scene', function() {
         var ellipsoid = Ellipsoid.WGS84;
-        var position = ellipsoid.cartographicToCartesian(new Cartographic(0.0, 0.0));
+        var position = Cartesian3.fromDegrees(0.0, 0.0);
         expect(function() {
             SceneTransforms.wgs84ToWindowCoordinates(undefined, position);
         }).toThrowDeveloperError();
@@ -64,8 +60,7 @@ defineSuite([
         var position = ellipsoid.cartographicToCartesian(positionCartographic);
 
         // Update scene state
-        scene.initializeFrame();
-        scene.render();
+        scene.renderForSpecs();
 
         var windowCoordinates = SceneTransforms.wgs84ToWindowCoordinates(scene, position);
         expect(windowCoordinates.x).toEqualEpsilon(0.5, CesiumMath.EPSILON2);
@@ -79,8 +74,7 @@ defineSuite([
         var position = ellipsoid.cartographicToCartesian(positionCartographic);
 
         // Update scene state
-        scene.initializeFrame();
-        scene.render();
+        scene.renderForSpecs();
 
         var drawingBufferCoordinates = SceneTransforms.wgs84ToDrawingBufferCoordinates(scene, position);
         expect(drawingBufferCoordinates.x).toEqualEpsilon(0.5, CesiumMath.EPSILON2);
@@ -94,8 +88,7 @@ defineSuite([
         var position = ellipsoid.cartographicToCartesian(positionCartographic);
 
         // Update scene state
-        scene.initializeFrame();
-        scene.render();
+        scene.renderForSpecs();
 
         var windowCoordinates = SceneTransforms.wgs84ToWindowCoordinates(scene, position);
         expect(windowCoordinates).not.toBeDefined();
@@ -108,8 +101,7 @@ defineSuite([
         var position = ellipsoid.cartographicToCartesian(positionCartographic);
 
         // Update scene state
-        scene.initializeFrame();
-        scene.render();
+        scene.renderForSpecs();
 
         var drawingBufferCoordinates = SceneTransforms.wgs84ToDrawingBufferCoordinates(scene, position);
         expect(drawingBufferCoordinates).not.toBeDefined();
@@ -118,8 +110,7 @@ defineSuite([
     it('returns correct window position in ColumbusView', function() {
         // Update scene state
         scene.morphToColumbusView(0);
-        scene.initializeFrame();
-        scene.render();
+        scene.renderForSpecs();
 
         var actualWindowCoordinates = new Cartesian2(0.5, 0.5);
         var position = scene.camera.pickEllipsoid(actualWindowCoordinates);
@@ -131,8 +122,7 @@ defineSuite([
     it('returns correct drawing buffer position in ColumbusView', function() {
         // Update scene state
         scene.morphToColumbusView(0);
-        scene.initializeFrame();
-        scene.render();
+        scene.renderForSpecs();
 
         var actualDrawingBufferCoordinates = new Cartesian2(0.5, 0.5);
         var position = scene.camera.pickEllipsoid(actualDrawingBufferCoordinates);
@@ -144,8 +134,7 @@ defineSuite([
     it('returns undefined for window position behind camera in ColumbusView', function() {
         // Update scene state
         scene.morphToColumbusView(0);
-        scene.initializeFrame();
-        scene.render();
+        scene.renderForSpecs();
 
         var position = new Cartesian3();
         Cartesian3.normalize(scene.camera.position, position);
@@ -159,8 +148,7 @@ defineSuite([
     it('returns undefined for drawing buffer position behind camera in ColumbusView', function() {
         // Update scene state
         scene.morphToColumbusView(0);
-        scene.initializeFrame();
-        scene.render();
+        scene.renderForSpecs();
 
         var position = new Cartesian3();
         Cartesian3.normalize(scene.camera.position, position);
@@ -177,7 +165,7 @@ defineSuite([
         scene.initializeFrame();
 
         var ellipsoid = Ellipsoid.WGS84;
-        var position = ellipsoid.cartographicToCartesian(new Cartographic());
+        var position = Cartesian3.fromDegrees(0,0);
 
         var windowCoordinates = SceneTransforms.wgs84ToWindowCoordinates(scene, position);
         expect(windowCoordinates.x).toEqualEpsilon(0.5, CesiumMath.EPSILON2);
@@ -187,11 +175,10 @@ defineSuite([
     it('returns correct drawing buffer position in 2D', function() {
         // Update scene state
         scene.morphTo2D(0);
-        scene.initializeFrame();
-        scene.render();
+        scene.renderForSpecs();
 
         var ellipsoid = Ellipsoid.WGS84;
-        var position = ellipsoid.cartographicToCartesian(new Cartographic());
+        var position = Cartesian3.fromDegrees(0,0);
 
         var drawingBufferCoordinates = SceneTransforms.wgs84ToDrawingBufferCoordinates(scene, position);
         expect(drawingBufferCoordinates.x).toEqualEpsilon(0.5, CesiumMath.EPSILON2);

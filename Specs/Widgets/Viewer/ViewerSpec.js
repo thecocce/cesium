@@ -10,7 +10,7 @@ defineSuite([
         'DataSources/DataSourceCollection',
         'DataSources/DataSourceDisplay',
         'Scene/SceneMode',
-        'Specs/EventHelper',
+        'Specs/DomEventSimulator',
         'Specs/MockDataSource',
         'Widgets/Animation/Animation',
         'Widgets/BaseLayerPicker/BaseLayerPicker',
@@ -32,7 +32,7 @@ defineSuite([
         DataSourceCollection,
         DataSourceDisplay,
         SceneMode,
-        EventHelper,
+        DomEventSimulator,
         MockDataSource,
         Animation,
         BaseLayerPicker,
@@ -310,6 +310,20 @@ defineSuite([
         expect(contextAttributes.antialias).toEqual(webglOptions.antialias);
         expect(contextAttributes.premultipliedAlpha).toEqual(webglOptions.premultipliedAlpha);
         expect(contextAttributes.preserveDrawingBuffer).toEqual(webglOptions.preserveDrawingBuffer);
+    });
+
+    it('can enable Order Independent Translucency', function() {
+        viewer = new Viewer(container, {
+            orderIndependentTranslucency : true
+        });
+        expect(viewer.scene.orderIndependentTranslucency).toBe(true);
+    });
+
+    it('can disable Order Independent Translucency', function() {
+        viewer = new Viewer(container, {
+            orderIndependentTranslucency : false
+        });
+        expect(viewer.scene.orderIndependentTranslucency).toBe(false);
     });
 
     it('can set scene mode', function() {
@@ -627,7 +641,7 @@ defineSuite([
             expect(found).toBe(true);
 
             // click the OK button to dismiss the panel
-            EventHelper.fireClick(viewer._element.querySelector('.cesium-button'));
+            DomEventSimulator.fireClick(viewer._element.querySelector('.cesium-button'));
 
             expect(viewer._element.querySelector('.cesium-widget-errorPanel')).toBeNull();
         });

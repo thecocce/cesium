@@ -9,7 +9,7 @@ defineSuite([
         'Scene/SceneMode',
         'Scene/SkyBox',
         'Scene/TileCoordinatesImageryProvider',
-        'Specs/EventHelper'
+        'Specs/DomEventSimulator'
     ], function(
         CesiumWidget,
         Clock,
@@ -20,7 +20,7 @@ defineSuite([
         SceneMode,
         SkyBox,
         TileCoordinatesImageryProvider,
-        EventHelper) {
+        DomEventSimulator) {
     "use strict";
     /*global jasmine,describe,xdescribe,it,xit,expect,beforeEach,afterEach,beforeAll,afterAll,spyOn,runs,waits,waitsFor*/
 
@@ -181,6 +181,20 @@ defineSuite([
         expect(contextAttributes.preserveDrawingBuffer).toEqual(webglOptions.preserveDrawingBuffer);
     });
 
+    it('can enable Order Independent Translucency', function() {
+        widget = new CesiumWidget(container, {
+            orderIndependentTranslucency : true
+        });
+        expect(widget.scene.orderIndependentTranslucency).toBe(true);
+    });
+
+    it('can disable Order Independent Translucency', function() {
+        widget = new CesiumWidget(container, {
+            orderIndependentTranslucency : false
+        });
+        expect(widget.scene.orderIndependentTranslucency).toBe(false);
+    });
+
     it('throws if no container provided', function() {
         expect(function() {
             return new CesiumWidget(undefined);
@@ -254,7 +268,7 @@ defineSuite([
             expect(found).toBe(true);
 
             // click the OK button to dismiss the panel
-            EventHelper.fireClick(widget._element.querySelector('.cesium-button'));
+            DomEventSimulator.fireClick(widget._element.querySelector('.cesium-button'));
 
             expect(widget._element.querySelector('.cesium-widget-errorPanel')).toBeNull();
         });

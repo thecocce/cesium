@@ -503,7 +503,7 @@ define([
          * @type {Number}
          * @readonly
          *
-         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>ALIASED_LINE_WIDTH_RANGE</code>.
+         * @see {@link https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGet.xml|glGet} with <code>ALIASED_LINE_WIDTH_RANGE</code>.
          */
         maximumAliasedLineWidth : {
             get : function() {
@@ -632,7 +632,6 @@ define([
          * @memberof Scene.prototype
          *
          * @type {TerrainProvider}
-         * @readonly
          */
         terrainProvider : {
             get : function() {
@@ -690,6 +689,7 @@ define([
         /**
          * @memberof Scene.prototype
          * @private
+         * @readonly
          */
         context : {
             get : function() {
@@ -725,6 +725,7 @@ define([
          * Gets whether or not the scene is optimized for 3D only viewing.
          * @memberof Scene.prototype
          * @type {Boolean}
+         * @readonly
          */
         scene3DOnly : {
             get : function() {
@@ -738,6 +739,7 @@ define([
          * other factors that could prevent OIT from functioning on a given system configuration.
          * @memberof Scene.prototype
          * @type {Boolean}
+         * @readonly
          */
         orderIndependentTranslucency : {
             get : function() {
@@ -749,6 +751,7 @@ define([
          * Gets the unique identifier for this scene.
          * @memberof Scene.prototype
          * @type {String}
+         * @readonly
          */
         id : {
             get : function() {
@@ -985,8 +988,12 @@ define([
     function createDebugFragmentShaderProgram(command, scene, shaderProgram) {
         var context = scene.context;
         var sp = defaultValue(shaderProgram, command.shaderProgram);
-        var fragmentShaderSource = sp.fragmentShaderSource;
-        var renamedFS = fragmentShaderSource.replace(/void\s+main\s*\(\s*(?:void)?\s*\)/g, 'void czm_Debug_main()');
+        var fs = sp.fragmentShaderSource.clone();
+
+        fs.sources = fs.sources.map(function(source) {
+            source = source.replace(/void\s+main\s*\(\s*(?:void)?\s*\)/g, 'void czm_Debug_main()');
+            return source;
+        });
 
         var newMain =
             'void main() \n' +
@@ -1012,9 +1019,10 @@ define([
 
         newMain += '}';
 
-        var source = renamedFS + '\n' + newMain;
+        fs.sources.push(newMain);
+
         var attributeLocations = getAttributeLocations(sp);
-        return context.createShaderProgram(sp.vertexShaderSource, source, attributeLocations);
+        return context.createShaderProgram(sp.vertexShaderSource, fs, attributeLocations);
     }
 
     function executeDebugCommand(command, scene, passState, renderState, shaderProgram) {
@@ -1412,6 +1420,14 @@ define([
         }
     };
 
+    /**
+     * @private
+     */
+    Scene.prototype.clampLineWidth = function(width) {
+        var context = this._context;
+        return Math.max(context.minimumAliasedLineWidth, Math.min(width, context.maximumAliasedLineWidth));
+    };
+
     var orthoPickingFrustum = new OrthographicFrustum();
     var scratchOrigin = new Cartesian3();
     var scratchDirection = new Cartesian3();
@@ -1505,6 +1521,7 @@ define([
     var scratchRectangle = new BoundingRectangle(0.0, 0.0, rectangleWidth, rectangleHeight);
     var scratchColorZero = new Color(0.0, 0.0, 0.0, 0.0);
     var scratchPosition = new Cartesian2();
+    var scratchPosition2 = new Cartesian2();
 
     /**
      * Returns an object with a `primitive` property that contains the first (top) primitive in the scene
@@ -1554,6 +1571,91 @@ define([
         return object;
     };
 
+    /**
+     * Returns an array with all objects with a `primitive` property within a 2D rection of the window.
+     * Arraylength will be zero if there's nothing at the region location. 
+     *
+     * @param {Cartesian2} windowPosition Window coordinates to perform picking on.
+     * @returns {Array} Array of objects containing the picked primitives.
+     *
+     * @exception {DeveloperError} topLeftWindowPosition or bottomRightWindowPosition is undefined.
+     */
+    Scene.prototype.pickRegion = function(topLeftWindowPosition, bottomRightWindowPosition) {
+        //>>includeStart('debug', pragmas.debug);
+        if(!defined(topLeftWindowPosition)) {
+            throw new DeveloperError('topLeftWindowPosition is undefined.');
+        }
+
+        if(!defined(bottomRightWindowPosition)) {
+            throw new DeveloperError('bottomRightWindowPosition is undefined.');
+        }
+        //>>includeEnd('debug');
+
+        topLeftWindowPosition.y =  this.canvas.height - topLeftWindowPosition.y;
+        bottomRightWindowPosition.y =  this.canvas.height - bottomRightWindowPosition.y;        
+        
+        var minX = Math.min(topLeftWindowPosition.x, bottomRightWindowPosition.x);
+        var maxX = Math.max(topLeftWindowPosition.x, bottomRightWindowPosition.x);
+
+        var minY = Math.min(topLeftWindowPosition.y, bottomRightWindowPosition.y);
+        var maxY = Math.max(topLeftWindowPosition.y, bottomRightWindowPosition.y);
+        
+        topLeftWindowPosition.x = minX;
+        topLeftWindowPosition.y = minY;
+
+        bottomRightWindowPosition.x = maxX;
+        bottomRightWindowPosition.y = maxY;
+        
+        var context = this._context;
+        var us = context.uniformState;
+        var frameState = this._frameState;
+
+        var drawingBufferPositionTopLeft = SceneTransforms.transformWindowToDrawingBuffer(this, topLeftWindowPosition, scratchPosition);
+        var drawingBufferPositionBottomRight = SceneTransforms.transformWindowToDrawingBuffer(this, bottomRightWindowPosition, scratchPosition2);
+                
+        var drawingBufferPositionMiddle = new Cartesian2((drawingBufferPositionTopLeft.x + drawingBufferPositionBottomRight.x)*0.5, (drawingBufferPositionTopLeft.y + drawingBufferPositionBottomRight.y)*0.5);
+
+        if (!defined(this._pickFramebuffer)) {
+            this._pickFramebuffer = context.createPickFramebuffer();
+        }
+        
+        var rectangleWidth = Math.abs(drawingBufferPositionTopLeft.x - drawingBufferPositionBottomRight.x);
+        var rectangleHeight = Math.abs(drawingBufferPositionTopLeft.y - drawingBufferPositionBottomRight.y);
+        
+        if (rectangleWidth<3) {
+            rectangleWidth = 3;
+        }
+
+        if (rectangleHeight<3) {
+            rectangleHeight = 3;
+        }
+        
+        // Update with previous frame's number and time, assuming that render is called before picking.
+        updateFrameState(this, frameState.frameNumber, frameState.time);
+        //frameState.cullingVolume = getPickCullingVolume(this, drawingBufferPositionMiddle, rectangleWidth, rectangleHeight);
+        frameState.passes.pick = true;
+
+        us.update(context, frameState);
+
+        this._commandList.length = 0;
+        updatePrimitives(this);
+        createPotentiallyVisibleSet(this);
+
+        //drawingBufferPositionBottomRight.y = this.drawingBufferHeight - drawingBufferPositionBottomRight.y;
+        //drawingBufferPositionTopLeft.y = this.drawingBufferHeight - drawingBufferPositionTopLeft.y;
+        
+        var scratchRectangle = new BoundingRectangle(drawingBufferPositionTopLeft.x, drawingBufferPositionTopLeft.y, rectangleWidth, rectangleHeight);
+
+        executeCommands(this, this._pickFramebuffer.begin(scratchRectangle), scratchColorZero, true);
+        var result = this._pickFramebuffer.endWithRect(scratchRectangle);
+        context.endFrame();
+        callAfterRenderFunctions(frameState);
+        
+        
+        return result;
+    };
+    
+    
     /**
      * Returns a list of objects, each containing a `primitive` property, for all primitives at
      * a particular window coordinate position. Other properties may also be set depending on the
